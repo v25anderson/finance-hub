@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/theme_mode_provider.dart';
+import '../../../../design_system/components/aurora.dart';
 import '../../../../application/dashboard_data.dart';
 import '../../../../core/formatting.dart';
 import '../../../../core/money.dart';
@@ -17,34 +20,46 @@ const _pendingTint = Color(0xFFFFD68A);
 
 /// Cabeçalho de destaque: degradê da marca com o seletor de período e o KPI "Gastos do mês".
 /// Em celular vai de ponta a ponta (sob a barra de status); em telas largas vira um cartão grande.
-class HeroHeader extends StatelessWidget {
+class HeroHeader extends ConsumerWidget {
   const HeroHeader({super.key, required this.data, required this.onOpenDetail, required this.edgeToEdge});
   final DashboardData? data;
   final VoidCallback onOpenDetail;
   final bool edgeToEdge;
 
   @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
+  Widget build(BuildContext context, WidgetRef ref) {
     final top = edgeToEdge ? topInset(context) : 0.0;
-    final radius = edgeToEdge ? const BorderRadius.vertical(bottom: Radius.circular(32)) : BorderRadius.circular(Radii.xl);
-    return Container(
-      margin: edgeToEdge ? EdgeInsets.zero : const EdgeInsets.fromLTRB(Space.md, Space.lg, Space.md, 0),
-      padding: EdgeInsets.fromLTRB(Space.lg, top + Space.lg, Space.lg, Space.lg + 6),
-      decoration: BoxDecoration(
+    final radius = edgeToEdge ? const BorderRadius.vertical(bottom: Radius.circular(40)) : BorderRadius.circular(Radii.xl + 8);
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: edgeToEdge ? EdgeInsets.zero : const EdgeInsets.fromLTRB(Space.md, Space.lg, Space.md, 0),
+      child: Aurora(
         borderRadius: radius,
-        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [c.heroStart, c.heroEnd]),
+        padding: EdgeInsets.fromLTRB(Space.lg, top + Space.lg, Space.lg, Space.lg + 10),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text('Visão geral', style: AppText.title(AppColors.onHero).copyWith(fontSize: 28))),
+            Pressable(
+              key: const Key('theme-toggle'),
+              onTap: () => ref.read(themeModeProvider.notifier).toggle(context),
+              semanticLabel: 'Alternar tema',
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.16), border: Border.all(color: Colors.white.withValues(alpha: 0.22))),
+                child: Icon(dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, color: AppColors.onHero, size: 20),
+              ),
+            ),
+          ]),
+          const SizedBox(height: Space.sm + 2),
+          const PeriodSelector(onHero: true),
+          const SizedBox(height: Space.lg + 4),
+          if (data == null)
+            const SizedBox(height: 150, child: Center(child: CircularProgressIndicator(color: AppColors.onHero)))
+          else
+            _Kpi(data: data!, onTap: onOpenDetail),
+        ]),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Visão geral', style: AppText.title(AppColors.onHero)),
-        const SizedBox(height: Space.sm + 2),
-        const PeriodSelector(onHero: true),
-        const SizedBox(height: Space.lg),
-        if (data == null)
-          const SizedBox(height: 150, child: Center(child: CircularProgressIndicator(color: AppColors.onHero)))
-        else
-          _Kpi(data: data!, onTap: onOpenDetail),
-      ]),
     );
   }
 }
@@ -73,7 +88,7 @@ class _Kpi extends StatelessWidget {
         if (s.isEmpty)
           Text('Nenhuma conta neste mês.', style: AppText.body(dim))
         else ...[
-          AppProgress(value: s.paidFraction, color: AppColors.onHero, track: Colors.white.withValues(alpha: 0.22), height: 10),
+          AppProgress(value: s.paidFraction, color: AppColors.onHero, track: Colors.white.withValues(alpha: 0.2), height: 12),
           const SizedBox(height: Space.md),
           Row(children: [
             Expanded(child: _Part('PAGO', s.paidCents, _paidTint)),

@@ -34,15 +34,19 @@ class BillTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: c.surface,
-          borderRadius: BorderRadius.circular(Radii.lg),
-          border: Border.all(color: c.border.withValues(alpha: isLight ? 0.7 : 1)),
+          borderRadius: BorderRadius.circular(Radii.xl),
+          border: Border.all(color: isLight ? c.border.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.07)),
         ),
         child: Column(children: [
           Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Container(
               width: 46,
               height: 46,
-              decoration: BoxDecoration(color: accent.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(15)),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [accent.withValues(alpha: 0.30), accent.withValues(alpha: 0.10)]),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: accent.withValues(alpha: 0.25)),
+              ),
               child: Icon(categoryIcon(category?.icon), color: accent, size: 23),
             ),
             const SizedBox(width: 12),

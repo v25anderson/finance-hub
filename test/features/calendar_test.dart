@@ -30,7 +30,7 @@ Future<void> seedMonth(AppDatabase db) async {
 }
 
 Future<void> goToCalendar(Harness h) async {
-  await h.tester.tap(find.text('Calendário'));
+  await h.tester.tap(find.byKey(const Key('nav-Calendário')));
   await h.settle();
 }
 

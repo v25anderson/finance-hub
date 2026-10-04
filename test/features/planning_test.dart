@@ -13,7 +13,7 @@ import 'test_harness.dart';
 const wide = Size(1400, 1000);
 
 Future<void> goToPlanning(Harness h) async {
-  await h.tester.tap(find.text('Planejamento'));
+  await h.tester.tap(find.byKey(const Key('nav-Planejamento')));
   await h.settle();
 }
 

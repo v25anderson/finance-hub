@@ -183,7 +183,7 @@ void main() {
     expect(find.text('Vencidas (1)'), findsOneWidget);
     expect(find.text('Parcialmente pagas (1)'), findsOneWidget);
     expect(find.text('Futuras (0)'), findsOneWidget);
-    expect(find.text('Parcial'), findsOneWidget); // grupo inicial = Pendentes
+    expect(find.text('Parcial'), findsNWidgets(2)); // grupo inicial = Pendentes (+ o pôster em "Próximas contas")
     await t.tap(find.byKey(const Key('group-paid')));
     await h.settle();
     expect(find.text('Aluguel'), findsOneWidget);

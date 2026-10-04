@@ -22,8 +22,13 @@ class AppCard extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: color ?? c.surface,
-        borderRadius: BorderRadius.circular(Radii.lg),
-        border: Border.all(color: c.border.withValues(alpha: isLight ? 0.7 : 1)),
+        // no escuro, um brilho sutil no topo dá profundidade (efeito "tela de cinema"); no claro, sombra suave
+        gradient: color == null && !isLight
+            ? LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color.alphaBlend(Colors.white.withValues(alpha: 0.045), c.surface), c.surface])
+            : null,
+        borderRadius: BorderRadius.circular(Radii.xl),
+        border: Border.all(color: isLight ? c.border.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.07)),
+        boxShadow: isLight ? [BoxShadow(color: const Color(0xFF3A1096).withValues(alpha: 0.07), blurRadius: 28, offset: const Offset(0, 10))] : null,
       ),
       child: child,
     );

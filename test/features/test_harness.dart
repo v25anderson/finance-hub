@@ -83,7 +83,7 @@ Future<Harness> pumpApp(WidgetTester tester, {Size size = const Size(390, 844), 
 }
 
 Future<void> goToBills(Harness h) async {
-  await h.tester.tap(find.text('Contas').last);
+  await h.tester.tap(find.byKey(const Key('nav-Contas')));
   await h.settle();
 }
 

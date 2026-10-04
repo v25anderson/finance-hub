@@ -66,3 +66,6 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D60 | Arquivos de mudanças em conjunto plano `changes_<aparelho>_<n>.json`; leitura em sequência sem buracos | Sem pasta por aparelho; evita pular dados com listagem atrasada | Pasta por aparelho; ler tudo acima do cursor |
 | D61 | Sincronização manual, sem segundo plano | Previsível, sem consumo escondido; background exige permissões e agendamento por plataforma | Sincronização automática |
 | D62 | Registro local nunca editado e sem base adota o remoto (seed) | Evita conflito falso em categorias padrão e singletons criados em cada aparelho | Conflito sempre |
+| D63 | Dock flutuante de vidro com cápsula ativa e "+" embutido, em vez de barra inferior fixa | Visual próprio e memorável; libera o canto da tela (sem FAB cobrindo valores) | Barra inferior Material; FAB separado |
+| D64 | Tema escuro como padrão, com alternância no cabeçalho | Identidade "cinema" e contraste dos pôsteres; o usuário escolhe | Seguir o sistema |
+| D65 | Navegação nos testes por chave (`nav-<nome>`), não por texto | Rótulos de itens inativos não existem mais no dock | Manter rótulos invisíveis na árvore |

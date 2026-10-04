@@ -16,16 +16,16 @@ void main() {
     expect(layoutForWidth(1100), ShellLayout.expanded);
   });
 
-  appTest('celular usa bottom navigation com 5 destinos', (t, h) async {
-    expect(find.byType(AppNavBar), findsOneWidget);
+  appTest('celular usa o dock flutuante com 5 destinos', (t, h) async {
+    expect(find.byType(AppDock), findsOneWidget);
     expect(find.byType(AppSidebar), findsNothing);
-    expect(find.text('Calendário'), findsOneWidget);
+    expect(find.byKey(const Key('nav-Calendário')), findsOneWidget);
   });
 
   appTest('desktop usa sidebar e navega entre telas', size: const Size(1400, 900), (t, h) async {
     expect(find.byType(AppSidebar), findsOneWidget);
-    expect(find.byType(AppNavBar), findsNothing);
-    await t.tap(find.text('Análises'));
+    expect(find.byType(AppDock), findsNothing);
+    await t.tap(find.byKey(const Key('nav-Análises')));
     await h.settle();
     expect(find.text('Análise dos dados que você inseriu. Não é recomendação financeira.'), findsOneWidget);
   });

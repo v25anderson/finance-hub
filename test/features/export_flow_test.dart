@@ -50,7 +50,7 @@ void main() {
     final h = Harness(t, db);
     await h.settle();
 
-    await t.tap(find.text('Análises'));
+    await t.tap(find.byKey(const Key('nav-Análises')));
     await h.settle();
     await t.tap(find.byKey(const Key('export-open')));
     await h.settle();

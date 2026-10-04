@@ -17,6 +17,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.accentSoft,
     required this.heroStart,
     required this.heroEnd,
+    required this.heroGlow,
     required this.seriesA,
     required this.seriesB,
     required this.seriesC,
@@ -36,6 +37,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Degradê do cabeçalho de destaque (números grandes sobre cor de marca).
   final Color heroStart, heroEnd;
 
+  /// Brilho claro da mesma família (halo do cabeçalho, cápsula ativa, "+").
+  final Color heroGlow;
+
   /// Cores de séries de gráfico (ordem fixa, validadas para daltonismo nos dois temas).
   /// Para uma série única, os gráficos usam [accent].
   final Color seriesA, seriesB, seriesC;
@@ -54,7 +58,8 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: Color(0xFF7A2BF0),
     accentSoft: Color(0xFFEFE5FF),
     heroStart: Color(0xFF8B34F5),
-    heroEnd: Color(0xFF4B1AB8),
+    heroEnd: Color(0xFF3A1096),
+    heroGlow: Color(0xFFC58BFF),
     seriesA: Color(0xFF2A78D6),
     seriesB: Color(0xFFEB6834),
     seriesC: Color(0xFF1BAF7A),
@@ -75,7 +80,8 @@ class AppColors extends ThemeExtension<AppColors> {
     accent: Color(0xFFA877FF),
     accentSoft: Color(0xFF2A1C47),
     heroStart: Color(0xFF6A27D8),
-    heroEnd: Color(0xFF2A0F66),
+    heroEnd: Color(0xFF1B0847),
+    heroGlow: Color(0xFFB17BFF),
     seriesA: Color(0xFF3987E5),
     seriesB: Color(0xFFD95926),
     seriesC: Color(0xFF199E70),

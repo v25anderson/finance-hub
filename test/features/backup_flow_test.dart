@@ -37,7 +37,7 @@ Future<Harness> openBackup(WidgetTester t, {required FakeAuth auth, required Fak
   ));
   final h = Harness(t, db);
   await h.settle();
-  await t.tap(find.text('Análises'));
+  await t.tap(find.byKey(const Key('nav-Análises')));
   await h.settle();
   await t.tap(find.byKey(const Key('backup-open')));
   await h.settle();

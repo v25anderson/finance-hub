@@ -19,10 +19,10 @@ class AppDestination {
 }
 
 const _destinations = <AppDestination>[
-  AppDestination(NavItemData('Visão geral', Icons.grid_view_outlined, Icons.grid_view_rounded), DashboardPage()),
+  AppDestination(NavItemData('Visão geral', Icons.grid_view_outlined, Icons.grid_view_rounded, shortLabel: 'Início'), DashboardPage()),
   AppDestination(NavItemData('Contas', Icons.receipt_long_outlined, Icons.receipt_long_rounded), BillsPage()),
-  AppDestination(NavItemData('Calendário', Icons.calendar_month_outlined, Icons.calendar_month_rounded), CalendarPage()),
-  AppDestination(NavItemData('Planejamento', Icons.flag_outlined, Icons.flag_rounded), PlanningPage()),
+  AppDestination(NavItemData('Calendário', Icons.calendar_month_outlined, Icons.calendar_month_rounded, shortLabel: 'Agenda'), CalendarPage()),
+  AppDestination(NavItemData('Planejamento', Icons.flag_outlined, Icons.flag_rounded, shortLabel: 'Plano'), PlanningPage()),
   AppDestination(NavItemData('Análises', Icons.insights_outlined, Icons.insights_rounded), AnalyticsPage()),
 ];
 
@@ -45,11 +45,7 @@ class AdaptiveShell extends ConsumerStatefulWidget {
 class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
   void _select(int i) => ref.read(shellIndexProvider.notifier).select(i);
 
-  void _toggleTheme() {
-    final mode = ref.read(themeModeProvider);
-    final dark = mode == ThemeMode.dark || (mode == ThemeMode.system && MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-    ref.read(themeModeProvider.notifier).set(dark ? ThemeMode.light : ThemeMode.dark);
-  }
+  void _toggleTheme() => ref.read(themeModeProvider.notifier).toggle(context);
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +65,9 @@ class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
 
     if (layout == ShellLayout.compact) {
       return Scaffold(
+        extendBody: true, // o conteúdo rola por baixo do dock de vidro
         body: body, // cada página trata o recuo superior (barra de status) por conta própria
-        floatingActionButton: AddButton(onPressed: () => showBillForm(context)),
-        bottomNavigationBar: AppNavBar(items: items, selectedIndex: index, onSelected: _select),
+        bottomNavigationBar: AppDock(items: items, selectedIndex: index, onSelected: _select, onAdd: () => showBillForm(context)),
       );
     }
 

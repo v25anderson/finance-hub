@@ -14,6 +14,7 @@ import 'widgets/comparison_card.dart';
 import 'widgets/hero_header.dart';
 import 'widgets/income_card.dart';
 import 'widgets/investment_card.dart';
+import 'widgets/upcoming_rail.dart';
 
 /// Largura mínima do conteúdo para usar duas colunas.
 const _twoColumnsFrom = 880.0;
@@ -33,8 +34,9 @@ class DashboardPage extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 120),
       children: [
         HeroHeader(data: async.value, edgeToEdge: narrow, onOpenDetail: () => showMonthDetail(context, month)),
+        Reveal(index: 1, child: UpcomingRail(categories: categories)),
         Padding(
-          padding: const EdgeInsets.fromLTRB(Space.md, Space.md, Space.md, 0),
+          padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
           child: async.when(
             loading: () => const SizedBox.shrink(),
             error: (_, _) => const AppCard(child: Text('Não foi possível carregar os dados do mês.')),
