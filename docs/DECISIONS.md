@@ -54,3 +54,9 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D48 | Separador escolhível (vírgula/ponto e vírgula); BOM UTF-8; reais com duas casas a partir de centavos | Excel pt-BR exige `;` e BOM para acentos; sem erro de ponto flutuante | Só vírgula; valores em centavos |
 | D49 | Neutralizar injeção de fórmula em textos, não em números | Planilhas executam `=…` vindo de nomes digitados; números negativos devem continuar números | Não tratar; aspas em tudo |
 | D50 | `DataExporter` por formato e `DataImporter` reservado, sem implementação | JSON/Excel/PDF e importação futura entram sem mexer no resto; sem código especulativo | Implementar já |
+| D51 | `google_sign_in` + REST do Drive v3 com `http`, sem `googleapis` | O token fica com o serviço do sistema; poucas chamadas (listar, enviar, baixar, excluir) não justificam um SDK enorme | `googleapis` + `extension_google_sign_in_as_googleapis_auth` |
+| D52 | Backup = um JSON com todas as tabelas de dados, versão de formato e de esquema | Simples de validar, de restaurar atomicamente e de evoluir; base para os snapshots da Fase 11 | Um arquivo por tabela; cópia do arquivo SQLite |
+| D53 | Restauração substitui tudo, exige confirmação e guarda cópia local antes | É destrutiva; o usuário precisa poder voltar atrás | Mesclar na restauração (vira sincronização, Fase 11) |
+| D54 | O app nunca apaga backups do Drive sozinho | "Nunca apagar histórico em silêncio" | Retenção automática dos N últimos |
+| D55 | ID do cliente OAuth passado por `--dart-define`, não versionado; sem ele o recurso fica "não configurado" | Não há credenciais no repositório; o app continua útil sem Drive | Credenciais embutidas |
+| D56 | Comprovantes (anexos) adiados | Escopo grande (seleção de arquivo, cópia local, hash, envio); backup de dados primeiro | Fazer tudo na Fase 10 |

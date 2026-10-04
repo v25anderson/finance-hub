@@ -9,3 +9,6 @@ Modelo: log de mudanças por registro, sem sobrescrever arquivo.
 - Snapshots periódicos em `Backups/` aceleram dispositivo novo e servem de restauração.
 - Estados de UI: desconectado → conectado → sincronizando → sincronizado → erro.
 - Implementação: Fases 10 (backup/Drive) e 11 (sync).
+
+## Estado após a Fase 10
+Implementado: backup manual de snapshot completo (`Backups/` do desenho original virou a pasta "Finance Hub" do Drive) e restauração com cópia de segurança local. Ainda não existe o log de mudanças por registro, cursor, conflitos nem sincronização automática (Fase 11).

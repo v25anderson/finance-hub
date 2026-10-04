@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 
+import '../application/backup_service.dart';
 import '../application/bill_service.dart';
+import '../application/drive/drive_storage.dart';
 import '../application/dashboard_data.dart';
 import '../application/export_service.dart';
 import '../application/file_saver.dart';
@@ -23,6 +26,10 @@ import 'db/app_database.dart';
 import 'db/connection.dart';
 import 'repositories/analytics_repository.dart';
 import 'repositories/bill_repository.dart';
+import 'backup/backup_repository.dart';
+import 'backup/local_safety_store.dart';
+import 'drive/google_drive_storage.dart';
+import 'drive/google_sign_in_auth.dart';
 import 'file_picker_saver.dart';
 import 'repositories/category_repository.dart';
 import 'repositories/export_repository.dart';
@@ -325,3 +332,88 @@ final exportServiceProvider = Provider(
     clock: ref.watch(clockProvider),
   ),
 );
+
+/// Conexão com a conta Google (sobrescrevível em testes).
+final driveAuthProvider = Provider<DriveAuth>((ref) => GoogleSignInAuth());
+
+final driveStorageProvider = Provider<DriveStorage>((ref) {
+  final client = http.Client();
+  ref.onDispose(client.close);
+  return GoogleDriveStorage(client: client, headers: ref.watch(driveAuthProvider).authHeaders);
+});
+
+final safetyCopyStoreProvider = Provider<SafetyCopyStore>((ref) => const LocalSafetyStore());
+
+final backupServiceProvider = Provider(
+  (ref) => BackupService(
+    repository: BackupRepository(ref.watch(databaseProvider)),
+    storage: ref.watch(driveStorageProvider),
+    safety: ref.watch(safetyCopyStoreProvider),
+    clock: ref.watch(clockProvider),
+  ),
+);
+
+/// Estado da conexão com o Drive.
+sealed class DriveConnection {
+  const DriveConnection();
+}
+
+class DriveUnavailable extends DriveConnection {
+  const DriveUnavailable();
+}
+
+class DriveDisconnected extends DriveConnection {
+  const DriveDisconnected({this.error});
+  final String? error;
+}
+
+class DriveConnecting extends DriveConnection {
+  const DriveConnecting();
+}
+
+class DriveConnected extends DriveConnection {
+  const DriveConnected(this.email);
+  final String email;
+}
+
+class DriveConnectionNotifier extends Notifier<DriveConnection> {
+  DriveAuth get _auth => ref.read(driveAuthProvider);
+
+  @override
+  DriveConnection build() {
+    final auth = ref.read(driveAuthProvider);
+    if (!auth.available) return const DriveUnavailable();
+    Future(() async {
+      final account = await auth.restore();
+      if (ref.mounted && state is! DriveConnected) state = account == null ? const DriveDisconnected() : DriveConnected(account.email);
+    });
+    return const DriveDisconnected();
+  }
+
+  Future<void> connect() async {
+    state = const DriveConnecting();
+    try {
+      state = DriveConnected((await _auth.signIn()).email);
+    } on DriveException catch (e) {
+      state = DriveDisconnected(error: e.kind == DriveFailure.unauthorized ? 'Conexão cancelada.' : e.message);
+    } catch (_) {
+      state = const DriveDisconnected(error: 'Não foi possível conectar ao Google.');
+    }
+  }
+
+  Future<void> disconnect() async {
+    await _auth.signOut();
+    state = const DriveDisconnected();
+  }
+
+  /// A permissão expirou: volta para desconectado, sem apagar nada local.
+  void expired() => state = const DriveDisconnected(error: 'A permissão do Google expirou. Conecte novamente.');
+}
+
+final driveConnectionProvider = NotifierProvider<DriveConnectionNotifier, DriveConnection>(DriveConnectionNotifier.new);
+
+/// Backups no Drive, mais recentes primeiro. Só consulta quando conectado.
+final remoteBackupsProvider = FutureProvider.autoDispose<List<RemoteBackup>>((ref) {
+  if (ref.watch(driveConnectionProvider) is! DriveConnected) return const [];
+  return ref.watch(backupServiceProvider).list();
+});

@@ -15,7 +15,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 7 | Planejamento e projeções | ✅ (ver notas abaixo) |
 | 8 | Análises | ✅ (ver notas abaixo) |
 | 9 | Exportação CSV (**marco MVP local**) | ⏳ |
-| 10 | Google Drive (backup, comprovantes) | ⏳ |
+| 10 | Google Drive (backup manual; comprovantes ficam para depois) | ✅ |
 | 11 | Sincronização bidirecional | ⏳ |
 | 12 | Testes de integração/golden e sync | ⏳ |
 | 13 | Android APK/AAB | ⏳ |
@@ -108,3 +108,14 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Preparado para o futuro**: `DataExporter` por `ExportFormat` (JSON, Excel e PDF aparecem como "em breve" e são recusados pelo serviço); interface `DataImporter` reservada, sem implementação.
 - **Verificado**: analyze limpo; 337 testes (escape e ida e volta com parser independente, valores, status, ordem determinística, ZIP, cancelamento, fluxo na tela); build web ok.
 - **Ainda não feito / não verificado**: o seletor de arquivos real (`file_picker`) nunca rodou em um Android de verdade (só a compilação pelo GitHub Actions); sem importação; sem JSON/Excel/PDF; sem exportar um período específico.
+
+## Notas da Fase 10
+- **Escopo desta fase**: backup **manual** de todos os dados no Google Drive, listagem, restauração e exclusão de backups. Sincronização contínua é a Fase 11. **Comprovantes (anexos) não foram feitos**: o botão continua desabilitado e a tabela `attachments` entra no backup apenas como metadados.
+- **Onde**: Análises → ícone de nuvem. Estados: não configurado → desconectado → conectando → conectado.
+- **Acesso mínimo**: escopo `drive.file` (só a pasta "Finance Hub" e arquivos criados pelo app). Login pelo serviço do sistema (Play Services): o app não vê a senha e não grava token no banco.
+- **Formato**: JSON único (`finance_hub_backup_AAAAMMDD_HHMMSS.json`, UTC) com versão do formato e do esquema, contagens e as 9 tabelas de dados (incluindo itens excluídos). Metadados de sincronização do aparelho ficam de fora. Nome único por segundo: um backup nunca sobrescreve outro; o app **nunca apaga backups sozinho**, só a pedido.
+- **Restauração**: baixa e valida o arquivo antes de tocar no banco (recusa lixo, outro formato, versão mais nova), mostra contagens, exige confirmação, guarda uma cópia dos dados atuais em `safety/` no aparelho e então substitui tudo numa única transação (falha no meio = nada muda). O `deviceId` local é preservado.
+- **Erros**: permissão expirada derruba a conexão com mensagem clara; sem rede, sem espaço e indisponibilidade têm texto próprio; mensagens nunca incluem trechos de resposta nem dados do usuário.
+- **Configuração necessária**: veja `docs/GOOGLE_SETUP.md`. Sem o `GOOGLE_SERVER_CLIENT_ID` o recurso fica "não configurado".
+- **Verificado**: analyze limpo; testes do formato, ida e volta, transação atômica, cliente REST (requisições conferidas com cliente HTTP simulado), serviço e fluxo na tela com Drive falso.
+- **NÃO verificado**: o login Google e o Drive reais nunca foram exercitados (não há credenciais no ambiente nem Android físico). A forma exata das requisições segue a documentação da API v3 e foi conferida só contra um servidor simulado. Cópias de segurança em `safety/` não têm limpeza automática. Backup sem criptografia (previsto no roadmap de segurança).

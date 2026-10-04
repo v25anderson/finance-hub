@@ -69,6 +69,9 @@ class AppDatabase extends _$AppDatabase {
         },
       );
 
+  /// Reaplica o seed (usado após restaurar um backup incompleto).
+  Future<void> ensureSeed() => _seed();
+
   /// Garante categorias padrão e os singletons Planning e SyncMetadata.
   Future<void> _seed() async {
     final t = now();
