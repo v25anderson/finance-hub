@@ -1,7 +1,12 @@
 import 'enums.dart';
 
 class PlanningDefaults {
-  const PlanningDefaults({this.salaryCents = 0, this.extraIncomeCents = 0, this.savingsGoalCents = 0, this.investmentCents = 0});
+  const PlanningDefaults({
+    this.salaryCents = 0,
+    this.extraIncomeCents = 0,
+    this.savingsGoalCents = 0,
+    this.investmentCents = 0,
+  });
   final int salaryCents;
   final int extraIncomeCents;
   final int savingsGoalCents;
@@ -10,13 +15,22 @@ class PlanningDefaults {
 
 /// Overrides de um mês. Nulo = herda o padrão; zero = zero explícito.
 class MonthOverrides {
-  const MonthOverrides({this.salaryCents, this.extraIncomeCents, this.savingsGoalCents, this.investmentCents});
+  const MonthOverrides({
+    this.salaryCents,
+    this.extraIncomeCents,
+    this.savingsGoalCents,
+    this.investmentCents,
+  });
   final int? salaryCents;
   final int? extraIncomeCents;
   final int? savingsGoalCents;
   final int? investmentCents;
 
-  bool get isCustomized => salaryCents != null || extraIncomeCents != null || savingsGoalCents != null || investmentCents != null;
+  bool get isCustomized =>
+      salaryCents != null ||
+      extraIncomeCents != null ||
+      savingsGoalCents != null ||
+      investmentCents != null;
 }
 
 /// Lançamento de renda do mês (somado à base: padrão ou override).
@@ -37,6 +51,7 @@ class MonthPlan {
     required this.salaryCents,
     required this.extraCents,
     required this.otherCents,
+    required this.recordedIncomeCents,
     required this.investmentTargetCents,
     required this.investmentRealizedCents,
     required this.savingsGoalCents,
@@ -46,6 +61,9 @@ class MonthPlan {
   final int salaryCents;
   final int extraCents;
   final int otherCents;
+
+  /// Soma dos lançamentos de renda do mês (dado real). O restante da renda vem do padrão/override (esperada).
+  final int recordedIncomeCents;
   final int investmentTargetCents;
   final int investmentRealizedCents;
   final int savingsGoalCents;
@@ -57,11 +75,15 @@ class MonthPlan {
   int get investmentGapCents => investmentTargetCents - investmentRealizedCents;
 
   /// Realizado ÷ meta. Pode passar de 1. Sem meta → 0.
-  double get investmentFraction => investmentTargetCents <= 0 ? 0 : investmentRealizedCents / investmentTargetCents;
+  double get investmentFraction => investmentTargetCents <= 0
+      ? 0
+      : investmentRealizedCents / investmentTargetCents;
 
   /// Valor do mês se o restante da meta for investido (nunca menor que o já realizado).
   int get investmentProjectedCents =>
-      investmentTargetCents > investmentRealizedCents ? investmentTargetCents : investmentRealizedCents;
+      investmentTargetCents > investmentRealizedCents
+      ? investmentTargetCents
+      : investmentRealizedCents;
 }
 
 MonthPlan resolveMonthPlan({
@@ -70,12 +92,19 @@ MonthPlan resolveMonthPlan({
   List<IncomeEntry> incomes = const [],
   int investmentRealizedCents = 0,
 }) {
-  int sum(IncomeKind k) => incomes.where((i) => i.kind == k).fold(0, (s, i) => s + i.cents);
+  int sum(IncomeKind k) =>
+      incomes.where((i) => i.kind == k).fold(0, (s, i) => s + i.cents);
   return MonthPlan(
-    salaryCents: (overrides.salaryCents ?? defaults.salaryCents) + sum(IncomeKind.salary),
-    extraCents: (overrides.extraIncomeCents ?? defaults.extraIncomeCents) + sum(IncomeKind.extra),
+    salaryCents:
+        (overrides.salaryCents ?? defaults.salaryCents) +
+        sum(IncomeKind.salary),
+    extraCents:
+        (overrides.extraIncomeCents ?? defaults.extraIncomeCents) +
+        sum(IncomeKind.extra),
     otherCents: sum(IncomeKind.other),
-    investmentTargetCents: overrides.investmentCents ?? defaults.investmentCents,
+    recordedIncomeCents: incomes.fold(0, (s, i) => s + i.cents),
+    investmentTargetCents:
+        overrides.investmentCents ?? defaults.investmentCents,
     investmentRealizedCents: investmentRealizedCents,
     savingsGoalCents: overrides.savingsGoalCents ?? defaults.savingsGoalCents,
     customized: overrides.isCustomized,

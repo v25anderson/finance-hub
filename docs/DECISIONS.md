@@ -40,3 +40,7 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D34 | Inter embutida como fonte única; sem fontes baixadas em execução | Funciona offline e é consistente entre plataformas | `google_fonts` (rede em execução) |
 | D35 | Componentes de navegação, segmentados e chips próprios; Material só como infraestrutura (diálogos, foco, acessibilidade) | Identidade própria sem perder acessibilidade | Tema padrão do Material |
 | D36 | Todo movimento respeita "reduzir movimento" do sistema | Acessibilidade e testes determinísticos | Animações sempre ligadas |
+| D37 | Faixas de projeção contam o mês atual (1, 3, 6, 12 meses) | O enunciado é ambíguo ("próximos 3 meses"); contar o atual mantém "mês atual" como a faixa de 1 | Atual + N seguintes |
+| D38 | Sólido = dado real, hachurado = projeção, em barras, tabelas e selos | Requisito: nunca misturar os dois | Mesma cor para ambos |
+| D39 | Meta de economia mostrada como diferença factual, sem recomendação | Análise dos dados, não conselho financeiro | Alertas "você deveria…" |
+| D40 | Sem saldo de abertura nas projeções | MVP: não há contas bancárias com saldo (D10) | Saldo acumulado entre meses |

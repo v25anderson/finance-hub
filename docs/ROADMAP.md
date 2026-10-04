@@ -12,7 +12,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 5 | Recorrências | ✅ (ver notas abaixo) |
 | 6 | Calendário | ✅ (ver notas abaixo) |
 | 6.5 | Redesign visual (identidade própria, sem a cara padrão do Material) | ✅ (ver notas abaixo) |
-| 7 | Planejamento e projeções | ⏳ |
+| 7 | Planejamento e projeções | ✅ (ver notas abaixo) |
 | 8 | Análises | ⏳ |
 | 9 | Exportação CSV (**marco MVP local**) | ⏳ |
 | 10 | Google Drive (backup, comprovantes) | ⏳ |
@@ -75,3 +75,14 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Robustez de layout** (achada pelos testes com fonte larga e vale para fontes ampliadas): textos da barra lateral, do título de comparação, do chip de estado e da linha de valor das contas agora se adaptam ao espaço.
 - **Verificado**: analyze limpo; 231 testes; capturas conferidas no Chromium (celular claro/escuro, desktop, formulário, detalhe).
 - **Ainda não feito**: ícones personalizados (usa Material arredondado), ilustrações/estados vazios com arte, transições compartilhadas entre telas, tela de abertura.
+
+## Notas da Fase 7
+- **Planejamento**: valores padrão (salário líquido, renda extra, meta de economia, investimento) e **"Personalizar este mês"** por mês (switch). Campo vazio herda o padrão; zero é zero explícito; só o mês escolhido muda. Desligar o switch volta o mês aos padrões. Salvar tudo em branco é recusado com explicação.
+- **Projeções** (`lib/domain/projection.dart`): a partir do **mês atual**, em 1, 3, 6 ou 12 meses (**o mês atual conta**: "3 meses" = atual + 2). Usa renda padrão/personalizada, contas recorrentes (geradas até o horizonte), contas já cadastradas e investimento planejado.
+- **Real × projeção nunca misturados**: tabela com colunas "Dado real" e "Projeção"; barras com trecho **sólido = real** e **hachurado = projeção**; selos "Projeção" (só futuro) e "Real + projeção" (mês com algo já realizado); legenda fixa.
+- **Barra de composição** de cada mês: gastos, investimentos e sobra. Com saldo negativo, um traço marca onde a renda termina.
+- **Detalhe do mês**: tabela real/projeção, saldo, e a **meta de economia** como fato ("R$ X acima/abaixo da meta"), sem recomendação. Atalho "Editar planejamento deste mês".
+- **Consistência**: o saldo projetado do mês é o mesmo do "Quanto sobra" do dashboard (teste dedicado).
+- **Verificado**: analyze limpo; 261 testes (regras, UI e números conferidos à mão); capturas conferidas no Chromium (celular e desktop).
+- **Ainda não feito**: saldo inicial/acumulado entre meses (a soma do período é a soma dos saldos mensais, sem saldo de abertura); gráfico de linha da evolução; copiar o planejamento de um mês para vários.
+- **Bug achado pelos testes**: `SwitchListTile` dentro de cartão colorido exige `Material` próprio (asserção do Flutter).

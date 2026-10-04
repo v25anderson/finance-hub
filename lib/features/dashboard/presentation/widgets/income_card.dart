@@ -21,37 +21,67 @@ class IncomeCard extends ConsumerWidget {
     final c = context.colors;
     final plan = data.plan;
     return AppCard(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Expanded(child: SectionLabel('Renda')),
-          if (plan.customized) const StatusChip(label: 'Mês personalizado', tone: Tone.info, icon: Icons.tune),
-        ]),
-        const SizedBox(height: Space.md),
-        _Row('Salário líquido', plan.salaryCents),
-        _Row('Renda extra', plan.extraCents),
-        _Row('Outras rendas', plan.otherCents),
-        Divider(height: Space.lg, color: c.border),
-        Row(children: [
-          Expanded(child: Text('Renda total', style: AppText.body(c.textPrimary).copyWith(fontWeight: FontWeight.w600))),
-          MoneyText(plan.totalIncomeCents, key: const Key('income-total')),
-        ]),
-        const SizedBox(height: Space.md),
-        Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
-          OutlinedButton.icon(
-            onPressed: () => _addIncome(context, ref),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Adicionar renda'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(child: SectionLabel('Renda')),
+              if (plan.customized)
+                const StatusChip(
+                  label: 'Mês personalizado',
+                  tone: Tone.info,
+                  icon: Icons.tune,
+                ),
+            ],
           ),
-          TextButton(onPressed: () => _editDefaults(context, ref), child: const Text('Valores padrão')),
-        ]),
-      ]),
+          const SizedBox(height: Space.md),
+          _Row('Salário líquido', plan.salaryCents),
+          _Row('Renda extra', plan.extraCents),
+          _Row('Outras rendas', plan.otherCents),
+          Divider(height: Space.lg, color: c.border),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Renda total',
+                  style: AppText.body(c.textPrimary)
+                      .copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+              MoneyText(plan.totalIncomeCents, key: const Key('income-total')),
+            ],
+          ),
+          const SizedBox(height: Space.md),
+          Wrap(
+            spacing: Space.sm,
+            runSpacing: Space.sm,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => _addIncome(context, ref),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Adicionar renda'),
+              ),
+              TextButton(
+                onPressed: () => _editDefaults(context, ref),
+                child: const Text('Valores padrão'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Future<void> _addIncome(BuildContext context, WidgetRef ref) async {
     final input = await showAddIncomeDialog(context);
     if (input == null || !context.mounted) return;
-    await runGuarded(context, () => ref.read(incomeInvestmentServiceProvider).addIncome(data.yearMonth, input.kind, input.cents));
+    await runGuarded(
+      context,
+      () => ref
+          .read(incomeInvestmentServiceProvider)
+          .addIncome(data.yearMonth, input.kind, input.cents),
+    );
   }
 
   Future<void> _editDefaults(BuildContext context, WidgetRef ref) async {
@@ -61,14 +91,18 @@ class IncomeCard extends ConsumerWidget {
       context,
       salaryCents: p.defaultSalaryCents,
       extraCents: p.defaultExtraIncomeCents,
+      savingsCents: p.defaultSavingsGoalCents,
       investmentCents: p.defaultInvestmentCents,
     );
     if (input == null || !context.mounted) return;
     await runGuarded(
       context,
-      () => ref.read(incomeInvestmentServiceProvider).setDefaults(
+      () => ref
+          .read(incomeInvestmentServiceProvider)
+          .setDefaults(
             salaryCents: input.salaryCents,
             extraIncomeCents: input.extraCents,
+            savingsGoalCents: input.savingsCents,
             investmentCents: input.investmentCents,
           ),
     );
@@ -81,10 +115,14 @@ class _Row extends StatelessWidget {
   final int cents;
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(children: [
-          Expanded(child: Text(label, style: AppText.body(context.colors.textSecondary))),
-          MoneyText(cents),
-        ]),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 3),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(label, style: AppText.body(context.colors.textSecondary)),
+        ),
+        MoneyText(cents),
+      ],
+    ),
+  );
 }

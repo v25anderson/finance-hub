@@ -66,3 +66,13 @@ Contas **canceladas** ficam fora de todos os valores.
 - Cada conta ativa e não cancelada aparece no dia do seu **vencimento** (`dueDate`), não da ocorrência na regra.
 - Tom: paga → verde; com saldo e vencimento < hoje → vermelho; com saldo e vencimento em [hoje, hoje+7] → amarelo; demais → neutro. A hora do dia nunca altera o resultado.
 - A grade só mostra dias do mês exibido (posições vazias nas pontas), para não sugerir "sem contas" em dias de outro mês.
+
+## Projeção (Fase 7)
+Por mês, a partir do mês atual (o atual conta como o 1º). Cada valor tem parte **real** e parte **projeção**:
+| | real | projeção |
+|---|---|---|
+| renda | lançamentos de renda do mês | padrão ou valor personalizado do mês |
+| gastos | pago (inclui excedente) | restante a pagar (contas e recorrências futuras já geradas) |
+| investimentos | realizado | restante da meta do mês |
+Saldo do mês = renda − gastos − investimentos (igual ao saldo projetado do dashboard). Total do período = soma dos saldos mensais (sem saldo de abertura). Meta de economia: diferença = saldo do mês − meta (positivo = acima); sem meta, não há diferença.
+Personalização do mês: `MonthConfiguration` com 4 campos opcionais (nulo herda; zero é zero explícito).
