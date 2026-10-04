@@ -29,3 +29,6 @@ Fase 1: `flutter_riverpod`, `intl`. Previstas: `drift` (F2), `uuid`, `file_picke
 
 ## Extensibilidade
 `Exporter`/`Importer` são interfaces (CSV agora; JSON/Excel/PDF depois). IA futura consome o mesmo export, apenas por solicitação do usuário. Notificações locais: porta `ReminderScheduler` com implementação nula no MVP.
+
+## Visual (atualização)
+O app **não usa componentes nativos do Android**: o Flutter desenha toda a interface. A identidade visual vem dos tokens (`lib/design_system/tokens`), do tema (`theme/app_theme.dart`) e dos componentes próprios (`components/`). Fonte: Inter (embutida). Detalhes em DECISIONS D33–D36.

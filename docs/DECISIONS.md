@@ -36,3 +36,7 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D30 | Calendário: contas dentro do dia em telas largas; pontos + lista do dia no celular | Células estreitas não comportam nome e valor | Sempre chips (ilegível no celular) |
 | D31 | Cores do calendário sempre acompanhadas de ícone, legenda e rótulo de acessibilidade | Cor nunca sozinha | Apenas cor |
 | D32 | Canceladas e dias de outros meses não aparecem no calendário | Evita ruído e leitura enganosa | Mostrar riscadas / dias adjacentes |
+| D33 | Manter Flutter e redesenhar a identidade visual em vez de migrar para Kotlin | O Flutter desenha os próprios pixels (o visual é decisão de design); Kotlin perderia a Web, exigiria reescrever tudo e não pode ser compilado no ambiente de desenvolvimento | Migrar para Jetpack Compose |
+| D34 | Inter embutida como fonte única; sem fontes baixadas em execução | Funciona offline e é consistente entre plataformas | `google_fonts` (rede em execução) |
+| D35 | Componentes de navegação, segmentados e chips próprios; Material só como infraestrutura (diálogos, foco, acessibilidade) | Identidade própria sem perder acessibilidade | Tema padrão do Material |
+| D36 | Todo movimento respeita "reduzir movimento" do sistema | Acessibilidade e testes determinísticos | Animações sempre ligadas |

@@ -15,14 +15,11 @@ class StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = context.colors.tone(tone);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.sm + 2, vertical: Space.xs + 1),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.13),
-        borderRadius: BorderRadius.circular(Radii.pill),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.13), borderRadius: BorderRadius.circular(Radii.pill)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         if (icon != null) ...[Icon(icon, size: 13, color: color), const SizedBox(width: Space.xs)],
-        Text(label, style: AppText.label(color).copyWith(letterSpacing: 0.2)),
+        Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(color).copyWith(fontSize: 12, fontWeight: FontWeight.w700, height: 1.2))),
       ]),
     );
   }

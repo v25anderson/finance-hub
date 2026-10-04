@@ -12,6 +12,7 @@ import '../../../design_system/tokens/typography.dart';
 import '../../../domain/bill.dart';
 import '../../../domain/enums.dart';
 import 'recurrence_dialogs.dart';
+import '../../../design_system/components/app_segmented.dart';
 import 'status_style.dart';
 import 'ui_helpers.dart';
 
@@ -146,8 +147,9 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
         DropdownButtonFormField<Frequency?>(
           key: const Key('recurrence-dropdown'),
           isExpanded: true,
+          borderRadius: BorderRadius.circular(Radii.md),
           initialValue: _frequency,
-          decoration: const InputDecoration(labelText: 'Recorrência', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Recorrência'),
           items: const [
             DropdownMenuItem(value: null, child: Text('Não se repete')),
             DropdownMenuItem(value: Frequency.weekly, child: Text('Semanal')),
@@ -167,7 +169,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
               child: TextFormField(
                 controller: _interval,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'A cada ($_intervalUnit)', border: const OutlineInputBorder()),
+                decoration: InputDecoration(labelText: 'A cada ($_intervalUnit)'),
                 validator: (v) {
                   final n = int.tryParse((v ?? '').trim());
                   return (n == null || n < 1 || n > 999) ? 'Use de 1 a 999' : null;
@@ -185,9 +187,8 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: 'Termina em (opcional)',
-                    border: const OutlineInputBorder(),
                     suffixIcon: _end == null
-                        ? const Icon(Icons.calendar_today, size: 18)
+                        ? const Icon(Icons.calendar_today_rounded, size: 18)
                         : IconButton(tooltip: 'Remover data final', icon: const Icon(Icons.close, size: 18), onPressed: () => setState(() => _end = null)),
                   ),
                   child: Text(_end == null ? 'Sem fim' : formatDay(_end!)),
@@ -202,7 +203,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
     }
     final text = (widget.mode == BillFormMode.edit && src != null && src.isRecurring) ? 'Recorrente (escolha o alcance ao salvar)' : 'Não se repete';
     return InputDecorator(
-      decoration: const InputDecoration(labelText: 'Recorrência', border: OutlineInputBorder(), enabled: false),
+      decoration: const InputDecoration(labelText: 'Recorrência', enabled: false),
       child: Text(text, style: AppText.body(c.textSecondary)),
     );
   }
@@ -232,7 +233,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
             autofocus: widget.mode == BillFormMode.create,
             textCapitalization: TextCapitalization.sentences,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Nome', border: OutlineInputBorder()),
+            decoration: const InputDecoration(labelText: 'Nome'),
             validator: (v) => (v ?? '').trim().isEmpty ? 'Informe o nome' : null,
           ),
           const SizedBox(height: Space.md),
@@ -240,7 +241,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
             controller: _amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ ', border: OutlineInputBorder()),
+            decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ '),
             validator: (v) {
               final cents = parseCents(v ?? '');
               return (cents == null || cents <= 0) ? 'Informe um valor maior que zero' : null;
@@ -254,26 +255,26 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
               if (d != null) setState(() => _due = d);
             },
             child: InputDecorator(
-              decoration: const InputDecoration(labelText: 'Vencimento', border: OutlineInputBorder(), suffixIcon: Icon(Icons.calendar_today, size: 18)),
+              decoration: const InputDecoration(labelText: 'Vencimento', suffixIcon: Icon(Icons.calendar_today_rounded, size: 18)),
               child: Text(formatDay(_due)),
             ),
           ),
           const SizedBox(height: Space.md),
           DropdownButtonFormField<String>(
             isExpanded: true,
+            borderRadius: BorderRadius.circular(Radii.md),
             initialValue: categories.any((x) => x.id == _categoryId) ? _categoryId : null,
-            decoration: const InputDecoration(labelText: 'Categoria', border: OutlineInputBorder()),
+            decoration: const InputDecoration(labelText: 'Categoria'),
             items: [for (final cat in categories) DropdownMenuItem(value: cat.id, child: Text(cat.name))],
             onChanged: (v) => setState(() => _categoryId = v ?? _categoryId),
           ),
           const SizedBox(height: Space.md),
           Text('TIPO', style: AppText.label(c.textSecondary)),
           const SizedBox(height: Space.sm),
-          SegmentedButton<ExpenseType>(
-            showSelectedIcon: false,
-            segments: [for (final t in ExpenseType.values) ButtonSegment(value: t, label: Text(expenseTypeLabel(t)))],
-            selected: {_type},
-            onSelectionChanged: (s) => setState(() => _type = s.first),
+          AppSegmented<ExpenseType>(
+            options: [for (final t in ExpenseType.values) (t, expenseTypeLabel(t))],
+            selected: _type,
+            onChanged: (t) => setState(() => _type = t),
           ),
           const SizedBox(height: Space.md),
           _recurrenceSection(context),
@@ -286,7 +287,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
           TextFormField(
             controller: _note,
             maxLines: 2,
-            decoration: const InputDecoration(labelText: 'Observação', border: OutlineInputBorder()),
+            decoration: const InputDecoration(labelText: 'Observação'),
           ),
           const SizedBox(height: Space.lg),
           FilledButton(onPressed: _saving ? null : _save, child: const Padding(padding: EdgeInsets.all(Space.sm), child: Text('Salvar'))),

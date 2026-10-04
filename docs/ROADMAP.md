@@ -11,6 +11,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 4 | Dashboard | ✅ (ver notas abaixo) |
 | 5 | Recorrências | ✅ (ver notas abaixo) |
 | 6 | Calendário | ✅ (ver notas abaixo) |
+| 6.5 | Redesign visual (identidade própria, sem a cara padrão do Material) | ✅ (ver notas abaixo) |
 | 7 | Planejamento e projeções | ⏳ |
 | 8 | Análises | ⏳ |
 | 9 | Exportação CSV (**marco MVP local**) | ⏳ |
@@ -63,3 +64,14 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Verificado**: analyze limpo; 231 testes (regras, grade, UI em celular e desktop, recorrência nos meses futuros); capturas conferidas no Chromium (celular e desktop).
 - **Bug encontrado e corrigido pelos testes**: pontos do mesmo dia e mesmo estado tinham a mesma chave (erro "Duplicate keys").
 - **Ainda não feito**: arrastar uma conta para outro dia; criar conta tocando em um dia; dias de outros meses não são exibidos (decisão deliberada).
+
+## Notas do Redesign visual (entre as Fases 6 e 7)
+- **Motivação**: o visual padrão do Material (Roboto, barra inferior e botão flutuante padrão, chips e campos com contorno) parecia "nativo do Android". O Flutter desenha tudo por conta própria, então a aparência é 100% decisão de design.
+- **Tipografia**: Inter embutida (pesos 400 a 800, licença OFL em `assets/fonts`), com algarismos tabulares nos valores.
+- **Tema**: sem ondas de toque, botões em pílula, campos preenchidos e sem contorno, diálogos e sheets com cantos de 28, chaves e chips próprios, paleta nova (violeta de marca + neutros frios), claro e escuro refeitos.
+- **Componentes próprios**: barra de navegação inferior, barra lateral, botão "+" com degradê, controle segmentado, chips de seleção, `Pressable` (feedback de toque por escala), cartões, itens de lista com avatar da categoria.
+- **Dashboard**: cabeçalho de destaque em degradê com o seletor de período e o número do mês em tamanho grande (conta até o valor); cartões abaixo com entrada suave.
+- **Movimento**: contagem de valores, barras que preenchem, entrada escalonada dos cartões e troca de telas com fade. Tudo respeita "reduzir movimento" do sistema (também usado nos testes).
+- **Robustez de layout** (achada pelos testes com fonte larga e vale para fontes ampliadas): textos da barra lateral, do título de comparação, do chip de estado e da linha de valor das contas agora se adaptam ao espaço.
+- **Verificado**: analyze limpo; 231 testes; capturas conferidas no Chromium (celular claro/escuro, desktop, formulário, detalhe).
+- **Ainda não feito**: ícones personalizados (usa Material arredondado), ilustrações/estados vazios com arte, transições compartilhadas entre telas, tela de abertura.

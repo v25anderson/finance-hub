@@ -13,6 +13,7 @@ import '../../../design_system/tokens/typography.dart';
 import '../../../domain/calendar.dart';
 import '../../bills/presentation/bill_detail_sheet.dart';
 import '../../bills/presentation/bill_tile.dart';
+import '../../shared/presentation/page_header.dart';
 import '../../shared/presentation/period_selector.dart';
 import 'calendar_event_chip.dart';
 import 'calendar_style.dart';
@@ -43,7 +44,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     final month = ref.watch(selectedMonthProvider);
     final ym = ref.watch(selectedYearMonthProvider);
     final today = ref.watch(todayProvider);
@@ -51,11 +51,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final categories = <String, CategoryRow>{for (final cat in ref.watch(categoriesProvider).value ?? <CategoryRow>[]) cat.id: cat};
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Space.md, Space.lg, Space.md, 120),
+      padding: EdgeInsets.fromLTRB(Space.md, Space.lg + topInset(context), Space.md, 120),
       children: [
-        Text('Calendário', style: AppText.title(c.textPrimary)),
-        const Align(alignment: Alignment.centerLeft, child: PeriodSelector()),
+        const PageHeader('Calendário'),
         const SizedBox(height: Space.sm),
+        const Align(alignment: Alignment.centerLeft, child: PeriodSelector()),
+        const SizedBox(height: Space.md),
         const _Legend(),
         const SizedBox(height: Space.md),
         async.when(

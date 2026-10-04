@@ -41,7 +41,7 @@ void main() {
 
   appTest('criar conta recorrente mensal gera ocorrências nos meses seguintes', (t, h) async {
     await goToBills(h);
-    await t.tap(find.text('Adicionar'));
+    await t.tap(find.byTooltip('Adicionar'));
     await h.settle();
     await t.enterText(field('Nome'), 'Netflix');
     await t.enterText(field('Valor'), '39,90');
@@ -61,12 +61,12 @@ void main() {
     }
     expect(find.text('Abril 2027'), findsOneWidget);
     expect(find.text('Netflix'), findsOneWidget);
-    expect(find.byIcon(Icons.repeat), findsOneWidget); // indicador de recorrência
+    expect(find.byIcon(Icons.repeat_rounded), findsOneWidget); // indicador de recorrência
   });
 
   appTest('intervalo personalizado exige valor válido', (t, h) async {
     await goToBills(h);
-    await t.tap(find.text('Adicionar'));
+    await t.tap(find.byTooltip('Adicionar'));
     await h.settle();
     await t.enterText(field('Nome'), 'Vacina');
     await t.enterText(field('Valor'), '50');

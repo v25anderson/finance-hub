@@ -32,9 +32,17 @@ class ComparisonCard extends StatelessWidget {
           Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Icon(cmp.deltaCents == 0 ? Icons.drag_handle : (cmp.deltaCents > 0 ? Icons.arrow_upward : Icons.arrow_downward), size: 20, color: c.textSecondary),
             const SizedBox(width: Space.xs),
-            Text(
-              cmp.deltaFraction == null ? formatSigned(cmp.deltaCents) : formatSignedPercent(cmp.deltaFraction!),
-              style: AppText.title(c.textPrimary),
+            Flexible(
+              flex: 2,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  cmp.deltaFraction == null ? formatSigned(cmp.deltaCents) : formatSignedPercent(cmp.deltaFraction!),
+                  maxLines: 1,
+                  style: AppText.title(c.textPrimary),
+                ),
+              ),
             ),
             const SizedBox(width: Space.sm),
             Flexible(child: Text('vs $prevName', style: AppText.body(c.textSecondary))),

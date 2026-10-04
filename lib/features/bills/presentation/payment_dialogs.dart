@@ -81,7 +81,7 @@ class _PaymentDialogState extends State<_PaymentDialog> {
                 autofocus: !widget.total,
                 readOnly: widget.total,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ ', border: OutlineInputBorder()),
+                decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ '),
                 onChanged: (_) => setState(() {}),
                 validator: (v) {
                   final c = parseCents(v ?? '');
@@ -98,7 +98,7 @@ class _PaymentDialogState extends State<_PaymentDialog> {
               Row(children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    icon: const Icon(Icons.calendar_today, size: 16),
+                    icon: const Icon(Icons.calendar_today_rounded, size: 16),
                     label: Text(formatDay(_date)),
                     onPressed: () async {
                       final d = await showDatePicker(
@@ -124,7 +124,7 @@ class _PaymentDialogState extends State<_PaymentDialog> {
               const SizedBox(height: Space.md),
               TextFormField(
                 controller: _note,
-                decoration: const InputDecoration(labelText: 'Observação (opcional)', border: OutlineInputBorder()),
+                decoration: const InputDecoration(labelText: 'Observação (opcional)'),
               ),
             ]),
           ),

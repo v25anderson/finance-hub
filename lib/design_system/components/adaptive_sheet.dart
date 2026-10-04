@@ -27,6 +27,8 @@ Future<T?> showAdaptiveSheet<T>(BuildContext context, {required WidgetBuilder bu
       alignment: Alignment.centerRight,
       child: Material(
         color: colors.surface,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left: Radius.circular(Radii.xl))),
+        clipBehavior: Clip.antiAlias,
         child: SizedBox(width: 480, height: double.infinity, child: SafeArea(child: builder(c))),
       ),
     ),

@@ -8,6 +8,8 @@ import '../../../design_system/tokens/colors.dart';
 import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
 import '../../../domain/bill_filters.dart';
+import '../../../design_system/components/pressable.dart';
+import '../../shared/presentation/page_header.dart';
 import '../../shared/presentation/period_selector.dart';
 import 'bill_detail_sheet.dart';
 import 'bill_tile.dart';
@@ -42,16 +44,25 @@ class _BillsPageState extends ConsumerState<BillsPage> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 820),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(Space.md, Space.lg, Space.md, 120),
+          padding: EdgeInsets.fromLTRB(Space.md, Space.lg + topInset(context), Space.md, 120),
           children: [
-            Row(children: [
-              Expanded(child: Text('Contas', style: AppText.title(c.textPrimary))),
-              IconButton(
-                tooltip: _favorites ? 'Mostrar todas' : 'Filtrar favoritos',
-                onPressed: () => setState(() => _favorites = !_favorites),
-                icon: Icon(_favorites ? Icons.star_rounded : Icons.star_outline_rounded, color: _favorites ? c.warning : c.textSecondary),
+            PageHeader(
+              'Contas',
+              trailing: Tooltip(
+                message: _favorites ? 'Mostrar todas' : 'Filtrar favoritos',
+                child: Pressable(
+                  onTap: () => setState(() => _favorites = !_favorites),
+                  scale: 0.9,
+                  child: Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(color: _favorites ? c.warning.withValues(alpha: 0.16) : c.surface, shape: BoxShape.circle, border: Border.all(color: _favorites ? Colors.transparent : c.border)),
+                    child: Icon(_favorites ? Icons.star_rounded : Icons.star_outline_rounded, color: _favorites ? c.warning : c.textSecondary, size: 22),
+                  ),
+                ),
               ),
-            ]),
+            ),
+            const SizedBox(height: Space.sm),
             const Align(alignment: Alignment.centerLeft, child: PeriodSelector()),
             const SizedBox(height: Space.md),
             billsAsync.when(
@@ -116,7 +127,7 @@ class _Empty extends StatelessWidget {
   }
 }
 
-/// Aba com rótulo e contagem; as quatro dividem a largura igualmente (cabem em 360 px).
+/// Aba com contagem e rótulo; as quatro dividem a largura igualmente (cabem em 360 px).
 class _TabButton extends StatelessWidget {
   const _TabButton({super.key, required this.label, required this.count, required this.countKey, required this.selected, required this.onTap});
   final String label;
@@ -128,22 +139,29 @@ class _TabButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final fg = selected ? Colors.white : c.textPrimary;
+    final fgDim = selected ? Colors.white.withValues(alpha: 0.85) : c.textSecondary;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Material(
-        color: selected ? c.accent.withValues(alpha: 0.14) : c.surfaceAlt,
-        borderRadius: BorderRadius.circular(Radii.md),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Radii.md),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: Space.sm + 2),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('$count', key: countKey, style: AppText.number(selected ? c.accent : c.textPrimary)),
-              const SizedBox(height: 2),
-              Text(label, maxLines: 1, style: AppText.body(selected ? c.accent : c.textSecondary).copyWith(fontSize: 12, fontWeight: FontWeight.w600)),
-            ]),
+      padding: const EdgeInsets.symmetric(horizontal: 3),
+      child: Pressable(
+        onTap: onTap,
+        scale: 0.96,
+        semanticLabel: label,
+        child: AnimatedContainer(
+          duration: reduce ? Duration.zero : Motion.normal,
+          curve: Motion.curve,
+          padding: const EdgeInsets.symmetric(vertical: Space.sm + 3),
+          decoration: BoxDecoration(
+            color: selected ? c.accent : c.surface,
+            borderRadius: BorderRadius.circular(Radii.md),
+            border: Border.all(color: selected ? Colors.transparent : c.border),
           ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text('$count', key: countKey, style: AppText.number(fg).copyWith(fontSize: 18)),
+            const SizedBox(height: 2),
+            Text(label, maxLines: 1, style: AppText.body(fgDim).copyWith(fontSize: 12, fontWeight: FontWeight.w600)),
+          ]),
         ),
       ),
     );

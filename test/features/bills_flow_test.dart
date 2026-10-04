@@ -26,7 +26,7 @@ void main() {
 
   appTest('cadastro rápido: FAB → preencher → salvar → aparece em Pendentes', (t, h) async {
     await goToBills(h);
-    await t.tap(find.text('Adicionar'));
+    await t.tap(find.byTooltip('Adicionar'));
     await h.settle();
     expect(find.text('Nova conta'), findsOneWidget);
 
@@ -43,7 +43,7 @@ void main() {
 
   appTest('validação: nome vazio e valor zero não salvam', (t, h) async {
     await goToBills(h);
-    await t.tap(find.text('Adicionar'));
+    await t.tap(find.byTooltip('Adicionar'));
     await h.settle();
     await t.enterText(field('Valor'), '0');
     await t.tap(find.text('Salvar'));
@@ -227,6 +227,7 @@ void main() {
     await goToBills(h);
     await t.tap(find.text('Netflix'));
     await h.settle();
+    await scrollTo(t, find.text('HISTÓRICO DE PAGAMENTOS'));
     expect(find.text('HISTÓRICO DE PAGAMENTOS'), findsOneWidget);
     expect(find.byType(BottomSheet), findsNothing);
     final panel = t.getRect(find.ancestor(of: find.text('HISTÓRICO DE PAGAMENTOS'), matching: find.byType(SizedBox)).first);

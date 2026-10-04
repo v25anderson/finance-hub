@@ -4,6 +4,7 @@ import '../design_system/components/app_card.dart';
 import '../design_system/tokens/colors.dart';
 import '../design_system/tokens/spacing.dart';
 import '../design_system/tokens/typography.dart';
+import '../features/shared/presentation/page_header.dart';
 
 /// Tela provisória até a fase correspondente ser implementada.
 class PlaceholderPage extends StatelessWidget {
@@ -15,9 +16,9 @@ class PlaceholderPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return ListView(
-      padding: const EdgeInsets.all(Space.lg),
+      padding: EdgeInsets.fromLTRB(Space.lg, Space.lg + topInset(context), Space.lg, Space.lg),
       children: [
-        Text(title, style: AppText.title(c.textPrimary)),
+        PageHeader(title),
         const SizedBox(height: Space.lg),
         AppCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

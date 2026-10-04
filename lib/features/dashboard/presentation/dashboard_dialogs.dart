@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/money.dart';
+import '../../../design_system/components/app_segmented.dart';
 import '../../../design_system/tokens/spacing.dart';
 import '../../../domain/enums.dart';
 
@@ -51,7 +52,7 @@ class _AmountDialogState extends State<_AmountDialog> {
               controller: _c,
               autofocus: true,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: widget.label, prefixText: 'R\$ ', border: const OutlineInputBorder()),
+              decoration: InputDecoration(labelText: widget.label, prefixText: 'R\$ '),
               onFieldSubmitted: (_) => _ok(),
               validator: (v) {
                 final c = parseCents(v ?? '');
@@ -98,21 +99,17 @@ class _IncomeDialogState extends State<_IncomeDialog> {
         content: Form(
           key: _form,
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SegmentedButton<IncomeKind>(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: IncomeKind.extra, label: Text('Renda extra')),
-                ButtonSegment(value: IncomeKind.other, label: Text('Outras')),
-              ],
-              selected: {_kind},
-              onSelectionChanged: (s) => setState(() => _kind = s.first),
+            AppSegmented<IncomeKind>(
+              options: const [(IncomeKind.extra, 'Renda extra'), (IncomeKind.other, 'Outras')],
+              selected: _kind,
+              onChanged: (k) => setState(() => _kind = k),
             ),
             const SizedBox(height: Space.md),
             TextFormField(
               controller: _c,
               autofocus: true,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ ', border: OutlineInputBorder()),
+              decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ '),
               validator: (v) {
                 final c = parseCents(v ?? '');
                 return (c == null || c <= 0) ? 'Informe um valor maior que zero' : null;
@@ -182,7 +179,7 @@ class _DefaultsDialogState extends State<_DefaultsDialog> {
         child: TextFormField(
           controller: c,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(labelText: label, prefixText: 'R\$ ', border: const OutlineInputBorder()),
+          decoration: InputDecoration(labelText: label, prefixText: 'R\$ '),
           validator: _validate,
         ),
       );

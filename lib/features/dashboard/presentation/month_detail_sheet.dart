@@ -7,6 +7,7 @@ import '../../../core/money.dart';
 import '../../../data/providers.dart';
 import '../../../design_system/components/adaptive_sheet.dart';
 import '../../../design_system/components/app_card.dart';
+import '../../../design_system/components/app_segmented.dart';
 import '../../../design_system/components/money_text.dart';
 import '../../../design_system/tokens/colors.dart';
 import '../../../design_system/tokens/spacing.dart';
@@ -82,11 +83,9 @@ class _MonthDetailSheetState extends ConsumerState<MonthDetailSheet> {
           const SizedBox(height: Space.lg),
           Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
             for (final g in _Group.values)
-              ChoiceChip(
+              KeyedSubtree(
                 key: Key('group-${g.name}'),
-                label: Text('${_labels[g]} (${count(g)})'),
-                selected: _group == g,
-                onSelected: (_) => setState(() => _group = g),
+                child: AppChoice(label: '${_labels[g]} (${count(g)})', selected: _group == g, onTap: () => setState(() => _group = g)),
               ),
           ]),
           const SizedBox(height: Space.md),

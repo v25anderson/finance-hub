@@ -3,25 +3,39 @@ import 'package:flutter/material.dart';
 import '../tokens/colors.dart';
 import '../tokens/spacing.dart';
 import '../tokens/typography.dart';
+import 'pressable.dart';
 
-/// Cartão base com espaçamento generoso e toque opcional.
+/// Cartão base: cantos grandes, espaço generoso e toque com feedback próprio.
 class AppCard extends StatelessWidget {
-  const AppCard({super.key, required this.child, this.onTap, this.padding = const EdgeInsets.all(Space.lg)});
+  const AppCard({super.key, required this.child, this.onTap, this.padding = const EdgeInsets.all(Space.lg), this.color});
   final Widget child;
   final VoidCallback? onTap;
   final EdgeInsets padding;
+  final Color? color;
 
   @override
-  Widget build(BuildContext context) => Card(
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(onTap: onTap, child: Padding(padding: padding, child: child)),
-      );
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final card = Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: color ?? c.surface,
+        borderRadius: BorderRadius.circular(Radii.lg),
+        border: Border.all(color: c.border.withValues(alpha: isLight ? 0.7 : 1)),
+      ),
+      child: child,
+    );
+    return onTap == null ? card : Pressable(onTap: onTap, scale: 0.985, child: card);
+  }
 }
 
 /// Rótulo em caixa alta usado acima de números.
 class SectionLabel extends StatelessWidget {
-  const SectionLabel(this.text, {super.key});
+  const SectionLabel(this.text, {super.key, this.color});
   final String text;
+  final Color? color;
   @override
-  Widget build(BuildContext context) => Text(text.toUpperCase(), style: AppText.label(context.colors.textSecondary));
+  Widget build(BuildContext context) => Text(text.toUpperCase(), style: AppText.label(color ?? context.colors.textSecondary));
 }

@@ -62,6 +62,9 @@ void appTest(String name, Future<void> Function(WidgetTester t, Harness h) body,
 
 /// [seed] roda ANTES de montar o app, em tempo real: sem streams ativas, várias escritas são seguras.
 Future<Harness> pumpApp(WidgetTester tester, {Size size = const Size(390, 844), Future<void> Function(AppDatabase db)? seed}) async {
+  // Como a opção "reduzir movimento" do sistema: números e barras aparecem direto no valor final.
+  tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -86,10 +89,13 @@ Future<void> goToBills(Harness h) async {
 
 Finder field(String label) => find.widgetWithText(TextFormField, label);
 
+/// Rolagem da lista mais ao topo da tela (a do painel aberto, se houver), e não a de um campo de texto.
+Finder _listScrollable() => find.descendant(of: find.byType(ListView).last, matching: find.byType(Scrollable)).first;
+
 /// Toca no widget; se ainda não foi construído (lista preguiçosa, abaixo da dobra), rola até ele antes.
 Future<void> tapVisible(WidgetTester t, Harness h, Finder f) async {
   if (f.evaluate().isEmpty) {
-    await t.scrollUntilVisible(f, 150, scrollable: find.byType(Scrollable).last);
+    await t.scrollUntilVisible(f, 150, scrollable: _listScrollable());
   } else {
     await t.ensureVisible(f);
   }
@@ -103,12 +109,12 @@ String tabCount(WidgetTester t, String tab) => t.widget<Text>(find.byKey(Key('ta
 
 /// Rola o painel aberto até [f] ser construído.
 Future<void> scrollTo(WidgetTester t, Finder f) async {
-  await t.scrollUntilVisible(f, 150, scrollable: find.byType(Scrollable).last);
+  await t.scrollUntilVisible(f, 150, scrollable: _listScrollable());
   await t.pump(const Duration(milliseconds: 100));
 }
 
 /// Volta ao topo do painel aberto.
 Future<void> scrollToTop(WidgetTester t) async {
-  await t.drag(find.byType(Scrollable).last, const Offset(0, 3000));
+  await t.drag(_listScrollable(), const Offset(0, 3000));
   await t.pump(const Duration(milliseconds: 300));
 }

@@ -210,21 +210,25 @@ void main() {
     expect(find.textContaining('Sem meta de investimento'), findsOneWidget);
   });
 
-  appTest('celular: alertas vêm antes do KPI e tudo cabe sem estourar layout', (t, h) async {
+  appTest('celular: destaque no topo, alertas logo abaixo e tudo cabe sem estourar layout', (t, h) async {
     await bill(h, 'Velha', 1000, DateTime(2026, 10, 3));
     await h.settle();
-    final alertY = t.getTopLeft(find.text('1 conta está vencida')).dy;
     final kpiY = t.getTopLeft(find.text('GASTOS DO MÊS')).dy;
-    expect(alertY, lessThan(kpiY));
+    final alertY = t.getTopLeft(find.text('1 conta está vencida')).dy;
+    final balanceY = t.getTopLeft(find.text('QUANTO SOBRA')).dy;
+    expect(kpiY, lessThan(alertY));
+    expect(alertY, lessThan(balanceY));
     await scrollTo(t, find.text('INVESTIMENTOS'));
     expect(find.text('INVESTIMENTOS'), findsOneWidget);
   });
 
-  appTest('desktop: duas colunas (KPI à esquerda, saldo à direita)', size: wide, (t, h) async {
+  appTest('desktop: destaque em largura total e duas colunas abaixo', size: wide, (t, h) async {
     await h.settle();
     final kpi = t.getTopLeft(find.text('GASTOS DO MÊS'));
+    final comparison = t.getTopLeft(find.text('COMPARAÇÃO COM O MÊS ANTERIOR'));
     final balance = t.getTopLeft(find.text('QUANTO SOBRA'));
-    expect(balance.dx, greaterThan(kpi.dx + 300));
-    expect((balance.dy - kpi.dy).abs(), lessThan(60));
+    expect(comparison.dy, greaterThan(kpi.dy)); // destaque primeiro
+    expect(balance.dx, greaterThan(comparison.dx + 300)); // duas colunas
+    expect((balance.dy - comparison.dy).abs(), lessThan(60)); // começam na mesma altura
   });
 }
