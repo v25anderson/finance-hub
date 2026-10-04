@@ -36,3 +36,10 @@ Dinheiro: **centavos inteiros**. Datas de vencimento: data pura (sem hora). Inst
 
 ## Exemplo
 Transaction{previsto=100000, vencimento=2026-10-15}; Payment{40000} → pago=40000, restante=60000, status=parcialmentePaga (ou vencida após 15/10).
+
+## Abas da tela de Contas (Fase 3)
+- **Pendentes**: há valor restante, não cancelada e **não vencida** (inclui parcialmente paga no prazo e vence hoje).
+- **Pagas**: totalmente paga.
+- **Vencidas**: vencida, inclusive parcialmente paga (mostra o status "Vencida" e o percentual pago).
+- **Todas**: tudo, inclusive canceladas.
+Toda conta ativa aparece em exatamente uma entre Pendentes, Pagas e Vencidas. "Vence hoje" não é vencida.

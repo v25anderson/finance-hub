@@ -9,6 +9,7 @@ import '../features/bills/presentation/bills_page.dart';
 import '../features/calendar/presentation/calendar_page.dart';
 import '../features/dashboard/presentation/dashboard_page.dart';
 import '../features/planning/presentation/planning_page.dart';
+import '../features/bills/presentation/bill_form_sheet.dart';
 import 'theme_mode_provider.dart';
 
 class AppDestination {
@@ -62,7 +63,7 @@ class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
       child: KeyedSubtree(key: ValueKey(_index), child: _destinations[_index].page),
     );
     final fab = FloatingActionButton.extended(
-      onPressed: () {}, // Fase 3: cadastro de conta
+      onPressed: () => showBillForm(context),
       icon: const Icon(Icons.add),
       label: const Text('Adicionar'),
     );

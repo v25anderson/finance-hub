@@ -22,3 +22,6 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D16 | Datas de vencimento como texto ISO `yyyy-MM-dd`; instantes em UTC como texto | Sem erro de fuso; ordenação lexicográfica correta | Unix timestamp para tudo |
 | D17 | Categorias padrão com ids estáveis (`cat-*`) | Não duplicam entre dispositivos na sincronização | UUID aleatório por dispositivo |
 | D18 | Código gerado do Drift versionado; Web com `--no-web-resources-cdn` | Build reproduzível e app Web 100% offline | Gerar no CI; CanvasKit via CDN |
+| D19 | "Marcar como pago" registra o **valor restante** como um novo pagamento (nunca zera nem apaga os anteriores) | Preserva o histórico | Sobrescrever o valor pago |
+| D20 | Valor da conta exige > 0 na UI/serviço; pagamento acima do restante é aceito e vira excedente | Evita contas vazias sem perder dinheiro registrado | Truncar o pagamento |
+| D21 | Ações principais de pagamento ficam no topo do detalhe; secundárias abaixo | Visíveis sem rolar no celular | Todas as ações no rodapé |

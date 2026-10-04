@@ -7,7 +7,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 0 | Arquitetura e especificação (docs) | ✅ |
 | 1 | Projeto Flutter + design system + shell adaptativo | ✅ (analyze, 7 testes e build web OK; build Android pendente: sem Android SDK no ambiente) |
 | 2 | Persistência local (Drift, schema, migrações, repositórios) | ✅ (ver notas abaixo) |
-| 3 | Contas e pagamentos (regras de domínio + UI) | ⏳ |
+| 3 | Contas e pagamentos (regras de domínio + UI) | ✅ (ver notas abaixo) |
 | 4 | Dashboard | ⏳ |
 | 5 | Recorrências | ⏳ |
 | 6 | Calendário | ⏳ |
@@ -29,3 +29,10 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - Verificado: testes com banco em memória e em arquivo real (com reabertura) e persistência no Chromium (recarregar a página mantém os dados).
 - **Ainda não feito**: mapeamento para entidades de domínio puras (Fase 3, junto das regras de status); geração de ocorrências recorrentes (Fase 5); testes de migração (só existe a v1); validação em dispositivo/emulador Android (sem Android SDK no ambiente).
 - Repositórios retornam as classes de linha do Drift por enquanto; a UI não deve depender delas diretamente a partir da Fase 3.
+
+## Notas da Fase 3
+- **Domínio puro** (`lib/domain/bill.dart`, `bill_filters.dart`): `Bill`/`Payment`, valores previsto/pago/restante/excedente e status derivado, sem Flutter nem banco.
+- **Camadas**: `BillRepository` (leitura mapeada para o domínio, reativa) e `BillService` (criar, editar, duplicar, favoritar, excluir/restaurar, pagamento parcial, marcar como pago, excluir pagamento).
+- **UI**: lista com abas (Pendentes/Pagas/Vencidas/Todas) + filtro de favoritos, seletor de período (mês/ano, meses futuros), cadastro rápido, detalhe (bottom sheet no celular, painel lateral no desktop), diálogos de pagamento, histórico de pagamentos, exclusão com desfazer.
+- **Verificado**: analyze limpo; 97 testes (domínio, dados e fluxos de UI com banco em memória); build Web; fluxo criar → listar → abrir detalhe no Chromium real (celular, 390 px).
+- **Ainda não feito (por design)**: recorrência no formulário (campo desabilitado; Fase 5); "Excluir esta/próximas/toda a recorrência" (Fase 5); anexar comprovante (botão desabilitado; Fase 10); cancelar conta pela UI (existe no repositório, sem botão); painel lateral do desktop validado só por teste de widget, não por captura de tela.

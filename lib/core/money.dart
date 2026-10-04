@@ -23,3 +23,6 @@ int? parseCents(String input) {
   if (v == null) return null;
   return (v * 100).round();
 }
+
+/// Centavos → texto editável (`1234,56`), para preencher campos de valor.
+String centsToInput(int cents) => (cents / 100).toStringAsFixed(2).replaceAll('.', ',');

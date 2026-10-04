@@ -11,6 +11,8 @@ dependencies:
   drift_flutter: ^0.3.1
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_riverpod: ^3.4.3
   intl: ^0.20.3
   path_provider: ^2.1.6

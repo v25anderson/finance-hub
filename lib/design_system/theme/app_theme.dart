@@ -43,7 +43,7 @@ abstract final class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: c.surface,
         indicatorColor: c.accent.withValues(alpha: 0.14),
-        labelTextStyle: WidgetStatePropertyAll(AppText.label(c.textSecondary)),
+        labelTextStyle: WidgetStatePropertyAll(AppText.label(c.textSecondary).copyWith(fontSize: 11, letterSpacing: 0)),
       ),
     );
   }
