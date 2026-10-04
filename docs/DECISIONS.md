@@ -49,3 +49,8 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D43 | Categorias em barras horizontais, não em donut | Valores próximos e muitas categorias: barras comparam melhor | Donut / pizza |
 | D44 | Cores de série fixas e validadas (3 séries); série única usa a cor de destaque; status reservado | Acessibilidade para daltonismo e significado consistente | Cores geradas por gráfico |
 | D45 | Todo gráfico tem leitura por toque e visão em tabela | Valores acessíveis sem depender de cor ou gesto | Só o desenho |
+| D46 | `file_picker` para salvar e `archive` para ZIP | Salvar onde o usuário escolher, em Android/Web/Desktop, sem permissões amplas; ZIP puro em Dart | `share_plus` (envia para apps), escrever em pasta fixa |
+| D47 | Um CSV por conjunto de dados; vários viram ZIP com LEIA-ME | CSV é tabular: misturar entidades num arquivo perde estrutura | Um CSV gigante |
+| D48 | Separador escolhível (vírgula/ponto e vírgula); BOM UTF-8; reais com duas casas a partir de centavos | Excel pt-BR exige `;` e BOM para acentos; sem erro de ponto flutuante | Só vírgula; valores em centavos |
+| D49 | Neutralizar injeção de fórmula em textos, não em números | Planilhas executam `=…` vindo de nomes digitados; números negativos devem continuar números | Não tratar; aspas em tudo |
+| D50 | `DataExporter` por formato e `DataImporter` reservado, sem implementação | JSON/Excel/PDF e importação futura entram sem mexer no resto; sem código especulativo | Implementar já |

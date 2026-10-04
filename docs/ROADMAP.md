@@ -97,3 +97,14 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Verificado**: analyze limpo; 308 testes (regras, repositório, funções de eixo e UI com números conferidos à mão); capturas conferidas no Chromium (desktop claro/escuro, celular, tabela).
 - **Ainda não feito**: comparação entre dois períodos; exportação dos gráficos; zoom em um mês. Taxa de poupança só usa investimentos *realizados* (não considera saldo que sobrou em conta).
 - **Bugs achados pelos testes e corrigidos**: a leitura do gráfico estourava a largura com fonte larga; "Personalizado" quebrava em duas linhas no celular.
+
+## Notas da Fase 9
+- **Onde**: Análises → "Exportar". Folha com formato, separador, conjuntos de dados e "Incluir itens excluídos".
+- **Formato CSV** (UTF-8 com BOM, linhas CRLF, cabeçalho em português). Um arquivo por conjunto: contas, pagamentos, categorias, recorrências, rendas, investimentos, planejamento. Um conjunto → `.csv`; vários → `.zip` com os CSVs e um `LEIA-ME.txt`. Nome com a data (`finance_hub_AAAA-MM-DD.zip`).
+- **Separador**: vírgula (decimal com ponto) ou ponto e vírgula (decimal com vírgula, abre direto no Excel pt-BR). Valores em reais com duas casas, calculados de centavos inteiros (sem ponto flutuante).
+- **Status** da conta é o derivado na data da exportação; datas puras `AAAA-MM-DD`; carimbos em UTC ISO 8601.
+- **Excluídos**: ficam de fora por padrão; com a opção ligada entram com a coluna `excluido_em`. Nada é alterado no banco ao exportar.
+- **Segurança do CSV**: textos que começam com `= + - @` ou tab recebem `'` na frente (evita injeção de fórmula no Excel/Planilhas). Números negativos não são alterados.
+- **Preparado para o futuro**: `DataExporter` por `ExportFormat` (JSON, Excel e PDF aparecem como "em breve" e são recusados pelo serviço); interface `DataImporter` reservada, sem implementação.
+- **Verificado**: analyze limpo; 337 testes (escape e ida e volta com parser independente, valores, status, ordem determinística, ZIP, cancelamento, fluxo na tela); build web ok.
+- **Ainda não feito / não verificado**: o seletor de arquivos real (`file_picker`) nunca rodou em um Android de verdade (só a compilação pelo GitHub Actions); sem importação; sem JSON/Excel/PDF; sem exportar um período específico.

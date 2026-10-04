@@ -8,3 +8,4 @@
 - `android:allowBackup="false"`: backup é opt-in via Drive.
 - Comprovantes: cópia local sempre; abertura nunca depende do Drive.
 - Roadmap: criptografia de backup com senha (AES-GCM), bloqueio biométrico.
+- Exportação: sempre iniciada pelo usuário; o arquivo é salvo onde ele escolher (seletor do sistema), sem envio pela rede. O arquivo exportado contém valores financeiros e fica fora da proteção do app: a tela avisa. CSV neutraliza injeção de fórmula (`= + - @`, tab) nos textos.

@@ -16,6 +16,7 @@ import '../../../design_system/tokens/typography.dart';
 import '../../../domain/analytics.dart';
 import '../../../domain/enums.dart';
 import '../../bills/presentation/status_style.dart' show expenseTypeLabel;
+import '../../export/presentation/export_sheet.dart';
 import '../../shared/presentation/page_header.dart';
 import '../../shared/presentation/period_selector.dart' show pickMonth;
 import 'category_bars.dart';
@@ -38,7 +39,15 @@ class AnalyticsPage extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(Space.md, Space.lg + topInset(context), Space.md, 120),
       children: [
-        const PageHeader('Análises'),
+        PageHeader(
+          'Análises',
+          trailing: TextButton.icon(
+            key: const Key('export-open'),
+            onPressed: () => showExportSheet(context),
+            icon: const Icon(Icons.ios_share_rounded, size: 18),
+            label: const Text('Exportar'),
+          ),
+        ),
         const SizedBox(height: Space.xs),
         Text('Análise dos dados que você inseriu. Não é recomendação financeira.', style: AppText.body(c.textSecondary).copyWith(fontSize: 13)),
         const SizedBox(height: Space.md),

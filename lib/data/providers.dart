@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/bill_service.dart';
 import '../application/dashboard_data.dart';
+import '../application/export_service.dart';
+import '../application/file_saver.dart';
 import '../application/income_investment_service.dart';
 import '../application/planning_service.dart';
 import '../application/recurrence_service.dart';
@@ -21,7 +23,9 @@ import 'db/app_database.dart';
 import 'db/connection.dart';
 import 'repositories/analytics_repository.dart';
 import 'repositories/bill_repository.dart';
+import 'file_picker_saver.dart';
 import 'repositories/category_repository.dart';
+import 'repositories/export_repository.dart';
 import 'repositories/planning_repository.dart';
 import 'repositories/recurring_repository.dart';
 import 'repositories/transaction_repository.dart';
@@ -310,3 +314,14 @@ final analyticsProvider = StreamProvider<Analytics>((ref) {
   final months = ref.watch(analyticsMonthsProvider);
   return ref.watch(analyticsRepositoryProvider).watchRange(months.first, months.last).map((s) => buildAnalytics(months, s));
 });
+
+/// Entrega de arquivos ao usuário (sobrescrevível em testes).
+final fileSaverProvider = Provider<FileSaver>((ref) => const FilePickerSaver());
+
+final exportServiceProvider = Provider(
+  (ref) => ExportService(
+    repository: ExportRepository(ref.watch(databaseProvider)),
+    saver: ref.watch(fileSaverProvider),
+    clock: ref.watch(clockProvider),
+  ),
+);

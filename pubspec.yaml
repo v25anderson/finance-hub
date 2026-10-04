@@ -7,8 +7,10 @@ environment:
   sdk: ^3.13.5
 
 dependencies:
+  archive: ^4.3.0
   drift: ^2.35.1
   drift_flutter: ^0.3.1
+  file_picker: ^13.1.0
   flutter:
     sdk: flutter
   flutter_localizations:

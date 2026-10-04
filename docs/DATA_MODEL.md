@@ -84,3 +84,13 @@ Período: lista de meses `yyyy-MM` terminando, no máximo, no mês atual.
 - **Investimentos**: planejado = meta do mês (valor do mês ou padrão); realizado = soma dos investimentos registrados no mês.
 - **Taxa de poupança** = investimentos realizados ÷ renda, por mês e no período. Sem renda, é indefinida ("—"); pode passar de 100%.
 - Categoria: parte = gasto da categoria ÷ gasto total; ordenadas do maior para o menor (desempate por id). A tela mostra as 8 maiores e agrupa o resto em "Outras".
+
+## Exportação CSV (Fase 9)
+Um arquivo por conjunto, UTF-8 com BOM, CRLF. Valores monetários em reais com duas casas (de centavos inteiros). Colunas:
+- **contas**: id, nome, categoria, categoria_id, tipo (fixo/variavel/pontual), vencimento, valor_previsto, valor_pago, valor_restante, excedente, percentual_pago, status (prevista/pendente/parcialmente_paga/paga/vencida/cancelada), favorito, recorrente, recorrencia_id, data_ocorrencia, observacao, criado_em, atualizado_em, cancelada_em.
+- **pagamentos**: id, conta_id, conta, valor, pago_em, observacao, criado_em.
+- **categorias**: id, nome, padrao, ordem, cor.
+- **recorrencias**: id, nome, categoria, categoria_id, tipo, frequencia (semanal/mensal/anual/dias), intervalo, primeiro_vencimento, fim, valor_base, favorito.
+- **rendas**: id, mes, tipo, valor, descricao, recebida. **investimentos**: id, mes, planejado, realizado, descricao.
+- **planejamento**: escopo (`padrao` ou `AAAA-MM`), salario_liquido, renda_extra, meta_economia, investimento_planejado. Campo vazio = herda o padrão; `0.00` = zero explícito.
+- `excluido_em` é acrescentada a contas, pagamentos, recorrências, rendas e investimentos quando se inclui excluídos.
