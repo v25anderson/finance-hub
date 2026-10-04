@@ -33,3 +33,6 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D27 | Exclusão em lote preserva passado e contas com pagamento, e informa o que manteve | Requisito: nunca apagar histórico em silêncio | Apagar tudo da regra |
 | D28 | "Esta e as próximas" não muda o vencimento nem as ocorrências editadas à mão/pagas | Evita sobrescrever decisões do usuário | Reescrever todas as futuras |
 | D29 | APK via GitHub Actions (chave de debug do Flutter), pois o ambiente não alcança o Android SDK | Entrega testável sem custo | Instalar o SDK localmente (bloqueado pela rede) |
+| D30 | Calendário: contas dentro do dia em telas largas; pontos + lista do dia no celular | Células estreitas não comportam nome e valor | Sempre chips (ilegível no celular) |
+| D31 | Cores do calendário sempre acompanhadas de ícone, legenda e rótulo de acessibilidade | Cor nunca sozinha | Apenas cor |
+| D32 | Canceladas e dias de outros meses não aparecem no calendário | Evita ruído e leitura enganosa | Mostrar riscadas / dias adjacentes |

@@ -61,3 +61,8 @@ Contas **canceladas** ficam fora de todos os valores.
 - **Valor**: cada ocorrência guarda o próprio valor previsto, então mudar o preço daqui para frente nunca reescreve o passado.
 - **Edição "esta e as próximas"**: atualiza a regra e as ocorrências posteriores **não editadas à mão, não canceladas e sem pagamento**.
 - **Exclusão** (nunca apaga histórico em silêncio): apenas esta · esta e as próximas (fim da regra = dia anterior; se for a primeira, a regra é excluída) · toda (futuras sem pagamento; passadas e com pagamento ficam; regra excluída).
+
+## Calendário (Fase 6)
+- Cada conta ativa e não cancelada aparece no dia do seu **vencimento** (`dueDate`), não da ocorrência na regra.
+- Tom: paga → verde; com saldo e vencimento < hoje → vermelho; com saldo e vencimento em [hoje, hoje+7] → amarelo; demais → neutro. A hora do dia nunca altera o resultado.
+- A grade só mostra dias do mês exibido (posições vazias nas pontas), para não sugerir "sem contas" em dias de outro mês.

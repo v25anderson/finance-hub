@@ -10,7 +10,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 3 | Contas e pagamentos (regras de domínio + UI) | ✅ (ver notas abaixo) |
 | 4 | Dashboard | ✅ (ver notas abaixo) |
 | 5 | Recorrências | ✅ (ver notas abaixo) |
-| 6 | Calendário | ⏳ |
+| 6 | Calendário | ✅ (ver notas abaixo) |
 | 7 | Planejamento e projeções | ⏳ |
 | 8 | Análises | ⏳ |
 | 9 | Exportação CSV (**marco MVP local**) | ⏳ |
@@ -55,3 +55,11 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Verificado**: analyze limpo; 201 testes (datas, serviço, migração, UI); gráfico conferido no Chromium real.
 - **Ainda não feito**: editar a frequência/intervalo de uma regra existente (excluir e recriar); desfazer exclusões em lote; ver/gerenciar regras numa lista própria.
 - **APK**: o ambiente de desenvolvimento não alcança `dl.google.com` (Android SDK). Foi adicionado `.github/workflows/android-apk.yml` para o GitHub Actions gerar o APK (artefato `finance-hub-apk`).
+
+## Notas da Fase 6
+- **Regras puras** (`lib/domain/calendar.dart`): tom de cada vencimento e grade do mês (domingo a sábado; vazios antes do dia 1 e depois do último dia; meses de 4, 5 e 6 semanas).
+- **Cores** (sempre com ícone e legenda): verde = paga; vermelho = vencida com saldo (inclui parcialmente paga vencida); amarelo = em aberto vencendo hoje ou em até 7 dias; neutro = futuro. Canceladas não aparecem.
+- **Telas largas (≥ 700 px)**: as contas aparecem dentro do dia (nome, valor, cor, ícone); mais de 3 no mesmo dia → "+N mais" abre a lista do dia. **Celular**: pontos coloridos (até 3 por dia) e a lista do dia selecionado logo abaixo (hoje por padrão; se o mês não tem hoje, o primeiro dia com contas). Tocar em uma conta abre o detalhe.
+- **Verificado**: analyze limpo; 231 testes (regras, grade, UI em celular e desktop, recorrência nos meses futuros); capturas conferidas no Chromium (celular e desktop).
+- **Bug encontrado e corrigido pelos testes**: pontos do mesmo dia e mesmo estado tinham a mesma chave (erro "Duplicate keys").
+- **Ainda não feito**: arrastar uma conta para outro dia; criar conta tocando em um dia; dias de outros meses não são exibidos (decisão deliberada).

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/tokens/colors.dart';
 import '../../../domain/bill.dart';
+import '../../../domain/calendar.dart' show soonDays;
 import '../../../domain/enums.dart';
 
 /// Aparência de cada estado. Cor sempre acompanhada de texto e ícone.
@@ -11,9 +12,6 @@ class StatusStyle {
   final Tone tone;
   final IconData icon;
 }
-
-/// Pendente a até [soonDays] dias do vencimento fica amarelo; mais longe, neutro.
-const soonDays = 7;
 
 StatusStyle styleFor(Bill bill, DateTime today) {
   final status = bill.statusOn(today);

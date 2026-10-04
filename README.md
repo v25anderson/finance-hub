@@ -18,3 +18,8 @@ Build Web offline (CanvasKit embutido, sem CDN):
 flutter build web --release --no-web-resources-cdn
 ```
 Os arquivos `web/sqlite3.wasm` e `web/drift_worker.js` são necessários ao banco na Web e devem acompanhar as versões do `pubspec.lock` (drift 2.35.1, sqlite3 3.5.2). O código gerado (`*.g.dart`) é versionado.
+
+## APK de teste (Android)
+Cada push na branch de desenvolvimento gera um APK pelo GitHub Actions (workflow *Android APK*).
+Baixe em **Actions → execução mais recente → Artifacts → `finance-hub-apk`** (zip com `app-release.apk`).
+É assinado com a chave de debug do Flutter: serve para instalar e testar, não para a Play Store.

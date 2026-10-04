@@ -27,3 +27,8 @@ String formatPercent(double fraction) {
 /// `mar/26`.
 String formatMonthShort(DateTime d) =>
     '${_cap(_monthName.format(d)).substring(0, 3).toLowerCase()}/${(d.year % 100).toString().padLeft(2, '0')}';
+
+final _dayLong = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');
+
+/// `Sexta-feira, 10 de outubro`.
+String formatDayLong(DateTime d) => _cap(_dayLong.format(d));
