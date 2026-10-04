@@ -19,3 +19,6 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D13 | Gráficos próprios com `CustomPaint` no início; avaliar `fl_chart` se necessário | Menos dependências | `fl_chart` desde o início |
 | D14 | Sem `go_router` no MVP (navegação por shell + sheets) | Menos dependências | `go_router` |
 | D15 | Material 3 só como infraestrutura; identidade visual própria via tokens | Requisito do produto | Tema M3 padrão |
+| D16 | Datas de vencimento como texto ISO `yyyy-MM-dd`; instantes em UTC como texto | Sem erro de fuso; ordenação lexicográfica correta | Unix timestamp para tudo |
+| D17 | Categorias padrão com ids estáveis (`cat-*`) | Não duplicam entre dispositivos na sincronização | UUID aleatório por dispositivo |
+| D18 | Código gerado do Drift versionado; Web com `--no-web-resources-cdn` | Build reproduzível e app Web 100% offline | Gerar no CI; CanvasKit via CDN |
