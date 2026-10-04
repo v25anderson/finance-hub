@@ -1,20 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/bill_service.dart';
 import '../application/dashboard_data.dart';
 import '../application/income_investment_service.dart';
+import '../application/recurrence_service.dart';
 import '../core/dates.dart';
 import '../domain/alerts.dart';
 import '../domain/balance.dart';
 import '../domain/month_comparison.dart';
 import '../domain/month_plan.dart';
 import '../domain/month_summary.dart';
+import '../domain/recurrence.dart';
 import '../domain/bill.dart';
 import 'db/app_database.dart';
 import 'db/connection.dart';
 import 'repositories/bill_repository.dart';
 import 'repositories/category_repository.dart';
 import 'repositories/planning_repository.dart';
+import 'repositories/recurring_repository.dart';
 import 'repositories/transaction_repository.dart';
 
 /// Relógio do app (sobrescrevível em testes).
@@ -33,6 +38,7 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 final categoryRepositoryProvider = Provider((ref) => CategoryRepository(ref.watch(databaseProvider)));
 final transactionRepositoryProvider = Provider((ref) => TransactionRepository(ref.watch(databaseProvider)));
 final planningRepositoryProvider = Provider((ref) => PlanningRepository(ref.watch(databaseProvider)));
+final recurringRepositoryProvider = Provider((ref) => RecurringRepository(ref.watch(databaseProvider)));
 final billRepositoryProvider = Provider((ref) => BillRepository(ref.watch(databaseProvider)));
 
 final billServiceProvider = Provider((ref) => BillService(
@@ -41,11 +47,31 @@ final billServiceProvider = Provider((ref) => BillService(
       clock: ref.watch(clockProvider),
     ));
 
+final recurrenceServiceProvider = Provider((ref) => RecurrenceService(
+      rules: ref.watch(recurringRepositoryProvider),
+      transactions: ref.watch(transactionRepositoryProvider),
+      bills: ref.watch(billRepositoryProvider),
+      clock: ref.watch(clockProvider),
+    ));
+
 final categoriesProvider = StreamProvider((ref) => ref.watch(categoryRepositoryProvider).watchAll());
 
 /// Contas do mês `yyyy-MM`.
-final billsForMonthProvider =
-    StreamProvider.family<List<Bill>, String>((ref, ym) => ref.watch(billRepositoryProvider).watchMonth(ym));
+///
+/// Ao observar um mês, garante (em segundo plano) que as ocorrências das recorrências existam até ele;
+/// o stream reemite quando elas são criadas.
+final billsForMonthProvider = StreamProvider.family<List<Bill>, String>((ref, ym) {
+  unawaited(ref.read(recurrenceServiceProvider).ensureMonth(ym).then<void>((_) {}, onError: (_) {}));
+  return ref.watch(billRepositoryProvider).watchMonth(ym);
+});
+
+/// Regra de recorrência (reativa), inclusive encerrada ou excluída, para mostrar o histórico.
+final recurrenceRuleProvider =
+    StreamProvider.family<RecurrenceRule?, String>((ref, id) => ref.watch(recurringRepositoryProvider).watchRule(id));
+
+/// Ocorrências ativas de uma recorrência (histórico de valores).
+final occurrencesProvider =
+    StreamProvider.family<List<Bill>, String>((ref, ruleId) => ref.watch(billRepositoryProvider).watchOccurrences(ruleId));
 
 /// Uma conta (reativa), para a tela de detalhe.
 final billProvider = StreamProvider.family<Bill?, String>((ref, id) => ref.watch(billRepositoryProvider).watchBill(id));

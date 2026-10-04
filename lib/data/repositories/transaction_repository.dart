@@ -89,6 +89,10 @@ class TransactionRepository extends RepoBase {
     ));
   }
 
+  /// Volta a ocorrência a "seguir a regra" (usado ao propagar edições "esta e as próximas").
+  Future<void> clearOverridden(String id) =>
+      (db.update(db.transactions)..where((t) => t.id.equals(id))).write(const TransactionsCompanion(overridden: Value(false)));
+
   /// Cancela (a conta continua no histórico, fora dos totais).
   Future<void> cancel(String id) async {
     final row = await getById(id);
@@ -140,6 +144,65 @@ class TransactionRepository extends RepoBase {
       note: row.note,
     );
   }
+
+  // ── Recorrência ───────────────────────────────────────────────
+
+  /// Datas (ISO) de todas as ocorrências já criadas para a regra, **inclusive as excluídas**:
+  /// uma ocorrência excluída não é recriada pela geração.
+  Future<Set<String>> existingOccurrenceDates(String recurringId) async {
+    final rows = await (db.select(db.transactions)..where((t) => t.recurringId.equals(recurringId))).get();
+    return {for (final r in rows) if (r.occurrenceDate != null) r.occurrenceDate!};
+  }
+
+  /// Insere ocorrências em lote. O índice único (regra, data) torna a operação idempotente:
+  /// repetir não duplica.
+  Future<void> insertOccurrences({
+    required String recurringId,
+    required String name,
+    required int plannedAmountCents,
+    required String categoryId,
+    required ExpenseType expenseType,
+    required bool favorite,
+    required List<DateTime> dates,
+  }) async {
+    if (dates.isEmpty) return;
+    final t = now();
+    final device = await db.currentDeviceId();
+    await db.batch((b) {
+      b.insertAll(
+        db.transactions,
+        [
+          for (final d in dates)
+            TransactionsCompanion.insert(
+              id: newId(),
+              createdAt: t,
+              updatedAt: t,
+              deviceId: Value(device),
+              name: name,
+              plannedAmountCents: plannedAmountCents,
+              dueDate: isoDate(d),
+              categoryId: categoryId,
+              expenseType: expenseType,
+              favorite: Value(favorite),
+              recurringId: Value(recurringId),
+              occurrenceDate: Value(isoDate(d)),
+            ),
+        ],
+        mode: InsertMode.insertOrIgnore,
+      );
+    });
+  }
+
+  /// Ocorrências ativas da regra com `occurrenceDate >= from` (ISO), em ordem.
+  Future<List<TransactionRow>> activeOccurrencesFrom(String recurringId, String from) =>
+      (db.select(db.transactions)
+            ..where((t) => t.recurringId.equals(recurringId) & t.deletedAt.isNull() & t.occurrenceDate.isBiggerOrEqualValue(from))
+            ..orderBy([(t) => OrderingTerm.asc(t.occurrenceDate)]))
+          .get();
+
+  /// Quantidade de pagamentos ativos de uma conta.
+  Future<int> paymentCount(String transactionId) async =>
+      (await (db.select(db.payments)..where((p) => p.transactionId.equals(transactionId) & p.deletedAt.isNull())).get()).length;
 
   // ── Pagamentos ────────────────────────────────────────────────
 

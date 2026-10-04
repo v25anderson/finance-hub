@@ -23,3 +23,7 @@ String formatPercent(double fraction) {
   final s = v == v.roundToDouble() ? v.round().toString() : v.toStringAsFixed(1).replaceAll('.', ',');
   return '$s%';
 }
+
+/// `mar/26`.
+String formatMonthShort(DateTime d) =>
+    '${_cap(_monthName.format(d)).substring(0, 3).toLowerCase()}/${(d.year % 100).toString().padLeft(2, '0')}';

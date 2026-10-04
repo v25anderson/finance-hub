@@ -43,7 +43,8 @@ class RecurringTransactions extends Table with BaseColumns {
 @DataClassName('TransactionRow')
 @TableIndex(name: 'idx_transactions_due', columns: {#dueDate})
 @TableIndex(name: 'idx_transactions_category', columns: {#categoryId})
-@TableIndex(name: 'idx_transactions_recurring', columns: {#recurringId, #occurrenceDate})
+/// Uma ocorrência por regra e data: torna a geração idempotente (v2). `NULL` em `recurring_id` é livre.
+@TableIndex(name: 'uq_transactions_occurrence', columns: {#recurringId, #occurrenceDate}, unique: true)
 class Transactions extends Table with BaseColumns {
   TextColumn get name => text()();
   IntColumn get plannedAmountCents => integer()();

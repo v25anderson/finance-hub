@@ -18,12 +18,14 @@ class PeriodSelector extends ConsumerWidget {
     final c = context.colors;
     return Row(mainAxisSize: MainAxisSize.min, children: [
       IconButton(tooltip: 'Mês anterior', onPressed: notifier.previous, icon: const Icon(Icons.chevron_left)),
-      InkWell(
-        borderRadius: BorderRadius.circular(Radii.sm),
-        onTap: () => _pick(context, ref),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: Space.xs),
-          child: Text(formatMonthYear(month), style: AppText.title(c.textPrimary).copyWith(fontSize: 18)),
+      Flexible(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(Radii.sm),
+          onTap: () => _pick(context, ref),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: Space.xs),
+            child: Text(formatMonthYear(month), maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.title(c.textPrimary).copyWith(fontSize: 18)),
+          ),
         ),
       ),
       IconButton(tooltip: 'Próximo mês', onPressed: notifier.next, icon: const Icon(Icons.chevron_right)),

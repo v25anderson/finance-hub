@@ -11,6 +11,7 @@ import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
 import '../../../domain/bill.dart';
 import '../../../domain/enums.dart';
+import 'recurrence_dialogs.dart';
 import 'status_style.dart';
 import 'ui_helpers.dart';
 
@@ -39,6 +40,9 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
   late ExpenseType _type;
   late bool _favorite;
   bool _saving = false;
+  Frequency? _frequency; // nulo = não se repete (só na criação)
+  final _interval = TextEditingController(text: '1');
+  DateTime? _end;
 
   @override
   void initState() {
@@ -61,31 +65,146 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
     _name.dispose();
     _amount.dispose();
     _note.dispose();
+    _interval.dispose();
     super.dispose();
   }
+
+  int get _intervalValue => int.tryParse(_interval.text.trim()) ?? 1;
 
   Future<void> _save() async {
     if (!_form.currentState!.validate() || _saving) return;
     setState(() => _saving = true);
     final svc = ref.read(billServiceProvider);
+    final recurrence = ref.read(recurrenceServiceProvider);
     final cents = parseCents(_amount.text)!;
+    final src = widget.source;
     String? id;
-    final ok = await runGuarded(context, () async {
-      if (widget.mode == BillFormMode.edit) {
-        id = widget.source!.id;
-        await svc.update(id!,
-            name: _name.text, plannedCents: cents, dueDate: _due, categoryId: _categoryId, expenseType: _type, favorite: _favorite, note: _note.text);
-      } else {
-        id = await svc.create(
-            name: _name.text, plannedCents: cents, dueDate: _due, categoryId: _categoryId, expenseType: _type, favorite: _favorite, note: _note.text);
+    var ok = false;
+
+    if (widget.mode == BillFormMode.edit && src != null && src.isRecurring) {
+      final dateChanged = dateOnly(_due) != dateOnly(src.dueDate);
+      final scope = await showEditScopeDialog(context, allowFollowing: !dateChanged);
+      if (scope == null || !mounted) {
+        if (mounted) setState(() => _saving = false);
+        return;
       }
-    });
+      id = src.id;
+      ok = await runGuarded(context, () async {
+        await recurrence.editOccurrence(src.id, scope,
+            name: _name.text,
+            plannedCents: cents,
+            categoryId: _categoryId,
+            expenseType: _type,
+            favorite: _favorite,
+            note: _note.text,
+            dueDate: dateChanged ? _due : null);
+      });
+    } else {
+      ok = await runGuarded(context, () async {
+        if (widget.mode == BillFormMode.edit) {
+          id = src!.id;
+          await svc.update(id!,
+              name: _name.text, plannedCents: cents, dueDate: _due, categoryId: _categoryId, expenseType: _type, favorite: _favorite, note: _note.text);
+        } else if (widget.mode == BillFormMode.create && _frequency != null) {
+          id = await recurrence.createRecurring(
+              name: _name.text,
+              amountCents: cents,
+              firstDue: _due,
+              categoryId: _categoryId,
+              expenseType: _type,
+              frequency: _frequency!,
+              interval: _intervalValue,
+              end: _end,
+              favorite: _favorite);
+        } else {
+          id = await svc.create(
+              name: _name.text, plannedCents: cents, dueDate: _due, categoryId: _categoryId, expenseType: _type, favorite: _favorite, note: _note.text);
+        }
+      });
+    }
     if (!mounted) return;
     if (ok) {
       Navigator.pop(context, id);
     } else {
       setState(() => _saving = false);
     }
+  }
+
+  String get _intervalUnit => switch (_frequency) {
+        Frequency.weekly => 'semanas',
+        Frequency.monthly => 'meses',
+        Frequency.yearly => 'anos',
+        Frequency.custom => 'dias',
+        null => '',
+      };
+
+  Widget _recurrenceSection(BuildContext context) {
+    final c = context.colors;
+    final src = widget.source;
+    if (widget.mode == BillFormMode.create) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        DropdownButtonFormField<Frequency?>(
+          key: const Key('recurrence-dropdown'),
+          isExpanded: true,
+          initialValue: _frequency,
+          decoration: const InputDecoration(labelText: 'Recorrência', border: OutlineInputBorder()),
+          items: const [
+            DropdownMenuItem(value: null, child: Text('Não se repete')),
+            DropdownMenuItem(value: Frequency.weekly, child: Text('Semanal')),
+            DropdownMenuItem(value: Frequency.monthly, child: Text('Mensal')),
+            DropdownMenuItem(value: Frequency.yearly, child: Text('Anual')),
+            DropdownMenuItem(value: Frequency.custom, child: Text('Personalizado (a cada N dias)')),
+          ],
+          onChanged: (v) => setState(() {
+            _frequency = v;
+            if (v == Frequency.custom && _interval.text.trim() == '1') _interval.text = '30';
+          }),
+        ),
+        if (_frequency != null) ...[
+          const SizedBox(height: Space.md),
+          Row(children: [
+            Expanded(
+              child: TextFormField(
+                controller: _interval,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'A cada ($_intervalUnit)', border: const OutlineInputBorder()),
+                validator: (v) {
+                  final n = int.tryParse((v ?? '').trim());
+                  return (n == null || n < 1 || n > 999) ? 'Use de 1 a 999' : null;
+                },
+              ),
+            ),
+            const SizedBox(width: Space.sm),
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(Radii.sm),
+                onTap: () async {
+                  final d = await showDatePicker(context: context, initialDate: _end ?? _due, firstDate: _due, lastDate: DateTime(2100));
+                  if (d != null) setState(() => _end = d);
+                },
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Termina em (opcional)',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: _end == null
+                        ? const Icon(Icons.calendar_today, size: 18)
+                        : IconButton(tooltip: 'Remover data final', icon: const Icon(Icons.close, size: 18), onPressed: () => setState(() => _end = null)),
+                  ),
+                  child: Text(_end == null ? 'Sem fim' : formatDay(_end!)),
+                ),
+              ),
+            ),
+          ]),
+          const SizedBox(height: Space.xs),
+          Text('Primeiro vencimento: ${formatDay(_due)}. As ocorrências futuras são criadas automaticamente.', style: AppText.body(c.textSecondary).copyWith(fontSize: 12)),
+        ],
+      ]);
+    }
+    final text = (widget.mode == BillFormMode.edit && src != null && src.isRecurring) ? 'Recorrente (escolha o alcance ao salvar)' : 'Não se repete';
+    return InputDecorator(
+      decoration: const InputDecoration(labelText: 'Recorrência', border: OutlineInputBorder(), enabled: false),
+      child: Text(text, style: AppText.body(c.textSecondary)),
+    );
   }
 
   @override
@@ -141,6 +260,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
           ),
           const SizedBox(height: Space.md),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: categories.any((x) => x.id == _categoryId) ? _categoryId : null,
             decoration: const InputDecoration(labelText: 'Categoria', border: OutlineInputBorder()),
             items: [for (final cat in categories) DropdownMenuItem(value: cat.id, child: Text(cat.name))],
@@ -156,10 +276,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
             onSelectionChanged: (s) => setState(() => _type = s.first),
           ),
           const SizedBox(height: Space.md),
-          InputDecorator(
-            decoration: const InputDecoration(labelText: 'Recorrência', border: OutlineInputBorder(), enabled: false),
-            child: Text('Não se repete (recorrências chegam na Fase 5)', style: AppText.body(c.textSecondary)),
-          ),
+          _recurrenceSection(context),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Favorita'),

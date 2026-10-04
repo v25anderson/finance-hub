@@ -11,8 +11,11 @@ import '../../../design_system/tokens/colors.dart';
 import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
 import '../../../domain/bill.dart';
+import '../../../domain/recurrence.dart';
 import 'bill_form_sheet.dart';
 import 'payment_dialogs.dart';
+import 'recurrence_dialogs.dart';
+import 'value_history_chart.dart';
 import 'status_style.dart';
 import 'ui_helpers.dart';
 
@@ -103,7 +106,7 @@ class _Content extends ConsumerWidget {
       _Info('Criada em', formatDay(bill.createdAt.toLocal())),
       _Info('Categoria', category?.name ?? '—'),
       _Info('Tipo', expenseTypeLabel(bill.expenseType)),
-      _Info('Recorrência', bill.isRecurring ? 'Recorrente' : 'Não se repete'),
+      _RecurrenceInfo(bill: bill),
       if (bill.note.isNotEmpty) _Info('Observação', bill.note),
       const SizedBox(height: Space.lg),
       const SizedBox(height: Space.lg),
@@ -132,6 +135,12 @@ class _Content extends ConsumerWidget {
           label: const Text('Excluir'),
         ),
       ]),
+      if (bill.isRecurring) ...[
+        const SizedBox(height: Space.xl),
+        const SectionLabelText('Histórico de valores'),
+        const SizedBox(height: Space.sm),
+        ValueHistorySection(ruleId: bill.recurringId!),
+      ],
       const SizedBox(height: Space.xl),
       const SectionLabelText('Histórico de pagamentos'),
       const SizedBox(height: Space.sm),
@@ -185,7 +194,20 @@ class _Content extends ConsumerWidget {
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     final svc = ref.read(billServiceProvider);
+    final recurrence = ref.read(recurrenceServiceProvider);
     final messenger = ScaffoldMessenger.of(context);
+
+    if (bill.isRecurring) {
+      final scope = await showDeleteScopeDialog(context);
+      if (scope == null || !context.mounted) return;
+      RecurrenceDeleteResult? result;
+      final done = await runGuarded(context, () async => result = await recurrence.deleteOccurrence(bill.id, scope));
+      if (!done || !context.mounted) return;
+      Navigator.pop(context);
+      messenger.showSnackBar(SnackBar(content: Text(describeDeleteResult(result!))));
+      return;
+    }
+
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
@@ -205,6 +227,22 @@ class _Content extends ConsumerWidget {
       content: const Text('Conta excluída'),
       action: SnackBarAction(label: 'Desfazer', onPressed: () => svc.restore(bill.id)),
     ));
+  }
+}
+
+/// Linha "Recorrência" com a frequência e o fim, vindos da regra.
+class _RecurrenceInfo extends ConsumerWidget {
+  const _RecurrenceInfo({required this.bill});
+  final Bill bill;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!bill.isRecurring) return const _Info('Recorrência', 'Não se repete');
+    final rule = ref.watch(recurrenceRuleProvider(bill.recurringId!)).value;
+    final text = rule == null
+        ? 'Recorrência encerrada'
+        : '${describeFrequency(rule.frequency, rule.interval)}${rule.end != null ? ' · até ${formatDay(rule.end!)}' : ''}';
+    return _Info('Recorrência', text);
   }
 }
 

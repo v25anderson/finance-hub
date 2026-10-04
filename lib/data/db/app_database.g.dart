@@ -7840,9 +7840,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_transactions_category',
     'CREATE INDEX idx_transactions_category ON transactions (category_id)',
   );
-  late final Index idxTransactionsRecurring = Index(
-    'idx_transactions_recurring',
-    'CREATE INDEX idx_transactions_recurring ON transactions (recurring_id, occurrence_date)',
+  late final Index uqTransactionsOccurrence = Index(
+    'uq_transactions_occurrence',
+    'CREATE UNIQUE INDEX uq_transactions_occurrence ON transactions (recurring_id, occurrence_date)',
   );
   late final Index idxPaymentsTransaction = Index(
     'idx_payments_transaction',
@@ -7878,7 +7878,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncConflicts,
     idxTransactionsDue,
     idxTransactionsCategory,
-    idxTransactionsRecurring,
+    uqTransactionsOccurrence,
     idxPaymentsTransaction,
     idxAttachmentsOwner,
     idxIncomesMonth,

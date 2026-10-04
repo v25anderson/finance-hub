@@ -9,7 +9,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 2 | Persistência local (Drift, schema, migrações, repositórios) | ✅ (ver notas abaixo) |
 | 3 | Contas e pagamentos (regras de domínio + UI) | ✅ (ver notas abaixo) |
 | 4 | Dashboard | ✅ (ver notas abaixo) |
-| 5 | Recorrências | ⏳ |
+| 5 | Recorrências | ✅ (ver notas abaixo) |
 | 6 | Calendário | ⏳ |
 | 7 | Planejamento e projeções | ⏳ |
 | 8 | Análises | ⏳ |
@@ -45,3 +45,13 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Ainda não feito (por design)**: edição completa do planejamento e a personalização mensal pela UI (Fase 7; hoje a personalização existe no repositório e é lida pelo dashboard, mas sem tela); projeções (Fase 7); alerta que abre a aba/estado correspondente em Contas (hoje só abre a aba Contas).
 - **Limitação conhecida**: os alertas leem todas as contas em aberto até 30 dias à frente (inclusive vencidas antigas) e filtram em memória; adequado ao volume pessoal, a otimizar com SQL se necessário.
 - **Lição de teste**: com streams do Drift ativas, duas escritas dentro de um mesmo `runAsync` travam o teste; `Harness.run` esvazia a zona de relógio falso após cada operação.
+
+## Notas da Fase 5
+- **Regra e geração** (`lib/domain/recurrence.dart`): semanal, mensal, anual e "a cada N dias"; a k-ésima data é sempre calculada a partir do início (31/01 → 28/02 → 31/03; 29/02 em ano não bissexto vira 28/02). Ocorrências são **materializadas** e geradas até 12 meses à frente, e sob demanda ao navegar para meses mais distantes.
+- **Schema v2** (primeira migração real): índice único `(regra, data)` torna a geração idempotente. A migração não apaga dados: duplicatas eventuais só perdem o vínculo com a regra. Testada reabrindo um banco v1.
+- **Edição**: "somente esta" (marca como editada à mão) ou "esta e as próximas" (atualiza a regra e as futuras que não foram editadas à mão nem têm pagamento; não permite mudar o vencimento).
+- **Exclusão**: "apenas esta" (não é recriada), "esta e as próximas" (a regra termina antes) e "toda a recorrência" (remove futuras sem pagamento; **passado e contas com pagamento permanecem**). O app informa quantas foram excluídas e quantas mantidas.
+- **Histórico de valores**: gráfico valor × tempo (degraus; tracejado = futuras previstas) e lista de mudanças como fatos, sem inferir motivo.
+- **Verificado**: analyze limpo; 201 testes (datas, serviço, migração, UI); gráfico conferido no Chromium real.
+- **Ainda não feito**: editar a frequência/intervalo de uma regra existente (excluir e recriar); desfazer exclusões em lote; ver/gerenciar regras numa lista própria.
+- **APK**: o ambiente de desenvolvimento não alcança `dl.google.com` (Android SDK). Foi adicionado `.github/workflows/android-apk.yml` para o GitHub Actions gerar o APK (artefato `finance-hub-apk`).

@@ -46,13 +46,22 @@ class AppDatabase extends _$AppDatabase {
   DateTime now() => clock().toUtc();
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
         onUpgrade: (m, from, to) async {
-          // Migrações futuras entram aqui, uma por versão (from < N).
+          if (from < 2) {
+            // v2: ocorrências de recorrência únicas por (regra, data).
+            await customStatement('DROP INDEX IF EXISTS idx_transactions_recurring');
+            // Duplicatas (se existirem) perdem o vínculo com a regra, mas nenhum dado é apagado.
+            await customStatement('''
+              UPDATE transactions SET recurring_id = NULL, occurrence_date = NULL
+              WHERE recurring_id IS NOT NULL AND rowid NOT IN (
+                SELECT MIN(rowid) FROM transactions WHERE recurring_id IS NOT NULL GROUP BY recurring_id, occurrence_date)''');
+            await m.createIndex(uqTransactionsOccurrence);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

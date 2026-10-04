@@ -29,3 +29,7 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D23 | Faixas de alerta exclusivas (hoje, amanhã, 2–7 dias, 8–30 dias) | Evita o mesmo vencimento em várias mensagens | Faixas cumulativas |
 | D24 | Investimento realizado = lançamentos registrados; meta vem do planejamento | Separa expectativa de fato | Um único campo |
 | D25 | "Marcar meta como realizada" registra o restante da meta como um lançamento | Mesmo padrão de "marcar como pago": preserva histórico | Sobrescrever o realizado |
+| D26 | Índice único (regra, data) e geração idempotente; ocorrência excluída permanece como tombstone | Concorrência segura e "excluir não recria" | Gerar sem unicidade e deduplicar depois |
+| D27 | Exclusão em lote preserva passado e contas com pagamento, e informa o que manteve | Requisito: nunca apagar histórico em silêncio | Apagar tudo da regra |
+| D28 | "Esta e as próximas" não muda o vencimento nem as ocorrências editadas à mão/pagas | Evita sobrescrever decisões do usuário | Reescrever todas as futuras |
+| D29 | APK via GitHub Actions (chave de debug do Flutter), pois o ambiente não alcança o Android SDK | Entrega testável sem custo | Instalar o SDK localmente (bloqueado pela rede) |

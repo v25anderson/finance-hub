@@ -41,6 +41,17 @@ class BillRepository extends RepoBase {
     return _withPayments(txs);
   }
 
+  /// Ocorrências ativas de uma recorrência, por vencimento (base do histórico de valores).
+  Stream<List<Bill>> watchOccurrences(String recurringId) => _changes().asyncMap((_) => getOccurrences(recurringId));
+
+  Future<List<Bill>> getOccurrences(String recurringId) async {
+    final txs = await (db.select(db.transactions)
+          ..where((t) => t.recurringId.equals(recurringId) & t.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
+        .get();
+    return _withPayments(txs);
+  }
+
   Future<Bill?> getBill(String id) async {
     final tx = await (db.select(db.transactions)..where((t) => t.id.equals(id) & t.deletedAt.isNull())).getSingleOrNull();
     if (tx == null) return null;
@@ -79,6 +90,7 @@ class BillRepository extends RepoBase {
         note: t.note,
         canceledAt: t.canceledAt,
         recurringId: t.recurringId,
+        occurrenceDate: t.occurrenceDate == null ? null : parseIsoDate(t.occurrenceDate!),
         payments: payments,
       );
 }

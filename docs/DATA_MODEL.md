@@ -53,3 +53,11 @@ Contas **canceladas** ficam fora de todos os valores.
 - **Investimento**: meta = override ?? padrão; realizado = soma dos investimentos registrados; % = realizado ÷ meta (pode passar de 100%); diferença = meta − realizado; projeção do mês = máx(meta, realizado).
 - **Saldos** (nunca misturados): *atual* = renda − pagos (caixa) − investimentos realizados; *após contas* = atual − pendentes; *projetado / após investimentos planejados* = renda − pagos − pendentes − max(meta, realizado).
 - **Alertas** (a partir de hoje, independem do mês exibido; só contas com saldo a pagar): vencidas; vencem hoje; vencem amanhã; vencem em 2–7 dias ("esta semana"); vencem em 8–30 dias. Faixas exclusivas, cada conta cai em uma só.
+
+## Recorrência (Fase 5)
+- **Regra**: frequência (semanal/mensal/anual/personalizado = a cada N dias), intervalo, primeiro vencimento (ancora o dia), fim opcional, dados-base (nome, valor, categoria, tipo, favorito).
+- **Ocorrência**: um `Transaction` com `recurringId` e `occurrenceDate` (a data na regra; `dueDate` pode divergir se editada só nela). Único por (regra, `occurrenceDate`), inclusive excluídas (tombstone): excluir não recria.
+- **Geração**: do início da regra até hoje + 12 meses (e até o mês navegado); idempotente.
+- **Valor**: cada ocorrência guarda o próprio valor previsto, então mudar o preço daqui para frente nunca reescreve o passado.
+- **Edição "esta e as próximas"**: atualiza a regra e as ocorrências posteriores **não editadas à mão, não canceladas e sem pagamento**.
+- **Exclusão** (nunca apaga histórico em silêncio): apenas esta · esta e as próximas (fim da regra = dia anterior; se for a primeira, a regra é excluída) · toda (futuras sem pagamento; passadas e com pagamento ficam; regra excluída).

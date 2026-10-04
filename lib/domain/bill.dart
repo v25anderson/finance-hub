@@ -31,6 +31,7 @@ class Bill {
     this.note = '',
     this.canceledAt,
     this.recurringId,
+    this.occurrenceDate,
     this.payments = const [],
   });
 
@@ -49,6 +50,9 @@ class Bill {
   final String note;
   final DateTime? canceledAt;
   final String? recurringId;
+
+  /// Data da ocorrência na regra (pode diferir do vencimento se foi editada).
+  final DateTime? occurrenceDate;
   final List<Payment> payments;
 
   bool get isCanceled => canceledAt != null;
@@ -99,6 +103,7 @@ class Bill {
         note: note,
         canceledAt: canceledAt,
         recurringId: recurringId,
+        occurrenceDate: occurrenceDate,
         payments: payments ?? this.payments,
       );
 }

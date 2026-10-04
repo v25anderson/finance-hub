@@ -51,19 +51,22 @@ class Harness {
 }
 
 /// `testWidgets` com app, banco em memória e limpeza garantida.
-void appTest(String name, Future<void> Function(WidgetTester t, Harness h) body, {Size size = const Size(390, 844)}) {
+void appTest(String name, Future<void> Function(WidgetTester t, Harness h) body,
+    {Size size = const Size(390, 844), Future<void> Function(AppDatabase db)? seed}) {
   testWidgets(name, (t) async {
-    final h = await pumpApp(t, size: size);
+    final h = await pumpApp(t, size: size, seed: seed);
     await body(t, h);
     await h.finish();
   });
 }
 
-Future<Harness> pumpApp(WidgetTester tester, {Size size = const Size(390, 844)}) async {
+/// [seed] roda ANTES de montar o app, em tempo real: sem streams ativas, várias escritas são seguras.
+Future<Harness> pumpApp(WidgetTester tester, {Size size = const Size(390, 844), Future<void> Function(AppDatabase db)? seed}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final db = memoryDb(clock: () => fixedNow.toUtc());
+  if (seed != null) await tester.runAsync(() => seed(db));
   await tester.pumpWidget(ProviderScope(
     overrides: [
       databaseProvider.overrideWithValue(db),
