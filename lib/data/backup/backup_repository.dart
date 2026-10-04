@@ -58,6 +58,10 @@ class BackupRepository extends RepoBase {
       await load(db.investments, 'investments', InvestmentRow.fromJson);
       await load(db.plannings, 'plannings', PlanningRow.fromJson);
       await load(db.monthConfigurations, 'month_configurations', MonthConfigRow.fromJson);
+      // os dados mudaram por inteiro: o histórico de sincronização deixou de valer
+      await db.delete(db.syncBase).go();
+      await db.delete(db.syncConflicts).go();
+      await (db.update(db.syncMetadata)).write(const SyncMetadataCompanion(remoteCursor: Value(null), lastSyncAt: Value(null)));
       await db.ensureSeed(); // garante categorias padrão e singletons mesmo se o backup não os trouxer
     });
   }

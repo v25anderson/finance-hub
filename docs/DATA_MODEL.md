@@ -94,3 +94,9 @@ Um arquivo por conjunto, UTF-8 com BOM, CRLF. Valores monetários em reais com d
 - **rendas**: id, mes, tipo, valor, descricao, recebida. **investimentos**: id, mes, planejado, realizado, descricao.
 - **planejamento**: escopo (`padrao` ou `AAAA-MM`), salario_liquido, renda_extra, meta_economia, investimento_planejado. Campo vazio = herda o padrão; `0.00` = zero explícito.
 - `excluido_em` é acrescentada a contas, pagamentos, recorrências, rendas e investimentos quando se inclui excluídos.
+
+## Sincronização (Fase 11, esquema v3)
+- `sync_base(entity, record_id, json)`: último estado sincronizado de cada registro (ancestral do merge). Sem linha = nunca sincronizado.
+- `sync_metadata`: `state`, `last_sync_at` e `remote_cursor` (JSON `{ownSeq, peers:{deviceId: último arquivo aplicado}}`).
+- `sync_conflicts`: `entity`, `record_id`, `local_json`, `remote_json`, `resolved_at` (nulo = aberto).
+- Tabelas sincronizadas: categorias, recorrências, contas, pagamentos, rendas, investimentos, planejamento e meses personalizados. Id de ocorrência de recorrência = UUID v5 de (regra, data).

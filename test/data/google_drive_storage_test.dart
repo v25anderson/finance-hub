@@ -3,6 +3,7 @@ import 'dart:io' show SocketException;
 import 'dart:typed_data';
 
 import 'package:finance_hub/application/drive/drive_storage.dart';
+import 'package:finance_hub/data/drive/drive_rest.dart';
 import 'package:finance_hub/data/drive/google_drive_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -13,11 +14,13 @@ Future<Map<String, String>> _h() async => {'Authorization': 'Bearer tok'};
 http.Response _json(Object body, [int code = 200]) => http.Response(jsonEncode(body), code, headers: {'content-type': 'application/json; charset=utf-8'});
 
 GoogleDriveStorage storage(Future<http.Response> Function(http.Request r) handler, [List<http.Request>? log]) => GoogleDriveStorage(
-      client: MockClient((r) {
-        log?.add(r);
-        return handler(r);
-      }),
-      headers: _h,
+      rest: DriveRest(
+        client: MockClient((r) {
+          log?.add(r);
+          return handler(r);
+        }),
+        headers: _h,
+      ),
     );
 
 void main() {

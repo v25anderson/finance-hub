@@ -60,3 +60,9 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D54 | O app nunca apaga backups do Drive sozinho | "Nunca apagar histórico em silêncio" | Retenção automática dos N últimos |
 | D55 | ID do cliente OAuth passado por `--dart-define`, não versionado; sem ele o recurso fica "não configurado" | Não há credenciais no repositório; o app continua útil sem Drive | Credenciais embutidas |
 | D56 | Comprovantes (anexos) adiados | Escopo grande (seleção de arquivo, cópia local, hash, envio); backup de dados primeiro | Fazer tudo na Fase 10 |
+| D57 | Sincronização por estado completo do registro + base local (merge de três vias), não log de operações | Idempotente, tolera reenvio e perda de arquivo, e permite conflito por campo sem relógio sincronizado | Log de operações; último-escreve-ganha |
+| D58 | Conflito nunca é resolvido em silêncio: o registro fica como está, não é enviado e o usuário escolhe | "Nada é descartado automaticamente" | Vence o mais recente |
+| D59 | Ocorrências de recorrência com id determinístico (UUID v5 de regra + data) | Dois aparelhos que geram a mesma ocorrência produzem o mesmo registro, sem duplicar nem violar o índice único | Deduplicar depois; só um aparelho gera |
+| D60 | Arquivos de mudanças em conjunto plano `changes_<aparelho>_<n>.json`; leitura em sequência sem buracos | Sem pasta por aparelho; evita pular dados com listagem atrasada | Pasta por aparelho; ler tudo acima do cursor |
+| D61 | Sincronização manual, sem segundo plano | Previsível, sem consumo escondido; background exige permissões e agendamento por plataforma | Sincronização automática |
+| D62 | Registro local nunca editado e sem base adota o remoto (seed) | Evita conflito falso em categorias padrão e singletons criados em cada aparelho | Conflito sempre |

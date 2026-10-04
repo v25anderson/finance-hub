@@ -140,3 +140,15 @@ class SyncConflicts extends Table with BaseColumns {
   TextColumn get remoteJson => text()();
   DateTimeColumn get resolvedAt => dateTime().nullable()();
 }
+
+/// Último estado sincronizado de cada registro (ancestral comum do merge de três vias, v3).
+/// Um registro é "alterado localmente" quando difere desta cópia; sem cópia, nunca foi sincronizado.
+@DataClassName('SyncBaseRow')
+class SyncBase extends Table {
+  TextColumn get entity => text()();
+  TextColumn get recordId => text()();
+  TextColumn get json => text()();
+
+  @override
+  Set<Column> get primaryKey => {entity, recordId};
+}

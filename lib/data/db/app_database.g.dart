@@ -7816,6 +7816,268 @@ class SyncConflictsCompanion extends UpdateCompanion<SyncConflictRow> {
   }
 }
 
+class $SyncBaseTable extends SyncBase
+    with TableInfo<$SyncBaseTable, SyncBaseRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncBaseTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
+  @override
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recordIdMeta = const VerificationMeta(
+    'recordId',
+  );
+  @override
+  late final GeneratedColumn<String> recordId = GeneratedColumn<String>(
+    'record_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+    'json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [entity, recordId, json];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_base';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncBaseRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('entity')) {
+      context.handle(
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityMeta);
+    }
+    if (data.containsKey('record_id')) {
+      context.handle(
+        _recordIdMeta,
+        recordId.isAcceptableOrUnknown(data['record_id']!, _recordIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordIdMeta);
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+        _jsonMeta,
+        json.isAcceptableOrUnknown(data['json']!, _jsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_jsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {entity, recordId};
+  @override
+  SyncBaseRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncBaseRow(
+      entity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity'],
+      )!,
+      recordId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}record_id'],
+      )!,
+      json: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}json'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncBaseTable createAlias(String alias) {
+    return $SyncBaseTable(attachedDatabase, alias);
+  }
+}
+
+class SyncBaseRow extends DataClass implements Insertable<SyncBaseRow> {
+  final String entity;
+  final String recordId;
+  final String json;
+  const SyncBaseRow({
+    required this.entity,
+    required this.recordId,
+    required this.json,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['entity'] = Variable<String>(entity);
+    map['record_id'] = Variable<String>(recordId);
+    map['json'] = Variable<String>(json);
+    return map;
+  }
+
+  SyncBaseCompanion toCompanion(bool nullToAbsent) {
+    return SyncBaseCompanion(
+      entity: Value(entity),
+      recordId: Value(recordId),
+      json: Value(json),
+    );
+  }
+
+  factory SyncBaseRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncBaseRow(
+      entity: serializer.fromJson<String>(json['entity']),
+      recordId: serializer.fromJson<String>(json['recordId']),
+      json: serializer.fromJson<String>(json['json']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'entity': serializer.toJson<String>(entity),
+      'recordId': serializer.toJson<String>(recordId),
+      'json': serializer.toJson<String>(json),
+    };
+  }
+
+  SyncBaseRow copyWith({String? entity, String? recordId, String? json}) =>
+      SyncBaseRow(
+        entity: entity ?? this.entity,
+        recordId: recordId ?? this.recordId,
+        json: json ?? this.json,
+      );
+  SyncBaseRow copyWithCompanion(SyncBaseCompanion data) {
+    return SyncBaseRow(
+      entity: data.entity.present ? data.entity.value : this.entity,
+      recordId: data.recordId.present ? data.recordId.value : this.recordId,
+      json: data.json.present ? data.json.value : this.json,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncBaseRow(')
+          ..write('entity: $entity, ')
+          ..write('recordId: $recordId, ')
+          ..write('json: $json')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(entity, recordId, json);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncBaseRow &&
+          other.entity == this.entity &&
+          other.recordId == this.recordId &&
+          other.json == this.json);
+}
+
+class SyncBaseCompanion extends UpdateCompanion<SyncBaseRow> {
+  final Value<String> entity;
+  final Value<String> recordId;
+  final Value<String> json;
+  final Value<int> rowid;
+  const SyncBaseCompanion({
+    this.entity = const Value.absent(),
+    this.recordId = const Value.absent(),
+    this.json = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncBaseCompanion.insert({
+    required String entity,
+    required String recordId,
+    required String json,
+    this.rowid = const Value.absent(),
+  }) : entity = Value(entity),
+       recordId = Value(recordId),
+       json = Value(json);
+  static Insertable<SyncBaseRow> custom({
+    Expression<String>? entity,
+    Expression<String>? recordId,
+    Expression<String>? json,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (entity != null) 'entity': entity,
+      if (recordId != null) 'record_id': recordId,
+      if (json != null) 'json': json,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncBaseCompanion copyWith({
+    Value<String>? entity,
+    Value<String>? recordId,
+    Value<String>? json,
+    Value<int>? rowid,
+  }) {
+    return SyncBaseCompanion(
+      entity: entity ?? this.entity,
+      recordId: recordId ?? this.recordId,
+      json: json ?? this.json,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
+    }
+    if (recordId.present) {
+      map['record_id'] = Variable<String>(recordId.value);
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncBaseCompanion(')
+          ..write('entity: $entity, ')
+          ..write('recordId: $recordId, ')
+          ..write('json: $json, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7832,6 +8094,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $MonthConfigurationsTable(this);
   late final $SyncMetadataTable syncMetadata = $SyncMetadataTable(this);
   late final $SyncConflictsTable syncConflicts = $SyncConflictsTable(this);
+  late final $SyncBaseTable syncBase = $SyncBaseTable(this);
   late final Index idxTransactionsDue = Index(
     'idx_transactions_due',
     'CREATE INDEX idx_transactions_due ON transactions (due_date)',
@@ -7876,6 +8139,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     monthConfigurations,
     syncMetadata,
     syncConflicts,
+    syncBase,
     idxTransactionsDue,
     idxTransactionsCategory,
     uqTransactionsOccurrence,
@@ -12507,6 +12771,172 @@ typedef $$SyncConflictsTableProcessedTableManager =
       SyncConflictRow,
       PrefetchHooks Function()
     >;
+typedef $$SyncBaseTableCreateCompanionBuilder = SyncBaseCompanion Function({
+  required String entity,
+  required String recordId,
+  required String json,
+  Value<int> rowid,
+});
+typedef $$SyncBaseTableUpdateCompanionBuilder = SyncBaseCompanion Function({
+  Value<String> entity,
+  Value<String> recordId,
+  Value<String> json,
+  Value<int> rowid,
+});
+
+class $$SyncBaseTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncBaseTable> {
+  $$SyncBaseTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordId => $composableBuilder(
+    column: $table.recordId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncBaseTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncBaseTable> {
+  $$SyncBaseTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordId => $composableBuilder(
+    column: $table.recordId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncBaseTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncBaseTable> {
+  $$SyncBaseTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
+
+  GeneratedColumn<String> get recordId =>
+      $composableBuilder(column: $table.recordId, builder: (column) => column);
+
+  GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+}
+
+class $$SyncBaseTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncBaseTable,
+          SyncBaseRow,
+          $$SyncBaseTableFilterComposer,
+          $$SyncBaseTableOrderingComposer,
+          $$SyncBaseTableAnnotationComposer,
+          $$SyncBaseTableCreateCompanionBuilder,
+          $$SyncBaseTableUpdateCompanionBuilder,
+          (
+            SyncBaseRow,
+            BaseReferences<_$AppDatabase, $SyncBaseTable, SyncBaseRow>,
+          ),
+          SyncBaseRow,
+          PrefetchHooks Function()
+        > {
+  $$SyncBaseTableTableManager(_$AppDatabase db, $SyncBaseTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncBaseTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncBaseTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncBaseTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> entity = const Value.absent(),
+                Value<String> recordId = const Value.absent(),
+                Value<String> json = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncBaseCompanion(
+                entity: entity,
+                recordId: recordId,
+                json: json,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String entity,
+                required String recordId,
+                required String json,
+                Value<int> rowid = const Value.absent(),
+              }) => SyncBaseCompanion.insert(
+                entity: entity,
+                recordId: recordId,
+                json: json,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SyncBaseTable, SyncBaseRow>(table),
+                  BaseReferences<_$AppDatabase, $SyncBaseTable, SyncBaseRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncBaseTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncBaseTable,
+      SyncBaseRow,
+      $$SyncBaseTableFilterComposer,
+      $$SyncBaseTableOrderingComposer,
+      $$SyncBaseTableAnnotationComposer,
+      $$SyncBaseTableCreateCompanionBuilder,
+      $$SyncBaseTableUpdateCompanionBuilder,
+      (SyncBaseRow, BaseReferences<_$AppDatabase, $SyncBaseTable, SyncBaseRow>),
+      SyncBaseRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12533,4 +12963,6 @@ class $AppDatabaseManager {
       $$SyncMetadataTableTableManager(_db, _db.syncMetadata);
   $$SyncConflictsTableTableManager get syncConflicts =>
       $$SyncConflictsTableTableManager(_db, _db.syncConflicts);
+  $$SyncBaseTableTableManager get syncBase =>
+      $$SyncBaseTableTableManager(_db, _db.syncBase);
 }

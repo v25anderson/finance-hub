@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart';
 
 import '../../core/dates.dart';
@@ -154,6 +155,11 @@ class TransactionRepository extends RepoBase {
     return {for (final r in rows) if (r.occurrenceDate != null) r.occurrenceDate!};
   }
 
+  /// Id determinístico: o mesmo (regra, data) gera o mesmo id em qualquer aparelho, então ocorrências
+  /// geradas separadamente em dois aparelhos são o MESMO registro na sincronização.
+  static String occurrenceId(String recurringId, DateTime date) =>
+      const Uuid().v5(Namespace.url.value, 'finance-hub/occurrence/$recurringId/${isoDate(date)}');
+
   /// Insere ocorrências em lote. O índice único (regra, data) torna a operação idempotente:
   /// repetir não duplica.
   Future<void> insertOccurrences({
@@ -174,7 +180,7 @@ class TransactionRepository extends RepoBase {
         [
           for (final d in dates)
             TransactionsCompanion.insert(
-              id: newId(),
+              id: occurrenceId(recurringId, d),
               createdAt: t,
               updatedAt: t,
               deviceId: Value(device),

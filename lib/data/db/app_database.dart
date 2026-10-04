@@ -36,6 +36,7 @@ const defaultCategories = <({String id, String name, int color, String icon})>[
   MonthConfigurations,
   SyncMetadata,
   SyncConflicts,
+  SyncBase,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e, {DateTime Function()? clock}) : clock = clock ?? DateTime.now;
@@ -46,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   DateTime now() => clock().toUtc();
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -61,6 +62,9 @@ class AppDatabase extends _$AppDatabase {
               WHERE recurring_id IS NOT NULL AND rowid NOT IN (
                 SELECT MIN(rowid) FROM transactions WHERE recurring_id IS NOT NULL GROUP BY recurring_id, occurrence_date)''');
             await m.createIndex(uqTransactionsOccurrence);
+          }
+          if (from < 3) {
+            await m.createTable(syncBase);
           }
         },
         beforeOpen: (details) async {

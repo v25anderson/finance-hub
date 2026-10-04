@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import '../application/backup_service.dart';
 import '../application/bill_service.dart';
 import '../application/drive/drive_storage.dart';
+import '../application/sync/sync_service.dart';
+import '../application/sync/sync_transport.dart';
 import '../application/dashboard_data.dart';
 import '../application/export_service.dart';
 import '../application/file_saver.dart';
@@ -28,7 +30,10 @@ import 'repositories/analytics_repository.dart';
 import 'repositories/bill_repository.dart';
 import 'backup/backup_repository.dart';
 import 'backup/local_safety_store.dart';
+import 'drive/drive_rest.dart';
 import 'drive/google_drive_storage.dart';
+import 'drive/google_drive_sync_transport.dart';
+import 'sync/sync_repository.dart';
 import 'drive/google_sign_in_auth.dart';
 import 'file_picker_saver.dart';
 import 'repositories/category_repository.dart';
@@ -337,10 +342,31 @@ final exportServiceProvider = Provider(
 final driveAuthProvider = Provider<DriveAuth>((ref) => GoogleSignInAuth());
 
 final driveStorageProvider = Provider<DriveStorage>((ref) {
+  return GoogleDriveStorage(rest: ref.watch(driveRestProvider));
+});
+
+final driveRestProvider = Provider<DriveRest>((ref) {
   final client = http.Client();
   ref.onDispose(client.close);
-  return GoogleDriveStorage(client: client, headers: ref.watch(driveAuthProvider).authHeaders);
+  return DriveRest(client: client, headers: ref.watch(driveAuthProvider).authHeaders);
 });
+
+final syncTransportProvider = Provider<SyncTransport>((ref) => GoogleDriveSyncTransport(rest: ref.watch(driveRestProvider)));
+
+final syncRepositoryProvider = Provider((ref) => SyncRepository(ref.watch(databaseProvider)));
+
+final syncServiceProvider = Provider(
+  (ref) => SyncService(
+    repository: ref.watch(syncRepositoryProvider),
+    transport: ref.watch(syncTransportProvider),
+    db: ref.watch(databaseProvider),
+    clock: ref.watch(clockProvider),
+  ),
+);
+
+final syncMetaProvider = StreamProvider((ref) => ref.watch(syncRepositoryProvider).watchMeta());
+
+final openConflictsProvider = StreamProvider((ref) => ref.watch(syncRepositoryProvider).watchOpenConflicts());
 
 final safetyCopyStoreProvider = Provider<SafetyCopyStore>((ref) => const LocalSafetyStore());
 

@@ -16,7 +16,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 8 | Análises | ✅ (ver notas abaixo) |
 | 9 | Exportação CSV (**marco MVP local**) | ⏳ |
 | 10 | Google Drive (backup manual; comprovantes ficam para depois) | ✅ |
-| 11 | Sincronização bidirecional | ⏳ |
+| 11 | Sincronização bidirecional | ✅ |
 | 12 | Testes de integração/golden e sync | ⏳ |
 | 13 | Android APK/AAB | ⏳ |
 | 14 | Web | ⏳ |
@@ -119,3 +119,11 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Configuração necessária**: veja `docs/GOOGLE_SETUP.md`. Sem o `GOOGLE_SERVER_CLIENT_ID` o recurso fica "não configurado".
 - **Verificado**: analyze limpo; testes do formato, ida e volta, transação atômica, cliente REST (requisições conferidas com cliente HTTP simulado), serviço e fluxo na tela com Drive falso.
 - **NÃO verificado**: o login Google e o Drive reais nunca foram exercitados (não há credenciais no ambiente nem Android físico). A forma exata das requisições segue a documentação da API v3 e foi conferida só contra um servidor simulado. Cópias de segurança em `safety/` não têm limpeza automática. Backup sem criptografia (previsto no roadmap de segurança).
+
+## Notas da Fase 11
+- **Escopo**: sincronização manual entre aparelhos via Drive, com merge de três vias por campo, conflitos decididos pelo usuário e tombstones. Detalhes e limites em `docs/SYNC.md`.
+- **Esquema v3**: nova tabela `sync_base` (último estado sincronizado). Migração cria a tabela; nada mais muda. Ocorrências de recorrência passam a ter id determinístico (as já existentes mantêm o id antigo).
+- **Onde**: tela "Backup e sincronização" (Análises → nuvem): "Sincronizar agora", estado e data da última sincronização, aviso e tela de conflitos (valores dos dois lados, "Manter este aparelho" / "Usar o outro").
+- **Bug achado e corrigido pelos testes**: `insertOnConflictUpdate` do Drift ignora colunas nulas no UPDATE, então "restaurar uma conta excluída" não chegava ao outro aparelho; a aplicação passou a atualizar com `toCompanion(false)` (grava nulos).
+- **Verificado**: testes puros do merge (todos os casos de base/local/remoto) e do formato; simulação de **dois aparelhos** com Drive em memória: criação, ausência de ping-pong, merge de campos diferentes, conflito + resolução nos dois sentidos, exclusão/restauração, pagamentos nos dois lados, seed sem conflito falso, recorrência gerada nos dois aparelhos sem duplicar, falha de envio com nova tentativa, arquivo de versão mais nova (nada aplicado), restauração reiniciando o histórico, seleção de arquivos com buracos; fluxo de tela com conflito.
+- **NÃO verificado**: sincronização real entre dois aparelhos/contas Google (sem credenciais nem aparelhos aqui); comportamento do Drive real com consistência eventual, cotas e arquivos grandes; desempenho com milhares de registros (a leitura carrega as tabelas inteiras); uso concorrente real de dois aparelhos ao mesmo tempo.

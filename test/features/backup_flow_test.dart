@@ -1,4 +1,7 @@
+import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:finance_hub/app/app.dart';
+import 'package:finance_hub/application/sync/sync_service.dart';
+import 'package:finance_hub/data/sync/sync_repository.dart';
 import 'package:finance_hub/data/db/app_database.dart';
 import 'package:finance_hub/data/providers.dart';
 import 'package:finance_hub/data/repositories/transaction_repository.dart';
@@ -9,10 +12,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../data/test_db.dart';
 import '../support/drive_fakes.dart';
+import '../support/memory_transport.dart';
 import 'package:finance_hub/application/drive/drive_storage.dart';
 import 'test_harness.dart';
 
-Future<Harness> openBackup(WidgetTester t, {required FakeAuth auth, required FakeDrive drive, required FakeSafety safety, Future<void> Function(AppDatabase)? seed}) async {
+Future<Harness> openBackup(WidgetTester t, {required FakeAuth auth, required FakeDrive drive, required FakeSafety safety, Future<void> Function(AppDatabase)? seed, MemoryTransport? transport}) async {
   t.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
   addTearDown(t.platformDispatcher.clearAccessibilityFeaturesTestValue);
   t.view.physicalSize = const Size(390, 1000);
@@ -27,6 +31,7 @@ Future<Harness> openBackup(WidgetTester t, {required FakeAuth auth, required Fak
       driveAuthProvider.overrideWithValue(auth),
       driveStorageProvider.overrideWithValue(drive),
       safetyCopyStoreProvider.overrideWithValue(safety),
+      if (transport != null) syncTransportProvider.overrideWithValue(transport),
     ],
     child: const FinanceHubApp(),
   ));
@@ -130,6 +135,56 @@ void main() {
     await t.tap(find.byKey(const Key('backup-connect')));
     await h.settle();
     expect(find.byKey(const Key('backup-account')), findsOneWidget);
+    await h.finish();
+  });
+
+  testWidgets('sincronizar mostra o resumo; conflito aparece e é resolvido pelo usuário', (t) async {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    final cloud = MemoryTransport();
+    String? billId;
+    final h = await openBackup(
+      t,
+      auth: FakeAuth(),
+      drive: FakeDrive(),
+      safety: FakeSafety(),
+      transport: cloud,
+      seed: (db) async {
+        billId = await TransactionRepository(db).create(name: 'Luz', plannedAmountCents: 10000, dueDate: DateTime(2026, 10, 20), categoryId: 'cat-outros', expenseType: ExpenseType.fixed);
+      },
+    );
+    await t.tap(find.byKey(const Key('backup-connect')));
+    await h.settle();
+    expect(find.text('Ainda não sincronizado.'), findsOneWidget);
+
+    await t.tap(find.byKey(const Key('sync-now')));
+    await h.settle();
+    expect(find.textContaining('enviados'), findsOneWidget);
+    expect(find.textContaining('Última sincronização'), findsOneWidget);
+
+    // outro aparelho recebe, edita e publica
+    final other = memoryDb(clock: () => fixedNow.toUtc());
+    addTearDown(() => t.runAsync(other.close));
+    await t.runAsync(() async {
+      final svc = SyncService(repository: SyncRepository(other), transport: cloud, db: other, clock: () => fixedNow);
+      await svc.sync();
+      await TransactionRepository(other).update(billId!, plannedAmountCents: 15000);
+      await svc.sync();
+    });
+    // e este aparelho edita o mesmo campo
+    await h.run(() => TransactionRepository(h.db).update(billId!, plannedAmountCents: 12000));
+
+    await t.tap(find.byKey(const Key('sync-now')));
+    await h.settle();
+    expect(find.text('1 conflito para resolver'), findsOneWidget); // o aviso fixo (a mensagem rápida fica na fila)
+    await t.tap(find.byKey(const Key('sync-conflicts')));
+    await h.settle();
+    expect(find.text('Conflitos de sincronização'), findsOneWidget);
+    expect(find.text('Este aparelho: R\$ 120,00'), findsOneWidget);
+    expect(find.text('Outro aparelho: R\$ 150,00'), findsOneWidget);
+    await t.tap(find.textContaining('Usar o outro'));
+    await h.settle();
+    expect(find.byKey(const Key('conflicts-empty')), findsOneWidget);
+    expect((await h.run(() => TransactionRepository(h.db).getById(billId!)))!.plannedAmountCents, 15000);
     await h.finish();
   });
 }

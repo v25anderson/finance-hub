@@ -289,7 +289,7 @@ void main() {
     expect(nov.single.plannedCents, 3990);
   });
 
-  group('migração v1 → v2', () {
+  group('migração v1 → v2 → v3', () {
     test('reabrir um banco v1 cria o índice único e preserva os dados', () async {
       final dir = await Directory.systemTemp.createTemp('fh_mig');
       addTearDown(() => dir.delete(recursive: true));
@@ -318,7 +318,8 @@ void main() {
       await d2.customSelect('SELECT 1').get(); // dispara a migração
       final idx = await d2.customSelect("SELECT name FROM sqlite_master WHERE type='index' AND name LIKE '%occurrence%'").get();
       expect(idx.map((r) => r.read<String>('name')), contains('uq_transactions_occurrence'));
-      expect((await d2.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 2);
+      expect((await d2.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 3); // v1 → v2 → v3 numa só abertura
+      expect((await d2.customSelect("SELECT name FROM sqlite_master WHERE type='table' AND name='sync_base'").get()).length, 1);
 
       final rows = await d2.select(d2.transactions).get();
       expect(rows.length, 3); // nada foi apagado
