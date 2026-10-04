@@ -27,3 +27,9 @@ String previousYearMonth(String yearMonth) {
   final d = DateTime(int.parse(p[0]), int.parse(p[1]) - 1);
   return yearMonthOf(d);
 }
+
+/// `yyyy-MM` → primeiro dia do mês.
+DateTime parseYearMonth(String yearMonth) {
+  final p = yearMonth.split('-');
+  return DateTime(int.parse(p[0]), int.parse(p[1]));
+}

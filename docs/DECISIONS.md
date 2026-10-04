@@ -44,3 +44,8 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D38 | Sólido = dado real, hachurado = projeção, em barras, tabelas e selos | Requisito: nunca misturar os dois | Mesma cor para ambos |
 | D39 | Meta de economia mostrada como diferença factual, sem recomendação | Análise dos dados, não conselho financeiro | Alertas "você deveria…" |
 | D40 | Sem saldo de abertura nas projeções | MVP: não há contas bancárias com saldo (D10) | Saldo acumulado entre meses |
+| D41 | Análises só até o mês atual; sem projeção no período | Real e projeção nunca se misturam (projeção fica no Planejamento) | Permitir meses futuros nas análises |
+| D42 | Gastos das análises = valor previsto das contas do mês | Mesma base do dashboard e da comparação mensal; não depende de pagamento | Somar só o que foi pago |
+| D43 | Categorias em barras horizontais, não em donut | Valores próximos e muitas categorias: barras comparam melhor | Donut / pizza |
+| D44 | Cores de série fixas e validadas (3 séries); série única usa a cor de destaque; status reservado | Acessibilidade para daltonismo e significado consistente | Cores geradas por gráfico |
+| D45 | Todo gráfico tem leitura por toque e visão em tabela | Valores acessíveis sem depender de cor ou gesto | Só o desenho |

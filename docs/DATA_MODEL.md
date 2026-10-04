@@ -76,3 +76,11 @@ Por mês, a partir do mês atual (o atual conta como o 1º). Cada valor tem part
 | investimentos | realizado | restante da meta do mês |
 Saldo do mês = renda − gastos − investimentos (igual ao saldo projetado do dashboard). Total do período = soma dos saldos mensais (sem saldo de abertura). Meta de economia: diferença = saldo do mês − meta (positivo = acima); sem meta, não há diferença.
 Personalização do mês: `MonthConfiguration` com 4 campos opcionais (nulo herda; zero é zero explícito).
+
+## Análises (Fase 8)
+Período: lista de meses `yyyy-MM` terminando, no máximo, no mês atual.
+- **Gastos** = soma do valor **previsto** das contas com vencimento no mês, sem canceladas nem excluídas (inclui recorrências já geradas). Por categoria e por tipo (fixo/variável/pontual). **Média mensal** = total ÷ número de meses (meses sem gasto contam como zero).
+- **Renda** = mesma regra do planejamento: (padrão ou valor do mês) + lançamentos de renda do mês. Os padrões valem também para meses passados sem personalização.
+- **Investimentos**: planejado = meta do mês (valor do mês ou padrão); realizado = soma dos investimentos registrados no mês.
+- **Taxa de poupança** = investimentos realizados ÷ renda, por mês e no período. Sem renda, é indefinida ("—"); pode passar de 100%.
+- Categoria: parte = gasto da categoria ÷ gasto total; ordenadas do maior para o menor (desempate por id). A tela mostra as 8 maiores e agrupa o resto em "Outras".

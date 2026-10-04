@@ -46,11 +46,14 @@ class PeriodSelector extends ConsumerWidget {
   }
 
   Future<void> _pick(BuildContext context, WidgetRef ref) async {
-    final current = ref.read(selectedMonthProvider);
-    final result = await showDialog<DateTime>(context: context, builder: (_) => _MonthPickerDialog(initial: current));
+    final result = await pickMonth(context, ref.read(selectedMonthProvider));
     if (result != null) ref.read(selectedMonthProvider.notifier).set(result.year, result.month);
   }
 }
+
+/// Diálogo de escolha de mês e ano. Retorna o primeiro dia do mês escolhido (ou nulo se cancelar).
+Future<DateTime?> pickMonth(BuildContext context, DateTime initial) =>
+    showDialog<DateTime>(context: context, builder: (_) => _MonthPickerDialog(initial: initial));
 
 class _Arrow extends StatelessWidget {
   const _Arrow({required this.icon, required this.tooltip, required this.color, required this.onTap});

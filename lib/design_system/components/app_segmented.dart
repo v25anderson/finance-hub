@@ -32,11 +32,14 @@ class AppSegmented<T> extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 11),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: value == selected ? c.surface : Colors.transparent,
+                  color: value == selected ? (Theme.of(context).brightness == Brightness.light ? c.surface : c.border) : Colors.transparent,
                   borderRadius: BorderRadius.circular(Radii.pill),
                   boxShadow: value == selected ? [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8, offset: const Offset(0, 2))] : null,
                 ),
-                child: Text(label, style: AppText.body(value == selected ? c.textPrimary : c.textSecondary).copyWith(fontSize: 14, fontWeight: value == selected ? FontWeight.w700 : FontWeight.w600)),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(label, maxLines: 1, style: AppText.body(value == selected ? c.textPrimary : c.textSecondary).copyWith(fontSize: 14, fontWeight: value == selected ? FontWeight.w700 : FontWeight.w600)),
+                ),
               ),
             ),
           ),

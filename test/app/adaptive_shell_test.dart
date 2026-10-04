@@ -27,6 +27,6 @@ void main() {
     expect(find.byType(AppNavBar), findsNothing);
     await t.tap(find.text('Análises'));
     await h.settle();
-    expect(find.text('Disponível na Fase 8.'), findsOneWidget);
+    expect(find.text('Análise dos dados que você inseriu. Não é recomendação financeira.'), findsOneWidget);
   });
 }

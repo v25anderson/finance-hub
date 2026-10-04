@@ -13,7 +13,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 6 | Calendário | ✅ (ver notas abaixo) |
 | 6.5 | Redesign visual (identidade própria, sem a cara padrão do Material) | ✅ (ver notas abaixo) |
 | 7 | Planejamento e projeções | ✅ (ver notas abaixo) |
-| 8 | Análises | ⏳ |
+| 8 | Análises | ✅ (ver notas abaixo) |
 | 9 | Exportação CSV (**marco MVP local**) | ⏳ |
 | 10 | Google Drive (backup, comprovantes) | ⏳ |
 | 11 | Sincronização bidirecional | ⏳ |
@@ -86,3 +86,14 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Verificado**: analyze limpo; 261 testes (regras, UI e números conferidos à mão); capturas conferidas no Chromium (celular e desktop).
 - **Ainda não feito**: saldo inicial/acumulado entre meses (a soma do período é a soma dos saldos mensais, sem saldo de abertura); gráfico de linha da evolução; copiar o planejamento de um mês para vários.
 - **Bug achado pelos testes**: `SwitchListTile` dentro de cartão colorido exige `Material` próprio (asserção do Flutter).
+
+## Notas da Fase 8
+- **Filtros**: 6, 12 e 24 meses (terminando no mês atual) e **Personalizado** (início e fim por mês e ano). O período nunca passa do mês atual: análise não mistura projeção. Fim antes do início leva o início junto; máximo de 60 meses.
+- **Indicadores**: gastos e média mensal, renda, investido (realizado, com a meta ao lado) e taxa de poupança.
+- **Gráficos** (um único eixo, sempre a partir de zero): evolução dos gastos (linha); gastos por categoria (barras horizontais); fixos × variáveis × pontuais (colunas empilhadas + totais e %); investimentos planejado × realizado (colunas agrupadas); renda (linha); taxa de poupança (linha).
+- **Regras de visualização aplicadas**: sem donut (as fatias seriam parecidas), cores de status reservadas, 3 cores de série validadas para daltonismo nos dois temas, marcas finas (barra ≤ 24 px com 4 px na ponta, linha de 2 px, ponto final de 9 px com anel), espaço de 2 px entre trechos, legenda para 2 ou mais séries, rótulos em tinta de texto, **toque/arraste lê o mês** e **"ver como tabela"** em todo gráfico (acesso aos valores sem depender de cor ou toque).
+- **Cores**: o verde-água do tema claro tem contraste de 2,74:1; a regra de compensação é atendida com valores visíveis na legenda e a visão em tabela.
+- **Texto neutro**: o app diz explicitamente "Análise dos dados que você inseriu. Não é recomendação financeira." e não interpreta nem sugere nada.
+- **Verificado**: analyze limpo; 308 testes (regras, repositório, funções de eixo e UI com números conferidos à mão); capturas conferidas no Chromium (desktop claro/escuro, celular, tabela).
+- **Ainda não feito**: comparação entre dois períodos; exportação dos gráficos; zoom em um mês. Taxa de poupança só usa investimentos *realizados* (não considera saldo que sobrou em conta).
+- **Bugs achados pelos testes e corrigidos**: a leitura do gráfico estourava a largura com fonte larga; "Personalizado" quebrava em duas linhas no celular.

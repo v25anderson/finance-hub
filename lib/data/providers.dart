@@ -9,6 +9,7 @@ import '../application/planning_service.dart';
 import '../application/recurrence_service.dart';
 import '../core/dates.dart';
 import '../domain/alerts.dart';
+import '../domain/analytics.dart';
 import '../domain/balance.dart';
 import '../domain/month_comparison.dart';
 import '../domain/month_plan.dart';
@@ -18,6 +19,7 @@ import '../domain/recurrence.dart';
 import '../domain/bill.dart';
 import 'db/app_database.dart';
 import 'db/connection.dart';
+import 'repositories/analytics_repository.dart';
 import 'repositories/bill_repository.dart';
 import 'repositories/category_repository.dart';
 import 'repositories/planning_repository.dart';
@@ -240,4 +242,71 @@ final projectionProvider = Provider<AsyncValue<Projection>>((ref) {
         ),
     ], currentYearMonth: current),
   );
+});
+
+final analyticsRepositoryProvider = Provider((ref) => AnalyticsRepository(ref.watch(databaseProvider)));
+
+enum AnalyticsPreset { m6, m12, m24, custom }
+
+extension AnalyticsPresetX on AnalyticsPreset {
+  /// Quantidade de meses dos presets; nulo no personalizado.
+  int? get months => switch (this) {
+        AnalyticsPreset.m6 => 6,
+        AnalyticsPreset.m12 => 12,
+        AnalyticsPreset.m24 => 24,
+        AnalyticsPreset.custom => null,
+      };
+}
+
+/// Filtro do período das Análises. O período termina, no máximo, no mês atual (sem projeção).
+class AnalyticsFilter {
+  const AnalyticsFilter({required this.preset, required this.customStart, required this.customEnd});
+  final AnalyticsPreset preset;
+  final String customStart;
+  final String customEnd;
+
+  AnalyticsFilter copyWith({AnalyticsPreset? preset, String? customStart, String? customEnd}) =>
+      AnalyticsFilter(preset: preset ?? this.preset, customStart: customStart ?? this.customStart, customEnd: customEnd ?? this.customEnd);
+}
+
+class AnalyticsFilterNotifier extends Notifier<AnalyticsFilter> {
+  String get _current => yearMonthOf(ref.read(todayProvider));
+
+  @override
+  AnalyticsFilter build() {
+    final current = yearMonthOf(ref.read(todayProvider));
+    return AnalyticsFilter(preset: AnalyticsPreset.m6, customStart: presetMonths(current, 6).first, customEnd: current);
+  }
+
+  void selectPreset(AnalyticsPreset p) => state = state.copyWith(preset: p);
+
+  /// Início do personalizado. Se passar do fim, o fim acompanha.
+  void setCustomStart(String ym) {
+    final start = ym.compareTo(_current) > 0 ? _current : ym;
+    final end = state.customEnd.compareTo(start) < 0 ? start : state.customEnd;
+    state = state.copyWith(customStart: start, customEnd: end);
+  }
+
+  /// Fim do personalizado (nunca depois do mês atual). Se ficar antes do início, o início acompanha.
+  void setCustomEnd(String ym) {
+    final end = ym.compareTo(_current) > 0 ? _current : ym;
+    final start = state.customStart.compareTo(end) > 0 ? end : state.customStart;
+    state = state.copyWith(customStart: start, customEnd: end);
+  }
+}
+
+final analyticsFilterProvider = NotifierProvider<AnalyticsFilterNotifier, AnalyticsFilter>(AnalyticsFilterNotifier.new);
+
+/// Meses do período escolhido, em ordem.
+final analyticsMonthsProvider = Provider<List<String>>((ref) {
+  final f = ref.watch(analyticsFilterProvider);
+  final current = yearMonthOf(ref.watch(todayProvider));
+  final n = f.preset.months;
+  return n != null ? presetMonths(current, n) : customMonths(f.customStart, f.customEnd);
+});
+
+/// Análise do período escolhido (reativa).
+final analyticsProvider = StreamProvider<Analytics>((ref) {
+  final months = ref.watch(analyticsMonthsProvider);
+  return ref.watch(analyticsRepositoryProvider).watchRange(months.first, months.last).map((s) => buildAnalytics(months, s));
 });
