@@ -8,7 +8,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 1 | Projeto Flutter + design system + shell adaptativo | ✅ (analyze, 7 testes e build web OK; build Android pendente: sem Android SDK no ambiente) |
 | 2 | Persistência local (Drift, schema, migrações, repositórios) | ✅ (ver notas abaixo) |
 | 3 | Contas e pagamentos (regras de domínio + UI) | ✅ (ver notas abaixo) |
-| 4 | Dashboard | ⏳ |
+| 4 | Dashboard | ✅ (ver notas abaixo) |
 | 5 | Recorrências | ⏳ |
 | 6 | Calendário | ⏳ |
 | 7 | Planejamento e projeções | ⏳ |
@@ -36,3 +36,12 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **UI**: lista com abas (Pendentes/Pagas/Vencidas/Todas) + filtro de favoritos, seletor de período (mês/ano, meses futuros), cadastro rápido, detalhe (bottom sheet no celular, painel lateral no desktop), diálogos de pagamento, histórico de pagamentos, exclusão com desfazer.
 - **Verificado**: analyze limpo; 97 testes (domínio, dados e fluxos de UI com banco em memória); build Web; fluxo criar → listar → abrir detalhe no Chromium real (celular, 390 px).
 - **Ainda não feito (por design)**: recorrência no formulário (campo desabilitado; Fase 5); "Excluir esta/próximas/toda a recorrência" (Fase 5); anexar comprovante (botão desabilitado; Fase 10); cancelar conta pela UI (existe no repositório, sem botão); painel lateral do desktop validado só por teste de widget, não por captura de tela.
+
+## Notas da Fase 4
+- **Regras puras em `lib/domain`**: `month_summary` (totais, listas por estado, distribuição por categoria), `month_comparison`, `month_plan` (renda e investimento do mês: padrão, override e lançamentos), `balance` (três saldos) e `alerts` (faixas de vencimento).
+- **Dashboard**: KPI "Gastos do mês" clicável (abre detalhe com Pagas/Pendentes/Vencidas/Parcialmente pagas/Futuras e distribuição por categoria), comparação neutra com o mês anterior, "Quanto sobra", renda, investimentos e alertas. Duas colunas a partir de 880 px de conteúdo; no celular os alertas vêm primeiro.
+- **Ações no dashboard**: adicionar renda do mês, definir valores padrão (salário, extra, investimento), registrar investimento realizado e "marcar meta como realizada".
+- **Verificado**: analyze limpo; 147 testes (domínio, dados e UI); build Web; dashboard conferido no Chromium real em celular claro/escuro e desktop, inclusive o detalhe do KPI.
+- **Ainda não feito (por design)**: edição completa do planejamento e a personalização mensal pela UI (Fase 7; hoje a personalização existe no repositório e é lida pelo dashboard, mas sem tela); projeções (Fase 7); alerta que abre a aba/estado correspondente em Contas (hoje só abre a aba Contas).
+- **Limitação conhecida**: os alertas leem todas as contas em aberto até 30 dias à frente (inclusive vencidas antigas) e filtram em memória; adequado ao volume pessoal, a otimizar com SQL se necessário.
+- **Lição de teste**: com streams do Drift ativas, duas escritas dentro de um mesmo `runAsync` travam o teste; `Harness.run` esvazia a zona de relógio falso após cada operação.

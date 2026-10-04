@@ -20,3 +20,10 @@ String yearMonthOf(DateTime d) => isoDate(d).substring(0, 7);
 
 /// Último dia do mês (regra: vencimento dia 31 em mês curto vira o último dia).
 int daysInMonth(int year, int month) => DateTime(year, month + 1, 0).day;
+
+/// Mês anterior de um `yyyy-MM`.
+String previousYearMonth(String yearMonth) {
+  final p = yearMonth.split('-');
+  final d = DateTime(int.parse(p[0]), int.parse(p[1]) - 1);
+  return yearMonthOf(d);
+}

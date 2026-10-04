@@ -25,3 +25,7 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D19 | "Marcar como pago" registra o **valor restante** como um novo pagamento (nunca zera nem apaga os anteriores) | Preserva o histórico | Sobrescrever o valor pago |
 | D20 | Valor da conta exige > 0 na UI/serviço; pagamento acima do restante é aceito e vira excedente | Evita contas vazias sem perder dinheiro registrado | Truncar o pagamento |
 | D21 | Ações principais de pagamento ficam no topo do detalhe; secundárias abaixo | Visíveis sem rolar no celular | Todas as ações no rodapé |
+| D22 | Comparação mensal só com números, cores neutras e sem texto interpretativo | Requisito: não gerar conclusões subjetivas | Verde/vermelho para queda/alta |
+| D23 | Faixas de alerta exclusivas (hoje, amanhã, 2–7 dias, 8–30 dias) | Evita o mesmo vencimento em várias mensagens | Faixas cumulativas |
+| D24 | Investimento realizado = lançamentos registrados; meta vem do planejamento | Separa expectativa de fato | Um único campo |
+| D25 | "Marcar meta como realizada" registra o restante da meta como um lançamento | Mesmo padrão de "marcar como pago": preserva histórico | Sobrescrever o realizado |

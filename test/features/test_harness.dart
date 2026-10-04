@@ -27,7 +27,16 @@ class Harness {
     }
   }
 
-  Future<T> run<T>(Future<T> Function() f) async => (await tester.runAsync(f))!;
+  /// Executa I/O real do banco e em seguida esvazia a zona de relógio falso. Sem isso, a atualização de
+  /// streams do Drift (iniciada na zona falsa) fica pendente e a próxima operação trava, esperando o banco.
+  Future<T> run<T>(Future<T> Function() f) async {
+    final r = (await tester.runAsync(f)) as T; // `as T` aceita operações void (resultado nulo)
+    for (var i = 0; i < 3; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 15)));
+    }
+    return r;
+  }
 
   /// Descarta a árvore (cancelando streams do Drift), deixa os timers pendentes dispararem e fecha o banco.
   Future<void> finish() async {
@@ -78,8 +87,10 @@ Finder field(String label) => find.widgetWithText(TextFormField, label);
 Future<void> tapVisible(WidgetTester t, Harness h, Finder f) async {
   if (f.evaluate().isEmpty) {
     await t.scrollUntilVisible(f, 150, scrollable: find.byType(Scrollable).last);
-    await t.pump(const Duration(milliseconds: 100));
+  } else {
+    await t.ensureVisible(f);
   }
+  await t.pump(const Duration(milliseconds: 100));
   await t.tap(f);
   await h.settle();
 }

@@ -43,3 +43,13 @@ Transaction{previsto=100000, vencimento=2026-10-15}; Payment{40000} → pago=400
 - **Vencidas**: vencida, inclusive parcialmente paga (mostra o status "Vencida" e o percentual pago).
 - **Todas**: tudo, inclusive canceladas.
 Toda conta ativa aparece em exatamente uma entre Pendentes, Pagas e Vencidas. "Vence hoje" não é vencida.
+
+## Cálculos do dashboard (Fase 4)
+Contas **canceladas** ficam fora de todos os valores.
+- **Gastos do mês** = soma dos valores previstos. **Pago** = por conta, o menor entre pago e previsto. **Pendente** = soma do restante. Invariante: `pago + pendente = gastos`. **Excedente** (pago além do previsto) é mostrado à parte e conta como saída real de caixa no saldo.
+- **% quitado** = pago ÷ gastos; mês sem gastos = 0%.
+- **Comparação**: variação absoluta e percentual do total previsto contra o mês anterior. Se o mês anterior não tem gastos, o percentual é indefinido (não exibido). Principais categorias = maiores variações absolutas (desempate por id). Sem juízo de valor (sem cores de bom/ruim).
+- **Renda do mês**: salário = (override do mês ?? padrão) + lançamentos de salário; renda extra = (override ?? padrão) + lançamentos de extra; outras = lançamentos de outras. Override nulo herda; zero é zero explícito.
+- **Investimento**: meta = override ?? padrão; realizado = soma dos investimentos registrados; % = realizado ÷ meta (pode passar de 100%); diferença = meta − realizado; projeção do mês = máx(meta, realizado).
+- **Saldos** (nunca misturados): *atual* = renda − pagos (caixa) − investimentos realizados; *após contas* = atual − pendentes; *projetado / após investimentos planejados* = renda − pagos − pendentes − max(meta, realizado).
+- **Alertas** (a partir de hoje, independem do mês exibido; só contas com saldo a pagar): vencidas; vencem hoje; vencem amanhã; vencem em 2–7 dias ("esta semana"); vencem em 8–30 dias. Faixas exclusivas, cada conta cai em uma só.

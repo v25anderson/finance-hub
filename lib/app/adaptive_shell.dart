@@ -10,6 +10,7 @@ import '../features/calendar/presentation/calendar_page.dart';
 import '../features/dashboard/presentation/dashboard_page.dart';
 import '../features/planning/presentation/planning_page.dart';
 import '../features/bills/presentation/bill_form_sheet.dart';
+import 'shell_index_provider.dart';
 import 'theme_mode_provider.dart';
 
 class AppDestination {
@@ -45,9 +46,7 @@ class AdaptiveShell extends ConsumerStatefulWidget {
 }
 
 class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
-  int _index = 0;
-
-  void _select(int i) => setState(() => _index = i);
+  void _select(int i) => ref.read(shellIndexProvider.notifier).select(i);
 
   void _toggleTheme() {
     final mode = ref.read(themeModeProvider);
@@ -57,10 +56,11 @@ class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
 
   @override
   Widget build(BuildContext context) {
+    final index = ref.watch(shellIndexProvider);
     final layout = layoutForWidth(MediaQuery.sizeOf(context).width);
     final body = AnimatedSwitcher(
       duration: const Duration(milliseconds: 180),
-      child: KeyedSubtree(key: ValueKey(_index), child: _destinations[_index].page),
+      child: KeyedSubtree(key: ValueKey(index), child: _destinations[index].page),
     );
     final fab = FloatingActionButton.extended(
       onPressed: () => showBillForm(context),
@@ -73,7 +73,7 @@ class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
         body: SafeArea(child: body),
         floatingActionButton: fab,
         bottomNavigationBar: NavigationBar(
-          selectedIndex: _index,
+          selectedIndex: index,
           onDestinationSelected: _select,
           destinations: [
             for (final d in _destinations)
@@ -93,7 +93,7 @@ class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
             extended: expanded,
             minExtendedWidth: 232,
             backgroundColor: c.surface,
-            selectedIndex: _index,
+            selectedIndex: index,
             onDestinationSelected: _select,
             leading: Padding(
               padding: const EdgeInsets.symmetric(vertical: Space.lg),

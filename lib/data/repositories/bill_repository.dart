@@ -16,6 +16,21 @@ class BillRepository extends RepoBase {
 
   Stream<Bill?> watchBill(String id) => _changes().asyncMap((_) => getBill(id));
 
+  /// Contas ainda a pagar com vencimento até hoje + [windowDays] (inclui vencidas de qualquer mês).
+  /// Base dos alertas de vencimento, que independem do mês exibido.
+  Stream<List<Bill>> watchOpenBills(DateTime today, {int windowDays = 30}) =>
+      _changes().asyncMap((_) => getOpenBills(today, windowDays: windowDays));
+
+  Future<List<Bill>> getOpenBills(DateTime today, {int windowDays = 30}) async {
+    final limit = isoDate(dateOnly(today).add(Duration(days: windowDays)));
+    final txs = await (db.select(db.transactions)
+          ..where((t) => t.deletedAt.isNull() & t.canceledAt.isNull() & t.dueDate.isSmallerOrEqualValue(limit))
+          ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
+        .get();
+    final bills = await _withPayments(txs);
+    return bills.where((b) => b.remainingCents > 0).toList();
+  }
+
   Future<List<Bill>> getMonth(String yearMonth) async {
     final r = monthRange(yearMonth);
     final txs = await (db.select(db.transactions)
