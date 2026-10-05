@@ -19,6 +19,7 @@ import 'value_history_chart.dart';
 import 'range_text.dart';
 import 'status_style.dart';
 import 'ui_helpers.dart';
+import '../../../design_system/components/app_snack.dart';
 
 Future<void> showBillDetail(BuildContext context, String billId) =>
     showAdaptiveSheet<void>(context, builder: (_) => BillDetailSheet(billId: billId));
@@ -221,10 +222,7 @@ class _Content extends ConsumerWidget {
     if (!done || removed == null || !context.mounted) return;
     // A barra de aviso fica atrás da folha modal (o toque cairia na área escura): fecha a folha e oferece o "Desfazer" na lista.
     Navigator.pop(context);
-    messenger.showSnackBar(SnackBar(
-      content: const Text('Pagamentos removidos'),
-      action: SnackBarAction(label: 'Desfazer', onPressed: () => svc.restorePayments(removed!)),
-    ));
+    showAppSnack(messenger, 'Pagamentos removidos', actionLabel: 'Desfazer', onAction: () => svc.restorePayments(removed!));
   }
 
   Future<void> _deletePayment(BuildContext context, WidgetRef ref, Payment p) async {
@@ -256,7 +254,7 @@ class _Content extends ConsumerWidget {
       final done = await runGuarded(context, () async => result = await recurrence.deleteOccurrence(bill.id, scope));
       if (!done || !context.mounted) return;
       Navigator.pop(context);
-      messenger.showSnackBar(SnackBar(content: Text(describeDeleteResult(result!))));
+      showAppSnack(messenger, describeDeleteResult(result!));
       return;
     }
 
@@ -275,10 +273,7 @@ class _Content extends ConsumerWidget {
     final done = await runGuarded(context, () => svc.delete(bill.id));
     if (!done || !context.mounted) return;
     Navigator.pop(context);
-    messenger.showSnackBar(SnackBar(
-      content: const Text('Conta excluída'),
-      action: SnackBarAction(label: 'Desfazer', onPressed: () => svc.restore(bill.id)),
-    ));
+    showAppSnack(messenger, 'Conta excluída', actionLabel: 'Desfazer', onAction: () => svc.restore(bill.id));
   }
 }
 

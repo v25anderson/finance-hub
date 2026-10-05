@@ -13,6 +13,7 @@ import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
 import '../../bills/presentation/ui_helpers.dart';
 import '../../shared/presentation/period_selector.dart';
+import '../../../design_system/components/app_snack.dart';
 
 /// "Personalizar este mês": valores só deste mês. Campo vazio = usa o padrão. Os demais meses não mudam.
 class MonthOverrideCard extends ConsumerStatefulWidget {
@@ -97,11 +98,7 @@ class _MonthOverrideCardState extends ConsumerState<MonthOverrideCard> {
         () => ref.read(planningServiceProvider).clearMonth(ym),
       );
       if (ok && mounted) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Este mês voltou a usar os valores padrão.'),
-          ),
-        );
+        showAppSnack(messenger, 'Este mês voltou a usar os valores padrão.');
       }
     }
   }
@@ -187,9 +184,7 @@ class _OverrideFormState extends ConsumerState<_OverrideForm> {
           ),
     );
     if (ok && mounted) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Planejamento do mês salvo.')),
-      );
+      showAppSnack(messenger, 'Planejamento do mês salvo.');
     }
   }
 

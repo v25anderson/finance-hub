@@ -15,6 +15,7 @@ import '../../../bills/presentation/ui_helpers.dart';
 import '../../../../data/db/app_database.dart';
 import '../dashboard_dialogs.dart';
 import 'entry_rows.dart';
+import '../../../../design_system/components/app_snack.dart';
 
 class InvestmentCard extends ConsumerWidget {
   const InvestmentCard({super.key, required this.data});
@@ -93,10 +94,7 @@ class InvestmentCard extends ConsumerWidget {
     String? id;
     final done = await runGuarded(context, () async => id = await svc.registerInvestment(data.yearMonth, cents));
     if (!done || id == null) return;
-    messenger.showSnackBar(SnackBar(
-      content: const Text('Meta marcada como realizada'),
-      action: SnackBarAction(label: 'Desfazer', onPressed: () => svc.removeInvestment(id!)),
-    ));
+    showAppSnack(messenger, 'Meta marcada como realizada', actionLabel: 'Desfazer', onAction: () => svc.removeInvestment(id!));
   }
 
   Future<void> _register(BuildContext context, WidgetRef ref, int cents) =>

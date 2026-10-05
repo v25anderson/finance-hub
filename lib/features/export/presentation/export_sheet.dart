@@ -12,6 +12,7 @@ import '../../../design_system/tokens/typography.dart';
 import '../../../domain/export/csv.dart';
 import '../../../domain/export/export_data.dart';
 import '../../../domain/export/exporter.dart';
+import '../../../design_system/components/app_snack.dart';
 
 Future<void> showExportSheet(BuildContext context) => showAdaptiveSheet<void>(context, builder: (_) => const ExportSheet());
 
@@ -48,7 +49,7 @@ class _ExportSheetState extends ConsumerState<ExportSheet> {
     }
     if (!mounted) return;
     setState(() => _busy = false);
-    messenger.showSnackBar(SnackBar(content: Text(message)));
+    showAppSnack(messenger, message);
     if (close) navigator.pop();
   }
 

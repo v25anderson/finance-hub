@@ -7,6 +7,7 @@ import '../../../../design_system/tokens/spacing.dart';
 import '../../../../design_system/tokens/typography.dart';
 import '../../../../domain/enums.dart';
 import '../../../bills/presentation/ui_helpers.dart';
+import '../../../../design_system/components/app_snack.dart';
 
 String incomeKindLabel(IncomeKind k) => switch (k) {
       IncomeKind.salary => 'Salário',
@@ -53,7 +54,7 @@ Future<void> removeWithUndo(
   final messenger = ScaffoldMessenger.of(context);
   final done = await runGuarded(context, remove);
   if (!done) return;
-  messenger.showSnackBar(SnackBar(content: Text(message), action: SnackBarAction(label: 'Desfazer', onPressed: () => restore())));
+  showAppSnack(messenger, message, actionLabel: 'Desfazer', onAction: () => restore());
 }
 
 String entryMoney(int cents) => formatCents(cents);

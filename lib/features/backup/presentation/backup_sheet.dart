@@ -17,6 +17,7 @@ import '../../../domain/backup/snapshot.dart';
 import '../../../domain/enums.dart';
 import '../../../domain/sync/change_file.dart';
 import 'conflicts_sheet.dart';
+import '../../../design_system/components/app_snack.dart';
 
 Future<void> showBackupSheet(BuildContext context) => showAdaptiveSheet<void>(context, builder: (_) => const BackupSheet());
 
@@ -33,7 +34,7 @@ class BackupSheet extends ConsumerStatefulWidget {
 class _BackupSheetState extends ConsumerState<BackupSheet> {
   var _busy = false;
 
-  void _say(String m) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+  void _say(String m) => showAppSnack(ScaffoldMessenger.of(context), m);
 
   /// Executa uma operação com tratamento único de erros. Permissão expirada derruba a conexão.
   Future<void> _run(Future<String?> Function() op) async {
