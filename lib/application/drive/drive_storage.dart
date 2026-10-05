@@ -3,16 +3,23 @@ import 'dart:typed_data';
 /// Por que o Drive não está disponível: build sem ID de cliente do Google, ou plataforma sem login Google (web e desktop).
 enum DriveUnavailableReason { notConfigured, unsupportedPlatform }
 
-enum DriveFailure { unauthorized, notFound, quota, network, unavailable, unknown }
+enum DriveFailure { unauthorized, canceled, configuration, notFound, quota, network, unavailable, unknown }
 
 /// Falha de acesso ao Drive. A mensagem nunca carrega dados do usuário nem trechos de resposta.
 class DriveException implements Exception {
-  DriveException(this.kind, [this.statusCode]);
+  DriveException(this.kind, [this.statusCode, this.code]);
   final DriveFailure kind;
   final int? statusCode;
 
+  /// Código curto do login (ex.: `clientConfigurationError`), só para diagnóstico. Nunca dados do usuário.
+  final String? code;
+
   String get message => switch (kind) {
         DriveFailure.unauthorized => 'A permissão do Google expirou. Conecte novamente.',
+        DriveFailure.canceled =>
+          'Login não concluído. Se você não cancelou, o app pode estar sem a configuração do Google (veja docs/GOOGLE_SETUP.md: pacote com.financehub.finance_hub e SHA-1).',
+        DriveFailure.configuration =>
+          'Configuração do Google incorreta neste app (cliente OAuth, pacote ou SHA-1). Veja docs/GOOGLE_SETUP.md${code == null ? '' : ' · código: $code'}.',
         DriveFailure.notFound => 'O arquivo não foi encontrado no Drive.',
         DriveFailure.quota => 'Seu Google Drive está sem espaço.',
         DriveFailure.network => 'Sem conexão com a internet.',
@@ -21,7 +28,7 @@ class DriveException implements Exception {
       };
 
   @override
-  String toString() => 'DriveException($kind${statusCode == null ? '' : ', $statusCode'})';
+  String toString() => 'DriveException($kind${statusCode == null ? '' : ', $statusCode'}${code == null ? '' : ', $code'})';
 }
 
 class RemoteBackup {

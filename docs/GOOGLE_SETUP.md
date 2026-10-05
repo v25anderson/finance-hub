@@ -22,3 +22,12 @@ O ID de cliente não é um segredo de alto risco (vai embutido no app), mas não
 
 ## Plataformas
 Android é o alvo da Fase 10. Web e desktop não têm login Google suportado por este pacote: a tela mostra "não configurado".
+
+## Se o login não funciona (checklist)
+A mensagem na tela de backup indica a causa:
+- **"Login com Google ainda não ativado"** → o app foi compilado sem `GOOGLE_SERVER_CLIENT_ID` (passo 3). Crie o segredo no GitHub e gere um APK novo.
+- **"Login não concluído"** (mesmo sem cancelar) → no Android, SHA-1 ou pacote errado costuma aparecer assim. Confira no cliente OAuth *Android*: pacote `com.financehub.finance_hub` e SHA-1 do APK instalado.
+- **"Configuração do Google incorreta … código: clientConfigurationError"** → cliente OAuth ausente/errado; o ID usado em `GOOGLE_SERVER_CLIENT_ID` precisa ser do tipo **Aplicativo da Web**, do mesmo projeto do cliente Android.
+- **Erro de acesso bloqueado / app não verificado** → adicione seu e-mail em *Tela de consentimento → Usuários de teste*.
+- Confirme que a **Google Drive API** está ativada no mesmo projeto e que há uma conta Google no aparelho.
+- Alterações no Google Cloud podem levar alguns minutos para valer.

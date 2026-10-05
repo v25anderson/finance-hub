@@ -59,7 +59,17 @@ class GoogleSignInAuth implements DriveAuth {
       _account = account;
       return DriveAccount(email: account.email);
     } on GoogleSignInException catch (e) {
-      throw DriveException(e.code == GoogleSignInExceptionCode.canceled ? DriveFailure.unauthorized : DriveFailure.unknown);
+      throw DriveException(
+        switch (e.code) {
+          GoogleSignInExceptionCode.canceled || GoogleSignInExceptionCode.interrupted => DriveFailure.canceled,
+          GoogleSignInExceptionCode.clientConfigurationError ||
+          GoogleSignInExceptionCode.providerConfigurationError =>
+            DriveFailure.configuration,
+          _ => DriveFailure.unknown,
+        },
+        null,
+        e.code.name,
+      );
     }
   }
 
