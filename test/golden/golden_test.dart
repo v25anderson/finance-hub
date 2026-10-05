@@ -1,6 +1,9 @@
 import 'dart:io';
 
+import 'package:finance_hub/data/repositories/transaction_repository.dart';
 import 'package:finance_hub/design_system/components/app_button.dart';
+import 'package:finance_hub/domain/enums.dart';
+import 'package:finance_hub/domain/value_range.dart';
 import 'package:finance_hub/design_system/components/sync_light.dart';
 import 'package:finance_hub/design_system/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -87,6 +90,43 @@ void main() {
     await t.tap(find.text('GASTOS DO MÊS'));
     await h.settle();
     await shot(t, 'month_detail_dark');
+    await h.finish();
+  });
+
+  testWidgets('formulário de nova conta com faixa de valor', (t) async {
+    final h = await open(t, tab: 'Contas');
+    await t.tap(find.byTooltip('Adicionar'));
+    await h.settle();
+    await t.enterText(field('Nome'), 'Energia');
+    final scrollable = find.descendant(of: find.byType(Form), matching: find.byType(Scrollable)).first;
+    await t.scrollUntilVisible(find.byKey(const Key('range-switch')), 200, scrollable: scrollable);
+    await t.tap(find.byKey(const Key('range-switch')));
+    await h.settle();
+    await t.scrollUntilVisible(find.byKey(const Key('range-max')), 200, scrollable: scrollable);
+    await t.enterText(find.byKey(const Key('range-min')), '200');
+    await t.enterText(find.byKey(const Key('range-max')), '300');
+    await h.settle(); // deixa a animação dos rótulos terminar
+    await shot(t, 'bill_form_range_dark');
+    await h.finish();
+  });
+
+  testWidgets('contas com faixa na lista e detalhe', (t) async {
+    final h = await pumpApp(t, seed: (db) async {
+      await seedRich(db);
+      await TransactionRepository(db).create(
+          name: 'Energia elétrica',
+          plannedAmountCents: 25000,
+          dueDate: DateTime(2026, 10, 22),
+          categoryId: 'cat-moradia',
+          expenseType: ExpenseType.variable,
+          range: const ValueRange(20000, 30000));
+    });
+    await t.tap(find.byKey(const Key('nav-Contas')));
+    await h.settle();
+    await shot(t, 'bills_range_dark');
+    await t.tap(find.text('Energia elétrica'));
+    await h.settle();
+    await shot(t, 'bill_detail_range_dark');
     await h.finish();
   });
 

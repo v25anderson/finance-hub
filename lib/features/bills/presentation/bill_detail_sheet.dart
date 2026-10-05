@@ -16,6 +16,7 @@ import 'bill_form_sheet.dart';
 import 'payment_dialogs.dart';
 import 'recurrence_dialogs.dart';
 import 'value_history_chart.dart';
+import 'range_text.dart';
 import 'status_style.dart';
 import 'ui_helpers.dart';
 
@@ -75,6 +76,18 @@ class _Content extends ConsumerWidget {
       const SizedBox(height: Space.lg),
       const SectionLabelText('Valor previsto'),
       MoneyText(bill.plannedCents, size: MoneySize.display),
+      if (bill.range != null) ...[
+        const SizedBox(height: Space.xs),
+        Row(children: [
+          Icon(Icons.swap_vert_rounded, size: 18, color: c.textSecondary),
+          const SizedBox(width: 6),
+          Expanded(child: Text('Faixa informada: ${formatRange(bill.range!)}', key: const Key('bill-range'), style: AppText.body(c.textSecondary).copyWith(fontWeight: FontWeight.w600))),
+        ]),
+        if (bill.paidRangePosition != null) Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(rangePositionText(bill.paidRangePosition!), key: const Key('bill-range-position'), style: AppText.body(c.textSecondary).copyWith(fontSize: 13)),
+        ),
+      ],
       const SizedBox(height: Space.md),
       Row(children: [
         Expanded(child: _Metric('Pago', bill.paidCents, Tone.success)),
@@ -125,7 +138,7 @@ class _Content extends ConsumerWidget {
           label: const Text('Duplicar'),
         ),
         const Tooltip(
-          message: 'Comprovantes chegam na Fase 10',
+          message: 'Comprovantes ainda não estão disponíveis',
           child: OutlinedButton(onPressed: null, child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.attach_file, size: 18), SizedBox(width: 6), Text('Anexar comprovante')])),
         ),
         OutlinedButton.icon(

@@ -76,3 +76,6 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D70 | Service worker próprio com cache por versão e sem `skipWaiting` | O do Flutter 3.47 só se desregistra; evita misturar arquivos de versões diferentes | Sem offline na web; precache fixo |
 | D71 | Content-Security-Policy no `index.html` (app web só fala com o próprio site) | O plugin do Google contatava `accounts.google.com` a cada abertura; princípio de privacidade | Aceitar a requisição; remover o plugin da web (não é possível por plataforma) |
 | D72 | Pedir armazenamento persistente ao navegador | App local-first: o IndexedDB não deve ser descartado por falta de espaço | Não pedir |
+| D73 | Faixa de valor é informação do usuário; o valor esperado continua único nos cálculos | Preserva "real e projeção nunca se misturam" e evita o app inventar estimativas; totais seguem consistentes | Calcular totais pelo ponto médio ou por cenários mínimo/máximo |
+| D74 | Faixa só em gasto variável; esperado obrigatoriamente dentro da faixa; em branco usa o ponto médio | Mantém o dado coerente e o cadastro rápido | Faixa em qualquer tipo; esperado livre |
+| D75 | Faixa guardada em colunas inteiras nulas (mín/máx), na conta e na regra de recorrência | Simples de migrar, sincronizar (campo a campo) e exportar | JSON em coluna de texto; tabela própria |

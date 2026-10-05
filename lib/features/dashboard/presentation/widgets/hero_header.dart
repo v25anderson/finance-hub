@@ -12,6 +12,8 @@ import '../../../../design_system/components/pressable.dart';
 import '../../../../design_system/tokens/colors.dart';
 import '../../../../design_system/tokens/spacing.dart';
 import '../../../../design_system/tokens/typography.dart';
+import '../../../../domain/value_range.dart';
+import '../../../bills/presentation/range_text.dart';
 import '../../../shared/presentation/page_header.dart';
 import '../../../shared/presentation/period_selector.dart';
 
@@ -84,6 +86,14 @@ class _Kpi extends StatelessWidget {
         ]),
         const SizedBox(height: Space.sm),
         MoneyText(s.totalCents, size: MoneySize.hero, color: AppColors.onHero),
+        if (s.hasRange) ...[
+          const SizedBox(height: Space.xs),
+          Text(
+            'Faixa informada: ${formatRange(ValueRange(s.rangeMinCents, s.rangeMaxCents))}',
+            key: const Key('hero-range'),
+            style: AppText.body(dim).copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+        ],
         const SizedBox(height: Space.lg),
         if (s.isEmpty)
           Text('Nenhuma conta neste mês.', style: AppText.body(dim))

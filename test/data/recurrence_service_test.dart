@@ -289,7 +289,7 @@ void main() {
     expect(nov.single.plannedCents, 3990);
   });
 
-  group('migração v1 → v2 → v3', () {
+  group('migração v1 → v2 → v3 → v4', () {
     test('reabrir um banco v1 cria o índice único e preserva os dados', () async {
       final dir = await Directory.systemTemp.createTemp('fh_mig');
       addTearDown(() => dir.delete(recursive: true));
@@ -310,6 +310,13 @@ void main() {
             "INSERT INTO transactions (id, created_at, updated_at, version, device_id, name, planned_amount_cents, due_date, category_id, expense_type, favorite, note, recurring_id, occurrence_date, overridden) "
             "VALUES ('$id', '$ts', '$ts', 1, '', 'Dup', 100, '2026-10-01', 'cat-outros', 'fixed', 0, '', 'r1', '2026-10-01', 0)");
       }
+      // simula um banco antigo de verdade: sem as colunas de faixa de valor (v4)
+      for (final c in ['planned_min_cents', 'planned_max_cents']) {
+        await d1.customStatement('ALTER TABLE transactions DROP COLUMN $c');
+      }
+      for (final c in ['base_min_cents', 'base_max_cents']) {
+        await d1.customStatement('ALTER TABLE recurring_transactions DROP COLUMN $c');
+      }
       await d1.customStatement('PRAGMA user_version = 1');
       await d1.close();
 
@@ -318,10 +325,13 @@ void main() {
       await d2.customSelect('SELECT 1').get(); // dispara a migração
       final idx = await d2.customSelect("SELECT name FROM sqlite_master WHERE type='index' AND name LIKE '%occurrence%'").get();
       expect(idx.map((r) => r.read<String>('name')), contains('uq_transactions_occurrence'));
-      expect((await d2.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 3); // v1 → v2 → v3 numa só abertura
+      expect((await d2.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 4); // v1 → v2 → v3 → v4 numa só abertura
       expect((await d2.customSelect("SELECT name FROM sqlite_master WHERE type='table' AND name='sync_base'").get()).length, 1);
 
+      final cols = (await d2.customSelect("PRAGMA table_info('transactions')").get()).map((r) => r.read<String>('name')).toSet();
+      expect(cols, containsAll(['planned_min_cents', 'planned_max_cents'])); // v4: faixa de valor
       final rows = await d2.select(d2.transactions).get();
+      expect(rows.every((r) => r.plannedMinCents == null && r.plannedMaxCents == null), isTrue); // dados antigos ficam sem faixa
       expect(rows.length, 3); // nada foi apagado
       expect(rows.where((r) => r.recurringId == 'r1').length, 1); // a duplicata perdeu o vínculo
       expect(rows.firstWhere((r) => r.id == a).name, 'A');

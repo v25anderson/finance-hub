@@ -7,6 +7,8 @@ import '../data/repositories/repo_base.dart';
 import '../data/repositories/transaction_repository.dart';
 import '../domain/bill.dart';
 import '../domain/enums.dart';
+import '../domain/value_range.dart';
+import 'bill_service.dart';
 import '../domain/recurrence.dart';
 
 /// Recorrências: gera ocorrências (materializadas, D05), edita e exclui por escopo.
@@ -61,7 +63,9 @@ class RecurrenceService {
     int interval = 1,
     DateTime? end,
     bool favorite = false,
+    ValueRange? range,
   }) async {
+    if (expenseType == ExpenseType.variable) BillService.checkRange(range, amountCents);
     final id = await rules.create(
       name: name,
       baseAmountCents: amountCents,
@@ -72,6 +76,7 @@ class RecurrenceService {
       interval: interval,
       end: end == null ? null : dateOnly(end),
       favorite: favorite,
+      range: expenseType == ExpenseType.variable ? range : null,
     );
     await ensureThrough(_horizon());
     return id;
@@ -97,6 +102,7 @@ class RecurrenceService {
             expenseType: rule.expenseType,
             favorite: rule.favorite,
             dates: missing,
+            range: rule.range,
           );
           created += missing.length;
         }
@@ -123,10 +129,18 @@ class RecurrenceService {
     bool? favorite,
     String? note,
     DateTime? dueDate,
+    ValueRange? range,
+    bool clearRange = false,
   }) async {
     final bill = await bills.getBill(billId);
     if (bill == null) throw NotFoundError('bill', billId);
     if (plannedCents != null && plannedCents <= 0) throw ValidationError('Informe um valor maior que zero');
+    if (range != null) {
+      if ((expenseType ?? bill.expenseType) != ExpenseType.variable) throw ValidationError('Faixa de valor só vale para gasto variável');
+      BillService.checkRange(range, plannedCents ?? bill.plannedCents);
+    }
+    // deixar de ser variável apaga a faixa junto
+    if (expenseType != null && expenseType != ExpenseType.variable) clearRange = true;
     final follows = scope == EditScope.thisAndFollowing && bill.recurringId != null;
     if (follows && dueDate != null && dateOnly(dueDate) != dateOnly(bill.dueDate)) {
       throw ValidationError('Para mudar o vencimento, edite somente esta ocorrência.');
@@ -141,12 +155,14 @@ class RecurrenceService {
       favorite: favorite,
       note: note,
       dueDate: dueDate,
+      range: range,
+      clearRange: clearRange,
     );
     if (!follows) return 0;
 
     final ruleId = bill.recurringId!;
     await transactions.clearOverridden(billId); // esta também passa a seguir a regra
-    await rules.updateBase(ruleId, name: name, baseAmountCents: plannedCents, categoryId: categoryId, expenseType: expenseType, favorite: favorite);
+    await rules.updateBase(ruleId, name: name, baseAmountCents: plannedCents, categoryId: categoryId, expenseType: expenseType, favorite: favorite, range: range, clearRange: clearRange);
 
     var updated = 0;
     final from = bill.occurrenceDate ?? bill.dueDate;
@@ -160,6 +176,8 @@ class RecurrenceService {
         categoryId: categoryId,
         expenseType: expenseType,
         favorite: favorite,
+        range: range,
+        clearRange: clearRange,
       );
       // Seguir a regra não é "edição manual": mantém a ocorrência livre para futuras mudanças em lote.
       await transactions.clearOverridden(row.id);

@@ -13,6 +13,8 @@ import '../../../design_system/tokens/colors.dart';
 import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
 import '../../../domain/bill.dart';
+import '../../../domain/value_range.dart';
+import '../../bills/presentation/range_text.dart';
 import '../../bills/presentation/bill_detail_sheet.dart';
 import '../../bills/presentation/bill_tile.dart';
 
@@ -88,6 +90,10 @@ class _MonthDetailSheetState extends ConsumerState<MonthDetailSheet> {
             Expanded(child: _Stat('Pago', s.paidCents, tone: Tone.success)),
             Expanded(child: _Stat('Pendente', s.pendingCents, tone: Tone.warning)),
           ]),
+          if (s.hasRange) ...[
+            const SizedBox(height: Space.sm),
+            Text('Faixa informada para o total: ${formatRange(ValueRange(s.rangeMinCents, s.rangeMaxCents))}', key: const Key('detail-range'), style: AppText.body(c.textSecondary).copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+          ],
           const SizedBox(height: Space.lg),
           Row(children: [
             for (final g in const [_Group.paid, _Group.pending, _Group.overdue]) ...[

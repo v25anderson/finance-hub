@@ -100,3 +100,11 @@ Um arquivo por conjunto, UTF-8 com BOM, CRLF. Valores monetários em reais com d
 - `sync_metadata`: `state`, `last_sync_at` e `remote_cursor` (JSON `{ownSeq, peers:{deviceId: último arquivo aplicado}}`).
 - `sync_conflicts`: `entity`, `record_id`, `local_json`, `remote_json`, `resolved_at` (nulo = aberto).
 - Tabelas sincronizadas: categorias, recorrências, contas, pagamentos, rendas, investimentos, planejamento e meses personalizados. Id de ocorrência de recorrência = UUID v5 de (regra, data).
+
+## Faixa de valor para gastos variáveis (esquema v4)
+- `transactions.planned_min_cents` / `planned_max_cents` e `recurring_transactions.base_min_cents` / `base_max_cents` (inteiros, nulos = sem faixa; sempre os dois juntos).
+- Só existe em **gasto variável**: em fixo ou pontual a faixa é descartada, e deixar de ser variável apaga a faixa.
+- Regras: mínimo > 0, máximo ≥ mínimo, e o **valor esperado** (`planned_amount_cents`) tem de estar dentro da faixa. Deixar o valor esperado em branco no formulário usa o ponto médio.
+- O valor esperado continua sendo o único número usado em status, progresso, totais, planejamento e projeções. A faixa é uma **informação do usuário**: aparece na lista, no detalhe ("pago dentro/abaixo/acima da faixa", só descrevendo) e como "faixa informada" do total do mês (contas com faixa entram com mínimo e máximo; as demais com o previsto). Nunca vira previsão do app nem recomendação.
+- Recorrências: a regra guarda a faixa e toda ocorrência gerada nasce com ela; "esta e as próximas" troca a faixa nas próximas não editadas e sem pagamento; "somente esta" não mexe nas outras.
+- Migração v3 → v4: duas colunas nulas em cada tabela; dados antigos ficam sem faixa. Exportação CSV: `faixa_minima` e `faixa_maxima` (contas e recorrências), vazias sem faixa. Backup e sincronização carregam as colunas (arquivos v4 não são lidos por apps antigos: "atualize o app").

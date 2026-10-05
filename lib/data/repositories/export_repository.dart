@@ -53,6 +53,8 @@ class ExportRepository extends RepoBase {
               recurringId: t.recurringId,
               occurrenceDate: t.occurrenceDate == null ? null : parseIsoDate(t.occurrenceDate!),
               deletedAt: t.deletedAt,
+              minCents: t.plannedMinCents,
+              maxCents: t.plannedMaxCents,
             ),
       ],
       payments: [
@@ -85,6 +87,8 @@ class ExportRepository extends RepoBase {
               baseCents: r.baseAmountCents,
               favorite: r.favorite,
               deletedAt: r.deletedAt,
+              minCents: r.baseMinCents,
+              maxCents: r.baseMaxCents,
             ),
       ],
       incomes: [

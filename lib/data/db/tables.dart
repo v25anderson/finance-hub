@@ -34,6 +34,10 @@ class RecurringTransactions extends Table with BaseColumns {
   IntColumn get intervalCount => integer().withDefault(const Constant(1))();
   IntColumn get dueDay => integer()();
 
+  /// Faixa de valor informada (gasto variável), v4. Ambas nulas = sem faixa.
+  IntColumn get baseMinCents => integer().nullable()();
+  IntColumn get baseMaxCents => integer().nullable()();
+
   /// Datas puras em ISO `yyyy-MM-dd`.
   TextColumn get startDate => text()();
   TextColumn get endDate => text().nullable()();
@@ -61,6 +65,10 @@ class Transactions extends Table with BaseColumns {
 
   /// Ocorrência editada manualmente: não é regenerada pela regra.
   BoolColumn get overridden => boolean().withDefault(const Constant(false))();
+
+  /// Faixa de valor informada (gasto variável), v4. Ambas nulas = sem faixa.
+  IntColumn get plannedMinCents => integer().nullable()();
+  IntColumn get plannedMaxCents => integer().nullable()();
 }
 
 @DataClassName('PaymentRow')

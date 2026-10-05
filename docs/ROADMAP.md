@@ -172,3 +172,11 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Pacote**: título e nome "Finance Hub", tela de carregamento escura, `theme-color`, ícones do app; workflow `Web` gera o pacote (`finance-hub-web`) com `base_href` opcional. Hospedagem e limites em `docs/WEB.md`.
 - **Verificado no Chromium**: título, abertura offline com o app completo e dados, download do ZIP de exportação, service worker ativo com cache por versão, nenhuma requisição externa permitida, app funcionando com a CSP.
 - **NÃO verificado**: Safari e Firefox, instalação como PWA, hospedagem real em HTTPS, cabeçalhos COOP/COEP, atualização real de versão com o cache antigo.
+
+## Notas: faixa de valor para gastos variáveis (pedido do usuário)
+- **Pedido**: ao marcar uma conta como variável, poder informar uma faixa (ex.: energia entre R$ 200 e R$ 300).
+- **Feito**: formulário com a opção "Informar faixa de valor" (só em Variável) com mínimo e máximo; valor esperado em branco = meio da faixa; validações (mínimo positivo, máximo ≥ mínimo, esperado dentro da faixa); faixa na lista, no detalhe e como "Faixa informada" no cabeçalho e no detalhe do mês; recorrências carregam a faixa; exportação, backup e sincronização incluem. Detalhes em `docs/DATA_MODEL.md`.
+- **Decisão de produto** (D73): a faixa **não** substitui o valor esperado; totais, status e projeções seguem usando um número só, para não misturar informação do usuário com estimativa do app. A faixa total do mês é apenas a soma das faixas informadas.
+- **Ainda não**: o planejamento/projeções não usam a faixa (não mostram cenário mínimo/máximo); não há aviso quando o valor pago sai da faixa além do texto descritivo no detalhe; alertas de conta variável fora da faixa não existem (seriam julgamento).
+- **Verificado**: 457 testes (domínio, regras, recorrência, sincronização com valores nulos, backup, exportação, fluxos de tela, dashboard) e 3 goldens novos; migração v1→v4 de um banco antigo.
+- Além disso: corrigido um texto antigo no detalhe da conta ("Comprovantes chegam na Fase 10"); `BillService.create` agora devolve erros de validação como `Future` (antes lançava de forma síncrona).

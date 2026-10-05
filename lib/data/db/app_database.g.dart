@@ -798,6 +798,28 @@ class $RecurringTransactionsTable extends RecurringTransactions
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _baseMinCentsMeta = const VerificationMeta(
+    'baseMinCents',
+  );
+  @override
+  late final GeneratedColumn<int> baseMinCents = GeneratedColumn<int>(
+    'base_min_cents',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _baseMaxCentsMeta = const VerificationMeta(
+    'baseMaxCents',
+  );
+  @override
+  late final GeneratedColumn<int> baseMaxCents = GeneratedColumn<int>(
+    'base_max_cents',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _startDateMeta = const VerificationMeta(
     'startDate',
   );
@@ -850,6 +872,8 @@ class $RecurringTransactionsTable extends RecurringTransactions
     frequency,
     intervalCount,
     dueDay,
+    baseMinCents,
+    baseMaxCents,
     startDate,
     endDate,
     favorite,
@@ -949,6 +973,24 @@ class $RecurringTransactionsTable extends RecurringTransactions
     } else if (isInserting) {
       context.missing(_dueDayMeta);
     }
+    if (data.containsKey('base_min_cents')) {
+      context.handle(
+        _baseMinCentsMeta,
+        baseMinCents.isAcceptableOrUnknown(
+          data['base_min_cents']!,
+          _baseMinCentsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('base_max_cents')) {
+      context.handle(
+        _baseMaxCentsMeta,
+        baseMaxCents.isAcceptableOrUnknown(
+          data['base_max_cents']!,
+          _baseMaxCentsMeta,
+        ),
+      );
+    }
     if (data.containsKey('start_date')) {
       context.handle(
         _startDateMeta,
@@ -1034,6 +1076,14 @@ class $RecurringTransactionsTable extends RecurringTransactions
         DriftSqlType.int,
         data['${effectivePrefix}due_day'],
       )!,
+      baseMinCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}base_min_cents'],
+      ),
+      baseMaxCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}base_max_cents'],
+      ),
       startDate: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}start_date'],
@@ -1075,6 +1125,10 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
   final int intervalCount;
   final int dueDay;
 
+  /// Faixa de valor informada (gasto variável), v4. Ambas nulas = sem faixa.
+  final int? baseMinCents;
+  final int? baseMaxCents;
+
   /// Datas puras em ISO `yyyy-MM-dd`.
   final String startDate;
   final String? endDate;
@@ -1093,6 +1147,8 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
     required this.frequency,
     required this.intervalCount,
     required this.dueDay,
+    this.baseMinCents,
+    this.baseMaxCents,
     required this.startDate,
     this.endDate,
     required this.favorite,
@@ -1123,6 +1179,12 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
     }
     map['interval_count'] = Variable<int>(intervalCount);
     map['due_day'] = Variable<int>(dueDay);
+    if (!nullToAbsent || baseMinCents != null) {
+      map['base_min_cents'] = Variable<int>(baseMinCents);
+    }
+    if (!nullToAbsent || baseMaxCents != null) {
+      map['base_max_cents'] = Variable<int>(baseMaxCents);
+    }
     map['start_date'] = Variable<String>(startDate);
     if (!nullToAbsent || endDate != null) {
       map['end_date'] = Variable<String>(endDate);
@@ -1148,6 +1210,12 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
       frequency: Value(frequency),
       intervalCount: Value(intervalCount),
       dueDay: Value(dueDay),
+      baseMinCents: baseMinCents == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseMinCents),
+      baseMaxCents: baseMaxCents == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseMaxCents),
       startDate: Value(startDate),
       endDate: endDate == null && nullToAbsent
           ? const Value.absent()
@@ -1179,6 +1247,8 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
       ),
       intervalCount: serializer.fromJson<int>(json['intervalCount']),
       dueDay: serializer.fromJson<int>(json['dueDay']),
+      baseMinCents: serializer.fromJson<int?>(json['baseMinCents']),
+      baseMaxCents: serializer.fromJson<int?>(json['baseMaxCents']),
       startDate: serializer.fromJson<String>(json['startDate']),
       endDate: serializer.fromJson<String?>(json['endDate']),
       favorite: serializer.fromJson<bool>(json['favorite']),
@@ -1205,6 +1275,8 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
       ),
       'intervalCount': serializer.toJson<int>(intervalCount),
       'dueDay': serializer.toJson<int>(dueDay),
+      'baseMinCents': serializer.toJson<int?>(baseMinCents),
+      'baseMaxCents': serializer.toJson<int?>(baseMaxCents),
       'startDate': serializer.toJson<String>(startDate),
       'endDate': serializer.toJson<String?>(endDate),
       'favorite': serializer.toJson<bool>(favorite),
@@ -1225,6 +1297,8 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
     Frequency? frequency,
     int? intervalCount,
     int? dueDay,
+    Value<int?> baseMinCents = const Value.absent(),
+    Value<int?> baseMaxCents = const Value.absent(),
     String? startDate,
     Value<String?> endDate = const Value.absent(),
     bool? favorite,
@@ -1242,6 +1316,8 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
     frequency: frequency ?? this.frequency,
     intervalCount: intervalCount ?? this.intervalCount,
     dueDay: dueDay ?? this.dueDay,
+    baseMinCents: baseMinCents.present ? baseMinCents.value : this.baseMinCents,
+    baseMaxCents: baseMaxCents.present ? baseMaxCents.value : this.baseMaxCents,
     startDate: startDate ?? this.startDate,
     endDate: endDate.present ? endDate.value : this.endDate,
     favorite: favorite ?? this.favorite,
@@ -1269,6 +1345,12 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
           ? data.intervalCount.value
           : this.intervalCount,
       dueDay: data.dueDay.present ? data.dueDay.value : this.dueDay,
+      baseMinCents: data.baseMinCents.present
+          ? data.baseMinCents.value
+          : this.baseMinCents,
+      baseMaxCents: data.baseMaxCents.present
+          ? data.baseMaxCents.value
+          : this.baseMaxCents,
       startDate: data.startDate.present ? data.startDate.value : this.startDate,
       endDate: data.endDate.present ? data.endDate.value : this.endDate,
       favorite: data.favorite.present ? data.favorite.value : this.favorite,
@@ -1291,6 +1373,8 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
           ..write('frequency: $frequency, ')
           ..write('intervalCount: $intervalCount, ')
           ..write('dueDay: $dueDay, ')
+          ..write('baseMinCents: $baseMinCents, ')
+          ..write('baseMaxCents: $baseMaxCents, ')
           ..write('startDate: $startDate, ')
           ..write('endDate: $endDate, ')
           ..write('favorite: $favorite')
@@ -1313,6 +1397,8 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
     frequency,
     intervalCount,
     dueDay,
+    baseMinCents,
+    baseMaxCents,
     startDate,
     endDate,
     favorite,
@@ -1334,6 +1420,8 @@ class RecurringRow extends DataClass implements Insertable<RecurringRow> {
           other.frequency == this.frequency &&
           other.intervalCount == this.intervalCount &&
           other.dueDay == this.dueDay &&
+          other.baseMinCents == this.baseMinCents &&
+          other.baseMaxCents == this.baseMaxCents &&
           other.startDate == this.startDate &&
           other.endDate == this.endDate &&
           other.favorite == this.favorite);
@@ -1353,6 +1441,8 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
   final Value<Frequency> frequency;
   final Value<int> intervalCount;
   final Value<int> dueDay;
+  final Value<int?> baseMinCents;
+  final Value<int?> baseMaxCents;
   final Value<String> startDate;
   final Value<String?> endDate;
   final Value<bool> favorite;
@@ -1371,6 +1461,8 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
     this.frequency = const Value.absent(),
     this.intervalCount = const Value.absent(),
     this.dueDay = const Value.absent(),
+    this.baseMinCents = const Value.absent(),
+    this.baseMaxCents = const Value.absent(),
     this.startDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.favorite = const Value.absent(),
@@ -1390,6 +1482,8 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
     required Frequency frequency,
     this.intervalCount = const Value.absent(),
     required int dueDay,
+    this.baseMinCents = const Value.absent(),
+    this.baseMaxCents = const Value.absent(),
     required String startDate,
     this.endDate = const Value.absent(),
     this.favorite = const Value.absent(),
@@ -1418,6 +1512,8 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
     Expression<String>? frequency,
     Expression<int>? intervalCount,
     Expression<int>? dueDay,
+    Expression<int>? baseMinCents,
+    Expression<int>? baseMaxCents,
     Expression<String>? startDate,
     Expression<String>? endDate,
     Expression<bool>? favorite,
@@ -1437,6 +1533,8 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
       if (frequency != null) 'frequency': frequency,
       if (intervalCount != null) 'interval_count': intervalCount,
       if (dueDay != null) 'due_day': dueDay,
+      if (baseMinCents != null) 'base_min_cents': baseMinCents,
+      if (baseMaxCents != null) 'base_max_cents': baseMaxCents,
       if (startDate != null) 'start_date': startDate,
       if (endDate != null) 'end_date': endDate,
       if (favorite != null) 'favorite': favorite,
@@ -1458,6 +1556,8 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
     Value<Frequency>? frequency,
     Value<int>? intervalCount,
     Value<int>? dueDay,
+    Value<int?>? baseMinCents,
+    Value<int?>? baseMaxCents,
     Value<String>? startDate,
     Value<String?>? endDate,
     Value<bool>? favorite,
@@ -1477,6 +1577,8 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
       frequency: frequency ?? this.frequency,
       intervalCount: intervalCount ?? this.intervalCount,
       dueDay: dueDay ?? this.dueDay,
+      baseMinCents: baseMinCents ?? this.baseMinCents,
+      baseMaxCents: baseMaxCents ?? this.baseMaxCents,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       favorite: favorite ?? this.favorite,
@@ -1532,6 +1634,12 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
     if (dueDay.present) {
       map['due_day'] = Variable<int>(dueDay.value);
     }
+    if (baseMinCents.present) {
+      map['base_min_cents'] = Variable<int>(baseMinCents.value);
+    }
+    if (baseMaxCents.present) {
+      map['base_max_cents'] = Variable<int>(baseMaxCents.value);
+    }
     if (startDate.present) {
       map['start_date'] = Variable<String>(startDate.value);
     }
@@ -1563,6 +1671,8 @@ class RecurringTransactionsCompanion extends UpdateCompanion<RecurringRow> {
           ..write('frequency: $frequency, ')
           ..write('intervalCount: $intervalCount, ')
           ..write('dueDay: $dueDay, ')
+          ..write('baseMinCents: $baseMinCents, ')
+          ..write('baseMaxCents: $baseMaxCents, ')
           ..write('startDate: $startDate, ')
           ..write('endDate: $endDate, ')
           ..write('favorite: $favorite, ')
@@ -1773,6 +1883,28 @@ class $TransactionsTable extends Transactions
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _plannedMinCentsMeta = const VerificationMeta(
+    'plannedMinCents',
+  );
+  @override
+  late final GeneratedColumn<int> plannedMinCents = GeneratedColumn<int>(
+    'planned_min_cents',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _plannedMaxCentsMeta = const VerificationMeta(
+    'plannedMaxCents',
+  );
+  @override
+  late final GeneratedColumn<int> plannedMaxCents = GeneratedColumn<int>(
+    'planned_max_cents',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1792,6 +1924,8 @@ class $TransactionsTable extends Transactions
     recurringId,
     occurrenceDate,
     overridden,
+    plannedMinCents,
+    plannedMaxCents,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1921,6 +2055,24 @@ class $TransactionsTable extends Transactions
         overridden.isAcceptableOrUnknown(data['overridden']!, _overriddenMeta),
       );
     }
+    if (data.containsKey('planned_min_cents')) {
+      context.handle(
+        _plannedMinCentsMeta,
+        plannedMinCents.isAcceptableOrUnknown(
+          data['planned_min_cents']!,
+          _plannedMinCentsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('planned_max_cents')) {
+      context.handle(
+        _plannedMaxCentsMeta,
+        plannedMaxCents.isAcceptableOrUnknown(
+          data['planned_max_cents']!,
+          _plannedMaxCentsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2000,6 +2152,14 @@ class $TransactionsTable extends Transactions
         DriftSqlType.bool,
         data['${effectivePrefix}overridden'],
       )!,
+      plannedMinCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}planned_min_cents'],
+      ),
+      plannedMaxCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}planned_max_cents'],
+      ),
     );
   }
 
@@ -2034,6 +2194,10 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
 
   /// Ocorrência editada manualmente: não é regenerada pela regra.
   final bool overridden;
+
+  /// Faixa de valor informada (gasto variável), v4. Ambas nulas = sem faixa.
+  final int? plannedMinCents;
+  final int? plannedMaxCents;
   const TransactionRow({
     required this.id,
     required this.createdAt,
@@ -2052,6 +2216,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     this.recurringId,
     this.occurrenceDate,
     required this.overridden,
+    this.plannedMinCents,
+    this.plannedMaxCents,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2085,6 +2251,12 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       map['occurrence_date'] = Variable<String>(occurrenceDate);
     }
     map['overridden'] = Variable<bool>(overridden);
+    if (!nullToAbsent || plannedMinCents != null) {
+      map['planned_min_cents'] = Variable<int>(plannedMinCents);
+    }
+    if (!nullToAbsent || plannedMaxCents != null) {
+      map['planned_max_cents'] = Variable<int>(plannedMaxCents);
+    }
     return map;
   }
 
@@ -2115,6 +2287,12 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           ? const Value.absent()
           : Value(occurrenceDate),
       overridden: Value(overridden),
+      plannedMinCents: plannedMinCents == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plannedMinCents),
+      plannedMaxCents: plannedMaxCents == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plannedMaxCents),
     );
   }
 
@@ -2143,6 +2321,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       recurringId: serializer.fromJson<String?>(json['recurringId']),
       occurrenceDate: serializer.fromJson<String?>(json['occurrenceDate']),
       overridden: serializer.fromJson<bool>(json['overridden']),
+      plannedMinCents: serializer.fromJson<int?>(json['plannedMinCents']),
+      plannedMaxCents: serializer.fromJson<int?>(json['plannedMaxCents']),
     );
   }
   @override
@@ -2168,6 +2348,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       'recurringId': serializer.toJson<String?>(recurringId),
       'occurrenceDate': serializer.toJson<String?>(occurrenceDate),
       'overridden': serializer.toJson<bool>(overridden),
+      'plannedMinCents': serializer.toJson<int?>(plannedMinCents),
+      'plannedMaxCents': serializer.toJson<int?>(plannedMaxCents),
     };
   }
 
@@ -2189,6 +2371,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     Value<String?> recurringId = const Value.absent(),
     Value<String?> occurrenceDate = const Value.absent(),
     bool? overridden,
+    Value<int?> plannedMinCents = const Value.absent(),
+    Value<int?> plannedMaxCents = const Value.absent(),
   }) => TransactionRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -2209,6 +2393,12 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
         ? occurrenceDate.value
         : this.occurrenceDate,
     overridden: overridden ?? this.overridden,
+    plannedMinCents: plannedMinCents.present
+        ? plannedMinCents.value
+        : this.plannedMinCents,
+    plannedMaxCents: plannedMaxCents.present
+        ? plannedMaxCents.value
+        : this.plannedMaxCents,
   );
   TransactionRow copyWithCompanion(TransactionsCompanion data) {
     return TransactionRow(
@@ -2243,6 +2433,12 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       overridden: data.overridden.present
           ? data.overridden.value
           : this.overridden,
+      plannedMinCents: data.plannedMinCents.present
+          ? data.plannedMinCents.value
+          : this.plannedMinCents,
+      plannedMaxCents: data.plannedMaxCents.present
+          ? data.plannedMaxCents.value
+          : this.plannedMaxCents,
     );
   }
 
@@ -2265,7 +2461,9 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           ..write('canceledAt: $canceledAt, ')
           ..write('recurringId: $recurringId, ')
           ..write('occurrenceDate: $occurrenceDate, ')
-          ..write('overridden: $overridden')
+          ..write('overridden: $overridden, ')
+          ..write('plannedMinCents: $plannedMinCents, ')
+          ..write('plannedMaxCents: $plannedMaxCents')
           ..write(')'))
         .toString();
   }
@@ -2289,6 +2487,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     recurringId,
     occurrenceDate,
     overridden,
+    plannedMinCents,
+    plannedMaxCents,
   );
   @override
   bool operator ==(Object other) =>
@@ -2310,7 +2510,9 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           other.canceledAt == this.canceledAt &&
           other.recurringId == this.recurringId &&
           other.occurrenceDate == this.occurrenceDate &&
-          other.overridden == this.overridden);
+          other.overridden == this.overridden &&
+          other.plannedMinCents == this.plannedMinCents &&
+          other.plannedMaxCents == this.plannedMaxCents);
 }
 
 class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
@@ -2331,6 +2533,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
   final Value<String?> recurringId;
   final Value<String?> occurrenceDate;
   final Value<bool> overridden;
+  final Value<int?> plannedMinCents;
+  final Value<int?> plannedMaxCents;
   final Value<int> rowid;
   const TransactionsCompanion({
     this.id = const Value.absent(),
@@ -2350,6 +2554,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     this.recurringId = const Value.absent(),
     this.occurrenceDate = const Value.absent(),
     this.overridden = const Value.absent(),
+    this.plannedMinCents = const Value.absent(),
+    this.plannedMaxCents = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -2370,6 +2576,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     this.recurringId = const Value.absent(),
     this.occurrenceDate = const Value.absent(),
     this.overridden = const Value.absent(),
+    this.plannedMinCents = const Value.absent(),
+    this.plannedMaxCents = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -2397,6 +2605,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     Expression<String>? recurringId,
     Expression<String>? occurrenceDate,
     Expression<bool>? overridden,
+    Expression<int>? plannedMinCents,
+    Expression<int>? plannedMaxCents,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2418,6 +2628,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
       if (recurringId != null) 'recurring_id': recurringId,
       if (occurrenceDate != null) 'occurrence_date': occurrenceDate,
       if (overridden != null) 'overridden': overridden,
+      if (plannedMinCents != null) 'planned_min_cents': plannedMinCents,
+      if (plannedMaxCents != null) 'planned_max_cents': plannedMaxCents,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2440,6 +2652,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     Value<String?>? recurringId,
     Value<String?>? occurrenceDate,
     Value<bool>? overridden,
+    Value<int?>? plannedMinCents,
+    Value<int?>? plannedMaxCents,
     Value<int>? rowid,
   }) {
     return TransactionsCompanion(
@@ -2460,6 +2674,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
       recurringId: recurringId ?? this.recurringId,
       occurrenceDate: occurrenceDate ?? this.occurrenceDate,
       overridden: overridden ?? this.overridden,
+      plannedMinCents: plannedMinCents ?? this.plannedMinCents,
+      plannedMaxCents: plannedMaxCents ?? this.plannedMaxCents,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2520,6 +2736,12 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
     if (overridden.present) {
       map['overridden'] = Variable<bool>(overridden.value);
     }
+    if (plannedMinCents.present) {
+      map['planned_min_cents'] = Variable<int>(plannedMinCents.value);
+    }
+    if (plannedMaxCents.present) {
+      map['planned_max_cents'] = Variable<int>(plannedMaxCents.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2546,6 +2768,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
           ..write('recurringId: $recurringId, ')
           ..write('occurrenceDate: $occurrenceDate, ')
           ..write('overridden: $overridden, ')
+          ..write('plannedMinCents: $plannedMinCents, ')
+          ..write('plannedMaxCents: $plannedMaxCents, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8688,6 +8912,8 @@ typedef $$RecurringTransactionsTableCreateCompanionBuilder =
       required Frequency frequency,
       Value<int> intervalCount,
       required int dueDay,
+      Value<int?> baseMinCents,
+      Value<int?> baseMaxCents,
       required String startDate,
       Value<String?> endDate,
       Value<bool> favorite,
@@ -8708,6 +8934,8 @@ typedef $$RecurringTransactionsTableUpdateCompanionBuilder =
       Value<Frequency> frequency,
       Value<int> intervalCount,
       Value<int> dueDay,
+      Value<int?> baseMinCents,
+      Value<int?> baseMaxCents,
       Value<String> startDate,
       Value<String?> endDate,
       Value<bool> favorite,
@@ -8831,6 +9059,16 @@ class $$RecurringTransactionsTableFilterComposer
 
   ColumnFilters<int> get dueDay => $composableBuilder(
     column: $table.dueDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get baseMinCents => $composableBuilder(
+    column: $table.baseMinCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get baseMaxCents => $composableBuilder(
+    column: $table.baseMaxCents,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8967,6 +9205,16 @@ class $$RecurringTransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get baseMinCents => $composableBuilder(
+    column: $table.baseMinCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get baseMaxCents => $composableBuilder(
+    column: $table.baseMaxCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get startDate => $composableBuilder(
     column: $table.startDate,
     builder: (column) => ColumnOrderings(column),
@@ -9057,6 +9305,16 @@ class $$RecurringTransactionsTableAnnotationComposer
 
   GeneratedColumn<int> get dueDay =>
       $composableBuilder(column: $table.dueDay, builder: (column) => column);
+
+  GeneratedColumn<int> get baseMinCents => $composableBuilder(
+    column: $table.baseMinCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get baseMaxCents => $composableBuilder(
+    column: $table.baseMaxCents,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get startDate =>
       $composableBuilder(column: $table.startDate, builder: (column) => column);
@@ -9168,6 +9426,8 @@ class $$RecurringTransactionsTableTableManager
                 Value<Frequency> frequency = const Value.absent(),
                 Value<int> intervalCount = const Value.absent(),
                 Value<int> dueDay = const Value.absent(),
+                Value<int?> baseMinCents = const Value.absent(),
+                Value<int?> baseMaxCents = const Value.absent(),
                 Value<String> startDate = const Value.absent(),
                 Value<String?> endDate = const Value.absent(),
                 Value<bool> favorite = const Value.absent(),
@@ -9186,6 +9446,8 @@ class $$RecurringTransactionsTableTableManager
                 frequency: frequency,
                 intervalCount: intervalCount,
                 dueDay: dueDay,
+                baseMinCents: baseMinCents,
+                baseMaxCents: baseMaxCents,
                 startDate: startDate,
                 endDate: endDate,
                 favorite: favorite,
@@ -9206,6 +9468,8 @@ class $$RecurringTransactionsTableTableManager
                 required Frequency frequency,
                 Value<int> intervalCount = const Value.absent(),
                 required int dueDay,
+                Value<int?> baseMinCents = const Value.absent(),
+                Value<int?> baseMaxCents = const Value.absent(),
                 required String startDate,
                 Value<String?> endDate = const Value.absent(),
                 Value<bool> favorite = const Value.absent(),
@@ -9224,6 +9488,8 @@ class $$RecurringTransactionsTableTableManager
                 frequency: frequency,
                 intervalCount: intervalCount,
                 dueDay: dueDay,
+                baseMinCents: baseMinCents,
+                baseMaxCents: baseMaxCents,
                 startDate: startDate,
                 endDate: endDate,
                 favorite: favorite,
@@ -9341,6 +9607,8 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       Value<String?> recurringId,
       Value<String?> occurrenceDate,
       Value<bool> overridden,
+      Value<int?> plannedMinCents,
+      Value<int?> plannedMaxCents,
       Value<int> rowid,
     });
 typedef $$TransactionsTableUpdateCompanionBuilder =
@@ -9362,6 +9630,8 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<String?> recurringId,
       Value<String?> occurrenceDate,
       Value<bool> overridden,
+      Value<int?> plannedMinCents,
+      Value<int?> plannedMaxCents,
       Value<int> rowid,
     });
 
@@ -9505,6 +9775,16 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<bool> get overridden => $composableBuilder(
     column: $table.overridden,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get plannedMinCents => $composableBuilder(
+    column: $table.plannedMinCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get plannedMaxCents => $composableBuilder(
+    column: $table.plannedMaxCents,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9665,6 +9945,16 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get plannedMinCents => $composableBuilder(
+    column: $table.plannedMinCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get plannedMaxCents => $composableBuilder(
+    column: $table.plannedMaxCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -9775,6 +10065,16 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<bool> get overridden => $composableBuilder(
     column: $table.overridden,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get plannedMinCents => $composableBuilder(
+    column: $table.plannedMinCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get plannedMaxCents => $composableBuilder(
+    column: $table.plannedMaxCents,
     builder: (column) => column,
   );
 
@@ -9900,6 +10200,8 @@ class $$TransactionsTableTableManager
                 Value<String?> recurringId = const Value.absent(),
                 Value<String?> occurrenceDate = const Value.absent(),
                 Value<bool> overridden = const Value.absent(),
+                Value<int?> plannedMinCents = const Value.absent(),
+                Value<int?> plannedMaxCents = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion(
                 id: id,
@@ -9919,6 +10221,8 @@ class $$TransactionsTableTableManager
                 recurringId: recurringId,
                 occurrenceDate: occurrenceDate,
                 overridden: overridden,
+                plannedMinCents: plannedMinCents,
+                plannedMaxCents: plannedMaxCents,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -9940,6 +10244,8 @@ class $$TransactionsTableTableManager
                 Value<String?> recurringId = const Value.absent(),
                 Value<String?> occurrenceDate = const Value.absent(),
                 Value<bool> overridden = const Value.absent(),
+                Value<int?> plannedMinCents = const Value.absent(),
+                Value<int?> plannedMaxCents = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion.insert(
                 id: id,
@@ -9959,6 +10265,8 @@ class $$TransactionsTableTableManager
                 recurringId: recurringId,
                 occurrenceDate: occurrenceDate,
                 overridden: overridden,
+                plannedMinCents: plannedMinCents,
+                plannedMaxCents: plannedMaxCents,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

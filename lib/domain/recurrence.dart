@@ -1,5 +1,6 @@
 import 'bill.dart';
 import 'enums.dart';
+import 'value_range.dart';
 
 /// Regra de recorrência (entidade pura).
 ///
@@ -19,6 +20,7 @@ class RecurrenceRule {
     this.interval = 1,
     this.end,
     this.favorite = false,
+    this.range,
   });
 
   final String id;
@@ -36,6 +38,9 @@ class RecurrenceRule {
   final DateTime? end;
   final bool favorite;
 
+  /// Faixa de valor informada para as ocorrências (gasto variável).
+  final ValueRange? range;
+
   RecurrenceRule copyWith({DateTime? end, bool clearEnd = false}) => RecurrenceRule(
         id: id,
         name: name,
@@ -47,6 +52,7 @@ class RecurrenceRule {
         interval: interval,
         end: clearEnd ? null : (end ?? this.end),
         favorite: favorite,
+        range: range,
       );
 }
 

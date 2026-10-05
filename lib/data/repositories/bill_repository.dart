@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../core/dates.dart';
 import '../../domain/bill.dart';
+import '../../domain/value_range.dart';
 import '../db/app_database.dart';
 import 'repo_base.dart';
 
@@ -91,6 +92,7 @@ class BillRepository extends RepoBase {
         canceledAt: t.canceledAt,
         recurringId: t.recurringId,
         occurrenceDate: t.occurrenceDate == null ? null : parseIsoDate(t.occurrenceDate!),
+        range: (t.plannedMinCents == null || t.plannedMaxCents == null) ? null : ValueRange(t.plannedMinCents!, t.plannedMaxCents!),
         payments: payments,
       );
 }

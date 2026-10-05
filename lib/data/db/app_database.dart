@@ -47,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   DateTime now() => clock().toUtc();
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -65,6 +65,13 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await m.createTable(syncBase);
+          }
+          if (from < 4) {
+            // v4: faixa de valor para gastos variáveis (colunas novas, nulas: nada muda nos dados existentes).
+            await m.addColumn(transactions, transactions.plannedMinCents);
+            await m.addColumn(transactions, transactions.plannedMaxCents);
+            await m.addColumn(recurringTransactions, recurringTransactions.baseMinCents);
+            await m.addColumn(recurringTransactions, recurringTransactions.baseMaxCents);
           }
         },
         beforeOpen: (details) async {

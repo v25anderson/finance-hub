@@ -11,6 +11,7 @@ import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
 import '../../../domain/bill.dart';
 import '../../../domain/enums.dart';
+import '../../../domain/value_range.dart';
 import 'recurrence_dialogs.dart';
 import '../../../design_system/components/app_segmented.dart';
 import 'status_style.dart';
@@ -36,6 +37,9 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
   late final TextEditingController _name;
   late final TextEditingController _amount;
   late final TextEditingController _note;
+  final _rangeMin = TextEditingController();
+  final _rangeMax = TextEditingController();
+  var _useRange = false;
   late DateTime _due;
   late String _categoryId;
   late ExpenseType _type;
@@ -59,6 +63,12 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
     _categoryId = s?.categoryId ?? 'cat-outros';
     _type = s?.expenseType ?? ExpenseType.variable;
     _favorite = s?.favorite ?? false;
+    final r = s?.range;
+    if (r != null) {
+      _useRange = true;
+      _rangeMin.text = centsToInput(r.minCents);
+      _rangeMax.text = centsToInput(r.maxCents);
+    }
   }
 
   @override
@@ -66,18 +76,34 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
     _name.dispose();
     _amount.dispose();
     _note.dispose();
+    _rangeMin.dispose();
+    _rangeMax.dispose();
     _interval.dispose();
     super.dispose();
   }
 
   int get _intervalValue => int.tryParse(_interval.text.trim()) ?? 1;
 
+  /// Faixa só vale para gasto variável com a opção ligada.
+  bool get _rangeOn => _type == ExpenseType.variable && _useRange;
+
+  ValueRange? get _range => _rangeOn ? ValueRange(parseCents(_rangeMin.text) ?? 0, parseCents(_rangeMax.text) ?? 0) : null;
+
+  /// Valor esperado: o digitado; com faixa e campo vazio, o ponto médio.
+  int? get _expectedCents {
+    final typed = parseCents(_amount.text);
+    if (typed != null && typed > 0) return typed;
+    final r = _range;
+    return (r != null && r.isValid) ? r.midpointCents : null;
+  }
+
   Future<void> _save() async {
     if (!_form.currentState!.validate() || _saving) return;
     setState(() => _saving = true);
     final svc = ref.read(billServiceProvider);
     final recurrence = ref.read(recurrenceServiceProvider);
-    final cents = parseCents(_amount.text)!;
+    final cents = _expectedCents!;
+    final range = _range;
     final src = widget.source;
     String? id;
     var ok = false;
@@ -98,14 +124,16 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
             expenseType: _type,
             favorite: _favorite,
             note: _note.text,
-            dueDate: dateChanged ? _due : null);
+            dueDate: dateChanged ? _due : null,
+            range: range,
+            clearRange: range == null);
       });
     } else {
       ok = await runGuarded(context, () async {
         if (widget.mode == BillFormMode.edit) {
           id = src!.id;
           await svc.update(id!,
-              name: _name.text, plannedCents: cents, dueDate: _due, categoryId: _categoryId, expenseType: _type, favorite: _favorite, note: _note.text);
+              name: _name.text, plannedCents: cents, dueDate: _due, categoryId: _categoryId, expenseType: _type, favorite: _favorite, note: _note.text, range: range, clearRange: range == null);
         } else if (widget.mode == BillFormMode.create && _frequency != null) {
           id = await recurrence.createRecurring(
               name: _name.text,
@@ -116,10 +144,11 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
               frequency: _frequency!,
               interval: _intervalValue,
               end: _end,
-              favorite: _favorite);
+              favorite: _favorite,
+              range: range);
         } else {
           id = await svc.create(
-              name: _name.text, plannedCents: cents, dueDate: _due, categoryId: _categoryId, expenseType: _type, favorite: _favorite, note: _note.text);
+              name: _name.text, plannedCents: cents, dueDate: _due, categoryId: _categoryId, expenseType: _type, favorite: _favorite, note: _note.text, range: range);
         }
       });
     }
@@ -208,6 +237,64 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
     );
   }
 
+  /// Faixa de valor opcional (ex.: energia entre R\$ 200 e R\$ 300), só para gasto variável.
+  Widget _rangeSection(BuildContext context) {
+    final c = context.colors;
+    String? minRule(String? v) {
+      final n = parseCents(v ?? '');
+      return (n == null || n <= 0) ? 'Informe o mínimo' : null;
+    }
+
+    String? maxRule(String? v) {
+      final n = parseCents(v ?? '');
+      final min = parseCents(_rangeMin.text);
+      if (n == null || n <= 0) return 'Informe o máximo';
+      if (min != null && n < min) return 'Menor que o mínimo';
+      return null;
+    }
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      SwitchListTile(
+        key: const Key('range-switch'),
+        contentPadding: EdgeInsets.zero,
+        title: const Text('Informar faixa de valor'),
+        subtitle: const Text('Para contas que variam, como energia entre R\$ 200 e R\$ 300'),
+        value: _useRange,
+        onChanged: (v) => setState(() => _useRange = v),
+      ),
+      if (_useRange) ...[
+        const SizedBox(height: Space.xs),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            child: TextFormField(
+              key: const Key('range-min'),
+              controller: _rangeMin,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(labelText: 'Mínimo', prefixText: 'R\$ '),
+              validator: minRule,
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const SizedBox(width: Space.sm),
+          Expanded(
+            child: TextFormField(
+              key: const Key('range-max'),
+              controller: _rangeMax,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(labelText: 'Máximo', prefixText: 'R\$ '),
+              validator: maxRule,
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+        ]),
+        const SizedBox(height: Space.xs),
+        Text('A faixa é uma informação sua: os totais continuam usando o valor esperado.', style: AppText.body(c.textSecondary).copyWith(fontSize: 12)),
+      ],
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -241,10 +328,14 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
             controller: _amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ '),
+            decoration: InputDecoration(labelText: _rangeOn ? 'Valor esperado' : 'Valor', prefixText: 'R\$ ', helperText: _rangeOn ? 'Em branco: usa o meio da faixa' : null),
             validator: (v) {
               final cents = parseCents(v ?? '');
-              return (cents == null || cents <= 0) ? 'Informe um valor maior que zero' : null;
+              if (_rangeOn && (v ?? '').trim().isEmpty) return null; // usa o ponto médio da faixa
+              if (cents == null || cents <= 0) return 'Informe um valor maior que zero';
+              final r = _range;
+              if (r != null && r.isValid && !r.contains(cents)) return 'Fora da faixa informada';
+              return null;
             },
           ),
           const SizedBox(height: Space.md),
@@ -276,6 +367,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
             selected: _type,
             onChanged: (t) => setState(() => _type = t),
           ),
+          if (_type == ExpenseType.variable) _rangeSection(context),
           const SizedBox(height: Space.md),
           _recurrenceSection(context),
           SwitchListTile(

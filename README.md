@@ -4,7 +4,7 @@ Aplicativo de finanças pessoais **local-first** (Flutter, Android primeiro; Web
 Seus dados ficam no aparelho e tudo funciona **sem internet e sem conta**. O Google Drive é opcional (backup e sincronização entre aparelhos), sempre por ação sua.
 
 ## O que ele faz
-- **Contas e pagamentos**: cadastro rápido, status derivado (prevista, pendente, vencida, parcialmente paga, paga), pagamento parcial sem nunca contar como pago, exclusão que preserva o histórico e permite desfazer.
+- **Contas e pagamentos**: cadastro rápido, faixa de valor opcional para gastos variáveis (ex.: energia entre R$ 200 e R$ 300), status derivado (prevista, pendente, vencida, parcialmente paga, paga), pagamento parcial sem nunca contar como pago, exclusão que preserva o histórico e permite desfazer.
 - **Recorrências**: contas fixas que se repetem; editar ou excluir "só esta", "esta e as próximas" ou "toda a recorrência", preservando o passado e o que já foi pago.
 - **Visão geral**: gastos do mês, "Próximas contas" em carrossel, alertas de vencimento, quanto sobra, comparação com o mês anterior, renda e investimentos.
 - **Calendário** de vencimentos, **planejamento** (valores padrão e personalizados por mês) com **projeções** de 1 a 12 meses, **análises** de 6/12/24 meses com gráficos acessíveis. Dado real e projeção nunca se misturam; as análises só descrevem, nunca aconselham.

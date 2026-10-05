@@ -11,6 +11,7 @@ import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
 import '../../../domain/bill.dart';
 import '../../shared/presentation/category_icon.dart';
+import 'range_text.dart';
 import 'status_style.dart';
 
 /// Item de lista: avatar da categoria, nome e vencimento, valor e estado. Toque com feedback próprio.
@@ -71,6 +72,17 @@ class BillTile extends StatelessWidget {
               ]),
             ),
           ]),
+          if (bill.range != null) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.swap_vert_rounded, size: 15, color: c.textSecondary),
+                const SizedBox(width: 4),
+                Flexible(child: Text('Faixa ${formatRange(bill.range!)}', key: Key('tile-range-${bill.id}'), maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(c.textSecondary).copyWith(fontSize: 12.5, fontWeight: FontWeight.w600))),
+              ]),
+            ),
+          ],
           if (bill.isPartiallyPaid) ...[
             const SizedBox(height: 12),
             AppProgress(value: bill.paidFraction, color: c.info, track: c.surfaceAlt, height: 6),

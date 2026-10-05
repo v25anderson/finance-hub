@@ -65,7 +65,7 @@ void main() {
     await h.settle();
     await t.enterText(field('Nome'), 'Internet fibra');
     await t.enterText(field('Valor'), '100');
-    await t.tap(find.text('Salvar'));
+    await tapSave(t);
     await h.settle();
     expect(find.text('Internet fibra'), findsOneWidget);
     expect(find.text('Pendente'), findsOneWidget);

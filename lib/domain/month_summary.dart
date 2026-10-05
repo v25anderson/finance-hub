@@ -29,6 +29,9 @@ class MonthSummary {
     required this.futureBills,
     required this.byCategory,
     required this.activeCount,
+    required this.rangeMinCents,
+    required this.rangeMaxCents,
+    required this.hasRange,
   });
 
   final int totalCents;
@@ -51,6 +54,12 @@ class MonthSummary {
   final List<CategoryTotal> byCategory;
   final int activeCount;
 
+  /// Faixa **informada** pelo usuário para o total do mês: contas com faixa entram com o mínimo e o máximo dela,
+  /// as demais com o valor previsto. Só existe quando alguma conta do mês tem faixa ([hasRange]); não é previsão do app.
+  final int rangeMinCents;
+  final int rangeMaxCents;
+  final bool hasRange;
+
   /// Saída de caixa real: pago dentro do previsto + excedente.
   int get paidCashCents => paidCents + excessCents;
 
@@ -65,12 +74,16 @@ class MonthSummary {
 
 MonthSummary computeMonthSummary(List<Bill> bills, DateTime today, {int pendingWindowDays = defaultPendingWindowDays}) {
   final active = bills.where((b) => !b.isCanceled).toList();
-  var total = 0, paid = 0, pending = 0, excess = 0;
+  var total = 0, paid = 0, pending = 0, excess = 0, rangeMin = 0, rangeMax = 0;
+  var anyRange = false;
   final paidBills = <Bill>[], pendingBills = <Bill>[], overdueBills = <Bill>[], partial = <Bill>[], future = <Bill>[];
   final perCategory = <String, int>{};
 
   for (final b in active) {
     total += b.plannedCents;
+    rangeMin += b.range?.minCents ?? b.plannedCents;
+    rangeMax += b.range?.maxCents ?? b.plannedCents;
+    if (b.hasRange) anyRange = true;
     paid += b.paidCents < b.plannedCents ? b.paidCents : b.plannedCents;
     pending += b.remainingCents;
     excess += b.excessCents;
@@ -104,5 +117,8 @@ MonthSummary computeMonthSummary(List<Bill> bills, DateTime today, {int pendingW
     futureBills: future,
     byCategory: categories,
     activeCount: active.length,
+    rangeMinCents: rangeMin,
+    rangeMaxCents: rangeMax,
+    hasRange: anyRange,
   );
 }

@@ -43,6 +43,8 @@ class ExportBill {
     this.recurringId,
     this.occurrenceDate,
     this.deletedAt,
+    this.minCents,
+    this.maxCents,
   });
   final String id, name, categoryId, categoryName, note;
   final ExpenseType expenseType;
@@ -52,6 +54,9 @@ class ExportBill {
   final DateTime createdAt, updatedAt;
   final DateTime? canceledAt, occurrenceDate, deletedAt;
   final String? recurringId;
+
+  /// Faixa de valor informada (gasto variável); nulas = sem faixa.
+  final int? minCents, maxCents;
 }
 
 class ExportPayment {
@@ -76,6 +81,8 @@ class ExportRecurrence {
     required this.favorite,
     this.end,
     this.deletedAt,
+    this.minCents,
+    this.maxCents,
   });
   final String id, name, categoryId, categoryName;
   final ExpenseType expenseType;
@@ -83,6 +90,7 @@ class ExportRecurrence {
   final int interval, baseCents;
   final DateTime start;
   final DateTime? end, deletedAt;
+  final int? minCents, maxCents;
   final bool favorite;
 }
 

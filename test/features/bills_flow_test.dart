@@ -1,5 +1,6 @@
 import 'package:finance_hub/data/repositories/transaction_repository.dart';
 import 'package:finance_hub/domain/enums.dart';
+import 'package:finance_hub/domain/value_range.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,7 +33,7 @@ void main() {
 
     await t.enterText(field('Nome'), 'YouTube Premium');
     await t.enterText(field('Valor'), '24,90');
-    await t.tap(find.text('Salvar'));
+    await tapSave(t);
     await h.settle();
 
     expect(find.text('YouTube Premium'), findsOneWidget);
@@ -46,7 +47,7 @@ void main() {
     await t.tap(find.byTooltip('Adicionar'));
     await h.settle();
     await t.enterText(field('Valor'), '0');
-    await t.tap(find.text('Salvar'));
+    await tapSave(t);
     await h.settle();
     expect(find.text('Informe o nome'), findsOneWidget);
     expect(find.text('Informe um valor maior que zero'), findsOneWidget);
@@ -163,7 +164,7 @@ void main() {
     await h.settle();
     await tapVisible(t, h, find.text('Editar'));
     await t.enterText(field('Valor'), '44,90');
-    await t.tap(find.text('Salvar'));
+    await tapSave(t);
     await h.settle();
     expect(find.text('R\$ 44,90'), findsWidgets);
   });
@@ -175,7 +176,7 @@ void main() {
     await h.settle();
     await tapVisible(t, h, find.text('Duplicar'));
     expect(find.text('Duplicar conta'), findsOneWidget);
-    await t.tap(find.text('Salvar'));
+    await tapSave(t);
     await h.settle();
     expect(find.text('Netflix (cópia)'), findsOneWidget);
     expect(find.text('Netflix'), findsOneWidget);
@@ -232,5 +233,112 @@ void main() {
     expect(find.byType(BottomSheet), findsNothing);
     final panel = t.getRect(find.ancestor(of: find.text('HISTÓRICO DE PAGAMENTOS'), matching: find.byType(SizedBox)).first);
     expect(panel.right, greaterThan(1300)); // encostado à direita
+  });
+
+  group('faixa de valor (gasto variável)', () {
+    Future<void> reveal(WidgetTester t, Finder f) =>
+        t.scrollUntilVisible(f, 200, scrollable: find.descendant(of: find.byType(Form), matching: find.byType(Scrollable)).first);
+
+    Future<void> openForm(WidgetTester t, Harness h) async {
+      await goToBills(h);
+      await t.tap(find.byTooltip('Adicionar'));
+      await h.settle();
+    }
+
+    Future<void> turnOnRange(WidgetTester t, Harness h, {required String min, required String max}) async {
+      await reveal(t, find.byKey(const Key('range-switch')));
+      await t.tap(find.byKey(const Key('range-switch')));
+      await h.settle();
+      await reveal(t, find.byKey(const Key('range-max')));
+      await t.enterText(find.byKey(const Key('range-min')), min);
+      await t.enterText(find.byKey(const Key('range-max')), max);
+    }
+
+    appTest('energia entre 200 e 300, valor esperado em branco: usa o meio e mostra a faixa', (t, h) async {
+      await openForm(t, h);
+      await t.enterText(field('Nome'), 'Energia');
+      await turnOnRange(t, h, min: '200', max: '300');
+      await tapSave(t);
+      await h.settle();
+
+      expect(find.text('Energia'), findsOneWidget);
+      expect(find.text('R\$ 250,00'), findsOneWidget); // o meio da faixa
+      expect(find.textContaining('Faixa R\$ 200,00 a R\$ 300,00'), findsOneWidget); // no item da lista
+      expect(tabCount(t, 'pending'), '1');
+
+      // detalhe: faixa e, depois de pagar, onde o total pago cai (só descreve)
+      await t.tap(find.text('Energia'));
+      await h.settle();
+      expect(find.text('Faixa informada: R\$ 200,00 a R\$ 300,00'), findsOneWidget);
+      expect(find.byKey(const Key('bill-range-position')), findsNothing); // ainda sem pagamento
+      await t.tap(find.text('Marcar como pago'));
+      await h.settle();
+      await t.tap(find.text('Confirmar pagamento'));
+      await h.settle();
+      expect(find.text('O total pago está dentro da faixa informada.'), findsOneWidget);
+    });
+
+    appTest('valor esperado digitado precisa estar dentro da faixa', (t, h) async {
+      await openForm(t, h);
+      await t.enterText(field('Nome'), 'Energia');
+      await t.enterText(field('Valor'), '350'); // antes de ligar a faixa (o campo vira "Valor esperado")
+      await turnOnRange(t, h, min: '200', max: '300');
+      await tapSave(t);
+      await h.settle();
+      // o erro está no campo "Valor esperado", lá em cima: volta ao topo do formulário para vê-lo
+      await t.drag(find.descendant(of: find.byType(Form), matching: find.byType(Scrollable)).first, const Offset(0, 2000));
+      await t.pump(const Duration(milliseconds: 300));
+      expect(find.text('Fora da faixa informada'), findsOneWidget);
+      expect(find.text('Nova conta'), findsOneWidget); // não salvou
+      expect(await h.run(() => h.db.select(h.db.transactions).get()), isEmpty);
+    });
+
+    appTest('máximo menor que o mínimo e campos vazios não salvam', (t, h) async {
+      await openForm(t, h);
+      await t.enterText(field('Nome'), 'Energia');
+      await turnOnRange(t, h, min: '300', max: '200');
+      await tapSave(t);
+      await h.settle();
+      expect(find.text('Menor que o mínimo'), findsOneWidget);
+      await t.enterText(find.byKey(const Key('range-min')), '');
+      await tapSave(t);
+      await h.settle();
+      expect(find.text('Informe o mínimo'), findsOneWidget);
+      expect(await h.run(() => h.db.select(h.db.transactions).get()), isEmpty);
+    });
+
+    appTest('a opção de faixa só aparece para gasto variável', (t, h) async {
+      await openForm(t, h);
+      expect(find.byKey(const Key('range-switch')), findsOneWidget); // "Variável" é o tipo padrão
+      await t.tap(find.text('Fixo'));
+      await h.settle();
+      expect(find.byKey(const Key('range-switch')), findsNothing);
+    });
+
+    appTest('editar uma conta com faixa preenche os campos e permite remover a faixa', (t, h) async {
+      final id = await h.run(() => TransactionRepository(h.db).create(
+          name: 'Água',
+          plannedAmountCents: 8000,
+          dueDate: DateTime(2026, 10, 18),
+          categoryId: 'cat-moradia',
+          expenseType: ExpenseType.variable,
+          range: const ValueRange(6000, 9000)));
+      await goToBills(h);
+      await t.tap(find.text('Água'));
+      await h.settle();
+      await tapVisible(t, h, find.text('Editar'));
+      await reveal(t, find.byKey(const Key('range-min')));
+      expect(t.widget<TextFormField>(find.byKey(const Key('range-min'))).controller!.text, '60,00');
+      expect(t.widget<TextFormField>(find.byKey(const Key('range-max'))).controller!.text, '90,00');
+      await reveal(t, find.byKey(const Key('range-switch')));
+      await t.tap(find.byKey(const Key('range-switch'))); // desliga
+      await h.settle();
+      await tapSave(t);
+      await h.settle();
+      final row = (await h.run(() => TransactionRepository(h.db).getById(id)))!;
+      expect(row.plannedMinCents, isNull);
+      expect(row.plannedMaxCents, isNull);
+      expect(row.plannedAmountCents, 8000);
+    });
   });
 }

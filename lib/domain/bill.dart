@@ -1,4 +1,5 @@
 import 'enums.dart';
+import 'value_range.dart';
 
 /// Estados de uma conta. O estado é **derivado** (DECISIONS D04), nunca armazenado.
 enum BillStatus { planned, pending, partiallyPaid, paid, overdue, canceled }
@@ -32,6 +33,7 @@ class Bill {
     this.canceledAt,
     this.recurringId,
     this.occurrenceDate,
+    this.range,
     this.payments = const [],
   });
 
@@ -53,10 +55,17 @@ class Bill {
 
   /// Data da ocorrência na regra (pode diferir do vencimento se foi editada).
   final DateTime? occurrenceDate;
+
+  /// Faixa de valor informada (só gastos variáveis). O valor previsto continua sendo [plannedCents].
+  final ValueRange? range;
   final List<Payment> payments;
 
   bool get isCanceled => canceledAt != null;
   bool get isRecurring => recurringId != null;
+  bool get hasRange => range != null;
+
+  /// Onde o total pago cai na faixa (nulo sem faixa ou sem pagamentos). Descrição factual, sem juízo.
+  RangePosition? get paidRangePosition => (range == null || paidCents <= 0) ? null : range!.position(paidCents);
 
   /// Soma dos pagamentos.
   int get paidCents => payments.fold(0, (s, p) => s + p.amountCents);
@@ -104,6 +113,7 @@ class Bill {
         canceledAt: canceledAt,
         recurringId: recurringId,
         occurrenceDate: occurrenceDate,
+        range: range,
         payments: payments ?? this.payments,
       );
 }

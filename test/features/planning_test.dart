@@ -99,7 +99,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Meta de economia padrão'),
         '1500',
       );
-      await t.tap(find.text('Salvar'));
+      await tapSave(t);
       await h.settle();
       final p = await h.run(() => PlanningRepository(h.db).getPlanning());
       expect(

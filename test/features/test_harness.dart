@@ -121,3 +121,14 @@ Future<void> scrollToTop(WidgetTester t) async {
   await t.drag(_listScrollable(), const Offset(0, 3000));
   await t.pump(const Duration(milliseconds: 300));
 }
+
+/// Rola o formulário até o botão "Salvar" (o formulário é uma lista preguiçosa) e o aciona.
+/// Chama o `onPressed` do botão: com o botão rente à borda inferior, o toque por coordenada às vezes não o alcança.
+Future<void> tapSave(WidgetTester t) async {
+  final scrollable = find.descendant(of: find.byType(Form), matching: find.byType(Scrollable)).first;
+  await t.scrollUntilVisible(find.text('Salvar'), 200, scrollable: scrollable);
+  final save = t.widget<FilledButton>(find.widgetWithText(FilledButton, 'Salvar'));
+  expect(save.onPressed, isNotNull, reason: 'o botão Salvar está desabilitado');
+  save.onPressed!();
+  await t.pump();
+}

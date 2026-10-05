@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 
 import '../../core/dates.dart';
 import '../../domain/enums.dart';
+import '../../domain/value_range.dart';
 import '../db/app_database.dart';
 import 'repo_base.dart';
 
@@ -36,9 +37,11 @@ class TransactionRepository extends RepoBase {
     String note = '',
     String? recurringId,
     DateTime? occurrenceDate,
+    ValueRange? range,
   }) async {
     if (name.trim().isEmpty) throw ValidationError('Nome é obrigatório');
     if (plannedAmountCents < 0) throw ValidationError('Valor não pode ser negativo');
+    if (range != null && !range.isValid) throw ValidationError('Faixa de valor inválida');
     final id = newId();
     final t = now();
     await db.into(db.transactions).insert(TransactionsCompanion.insert(
@@ -55,6 +58,8 @@ class TransactionRepository extends RepoBase {
           note: Value(note),
           recurringId: Value(recurringId),
           occurrenceDate: Value(occurrenceDate == null ? null : isoDate(occurrenceDate)),
+          plannedMinCents: Value(range?.minCents),
+          plannedMaxCents: Value(range?.maxCents),
         ));
     return id;
   }
@@ -69,12 +74,15 @@ class TransactionRepository extends RepoBase {
     ExpenseType? expenseType,
     bool? favorite,
     String? note,
+    ValueRange? range,
+    bool clearRange = false,
   }) async {
     final row = await getById(id);
     if (row == null) throw NotFoundError('transaction', id);
+    if (range != null && !range.isValid) throw ValidationError('Faixa de valor inválida');
     if (name != null && name.trim().isEmpty) throw ValidationError('Nome é obrigatório');
     if (plannedAmountCents != null && plannedAmountCents < 0) throw ValidationError('Valor não pode ser negativo');
-    final contentChanged = name != null || plannedAmountCents != null || dueDate != null || categoryId != null || expenseType != null;
+    final contentChanged = name != null || plannedAmountCents != null || dueDate != null || categoryId != null || expenseType != null || range != null || clearRange;
     await (db.update(db.transactions)..where((t) => t.id.equals(id))).write(TransactionsCompanion(
       name: name == null ? const Value.absent() : Value(name.trim()),
       plannedAmountCents: plannedAmountCents == null ? const Value.absent() : Value(plannedAmountCents),
@@ -83,6 +91,8 @@ class TransactionRepository extends RepoBase {
       expenseType: expenseType == null ? const Value.absent() : Value(expenseType),
       favorite: favorite == null ? const Value.absent() : Value(favorite),
       note: note == null ? const Value.absent() : Value(note),
+      plannedMinCents: clearRange ? const Value(null) : (range == null ? const Value.absent() : Value(range.minCents)),
+      plannedMaxCents: clearRange ? const Value(null) : (range == null ? const Value.absent() : Value(range.maxCents)),
       overridden: contentChanged && row.recurringId != null ? const Value(true) : const Value.absent(),
       updatedAt: Value(now()),
       version: Value(row.version + 1),
@@ -143,8 +153,11 @@ class TransactionRepository extends RepoBase {
       expenseType: row.expenseType,
       favorite: row.favorite,
       note: row.note,
+      range: _rangeOf(row.plannedMinCents, row.plannedMaxCents),
     );
   }
+
+  static ValueRange? _rangeOf(int? min, int? max) => (min == null || max == null) ? null : ValueRange(min, max);
 
   // ── Recorrência ───────────────────────────────────────────────
 
@@ -170,6 +183,7 @@ class TransactionRepository extends RepoBase {
     required ExpenseType expenseType,
     required bool favorite,
     required List<DateTime> dates,
+    ValueRange? range,
   }) async {
     if (dates.isEmpty) return;
     final t = now();
@@ -192,6 +206,8 @@ class TransactionRepository extends RepoBase {
               favorite: Value(favorite),
               recurringId: Value(recurringId),
               occurrenceDate: Value(isoDate(d)),
+              plannedMinCents: Value(range?.minCents),
+              plannedMaxCents: Value(range?.maxCents),
             ),
         ],
         mode: InsertMode.insertOrIgnore,

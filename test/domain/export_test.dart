@@ -255,9 +255,9 @@ void main() {
     test('recorrências com frequência, intervalo e fim opcional', () {
       final r = only(ExportDataset.recurrences);
       final n = r.skip(1).firstWhere((x) => x[1] == 'Netflix');
-      expect(n.sublist(4), ['fixo', 'mensal', '1', '2026-01-10', '', '39.90', 'true']);
+      expect(n.sublist(4), ['fixo', 'mensal', '1', '2026-01-10', '', '39.90', 'true', '', '']); // sem faixa: colunas vazias
       final v = r.skip(1).firstWhere((x) => x[1] == 'Vacina');
-      expect(v.sublist(4), ['pontual', 'dias', '30', '2026-02-01', '2026-12-01', '50.00', 'false']);
+      expect(v.sublist(4), ['pontual', 'dias', '30', '2026-02-01', '2026-12-01', '50.00', 'false', '', '']);
     });
 
     test('rendas e investimentos por mês', () {
@@ -285,6 +285,51 @@ void main() {
     });
   });
 
+  test('faixa de valor: colunas faixa_minima/faixa_maxima em contas e recorrências, vazias sem faixa', () {
+    final ranged = ExportBill(
+      id: 'e1',
+      name: 'Energia',
+      categoryId: 'cat-1',
+      categoryName: 'Moradia',
+      expenseType: ExpenseType.variable,
+      dueDate: DateTime(2026, 10, 20),
+      plannedCents: 25000,
+      paidCents: 0,
+      favorite: false,
+      note: '',
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 2),
+      minCents: 20000,
+      maxCents: 30000,
+    );
+    final data = ExportData(exportedAt: exportedAt, includeDeleted: true, bills: [ranged, bill('e2', 'Aluguel', 100000, 0, DateTime(2026, 10, 25))], recurrences: [
+      ExportRecurrence(
+        id: 'r9',
+        name: 'Energia',
+        categoryId: 'c1',
+        categoryName: 'Moradia',
+        expenseType: ExpenseType.variable,
+        frequency: Frequency.monthly,
+        interval: 1,
+        start: DateTime(2026, 1, 20),
+        baseCents: 25000,
+        favorite: false,
+        minCents: 20000,
+        maxCents: 30000,
+      ),
+    ]);
+    final bills = table(const CsvExporter().export(data, opts(ds: {ExportDataset.bills}, deleted: true)).single);
+    final h = bills.first;
+    expect(h.sublist(h.length - 3), ['faixa_minima', 'faixa_maxima', 'excluido_em']);
+    final energia = bills.skip(1).firstWhere((r) => r[1] == 'Energia');
+    expect(energia.sublist(energia.length - 3, energia.length - 1), ['200.00', '300.00']);
+    final aluguel = bills.skip(1).firstWhere((r) => r[1] == 'Aluguel');
+    expect(aluguel.sublist(aluguel.length - 3, aluguel.length - 1), ['', '']);
+    final recs = table(const CsvExporter().export(data, opts(ds: {ExportDataset.recurrences}, deleted: true)).single);
+    expect(recs.first.sublist(recs.first.length - 3), ['faixa_minima', 'faixa_maxima', 'excluido_em']);
+    expect(recs[1].sublist(recs[1].length - 3, recs[1].length - 1), ['200.00', '300.00']);
+  });
+
   test('LEIA-ME descreve separador, decimal e arquivos', () {
     final data = ExportData(exportedAt: exportedAt, includeDeleted: true);
     const exporter = CsvExporter();
@@ -296,6 +341,7 @@ void main() {
     expect(readme, contains('pagamentos.csv'));
     expect(readme, isNot(contains('planejamento.csv')));
     expect(readme, contains('Inclui itens excluídos'));
+    expect(readme, contains('faixa_minima'));
   });
 
   test('formatos: só CSV disponível por enquanto', () {

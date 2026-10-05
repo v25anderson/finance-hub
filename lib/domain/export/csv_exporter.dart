@@ -84,6 +84,7 @@ class CsvExporter implements DataExporter {
           files.add(file(ds, withDeleted([
             'id', 'nome', 'categoria', 'categoria_id', 'tipo', 'vencimento', 'valor_previsto', 'valor_pago', 'valor_restante', 'excedente',
             'percentual_pago', 'status', 'favorito', 'recorrente', 'recorrencia_id', 'data_ocorrencia', 'observacao', 'criado_em', 'atualizado_em', 'cancelada_em',
+            'faixa_minima', 'faixa_maxima',
           ]), [
             for (final b in bills)
               withDeletedCell([
@@ -107,6 +108,8 @@ class CsvExporter implements DataExporter {
                 b.createdAt,
                 b.updatedAt,
                 b.canceledAt,
+                b.minCents == null ? null : CsvMoney(b.minCents!),
+                b.maxCents == null ? null : CsvMoney(b.maxCents!),
               ], b.deletedAt),
           ]));
         case ExportDataset.payments:
@@ -130,7 +133,7 @@ class CsvExporter implements DataExporter {
               final c = a.name.toLowerCase().compareTo(b.name.toLowerCase());
               return c != 0 ? c : a.id.compareTo(b.id);
             });
-          files.add(file(ds, withDeleted(['id', 'nome', 'categoria', 'categoria_id', 'tipo', 'frequencia', 'intervalo', 'primeiro_vencimento', 'fim', 'valor_base', 'favorito']), [
+          files.add(file(ds, withDeleted(['id', 'nome', 'categoria', 'categoria_id', 'tipo', 'frequencia', 'intervalo', 'primeiro_vencimento', 'fim', 'valor_base', 'favorito', 'faixa_minima', 'faixa_maxima']), [
             for (final r in rs)
               withDeletedCell([
                 r.id,
@@ -144,6 +147,8 @@ class CsvExporter implements DataExporter {
                 r.end == null ? null : isoDate(r.end!),
                 CsvMoney(r.baseCents),
                 r.favorite,
+                r.minCents == null ? null : CsvMoney(r.minCents!),
+                r.maxCents == null ? null : CsvMoney(r.maxCents!),
               ], r.deletedAt),
           ]));
         case ExportDataset.incomes:
@@ -194,6 +199,7 @@ class CsvExporter implements DataExporter {
       ..writeln('- Textos que começariam com = + - @ recebem um apóstrofo (\') à frente para não virarem fórmula na planilha.')
       ..writeln('- "status" das contas é calculado na data da exportação: prevista, pendente, parcialmente_paga, paga, vencida ou cancelada.')
       ..writeln('- "valor_pago" é a soma dos pagamentos; "excedente" é o que foi pago além do previsto.')
+      ..writeln('- "faixa_minima" e "faixa_maxima": faixa de valor que você informou para gastos variáveis (vazio = sem faixa). O previsto continua sendo "valor_previsto".')
       ..writeln('- ${options.includeDeleted ? 'Inclui itens excluídos (coluna excluido_em).' : 'Itens excluídos não estão incluídos.'}')
       ..writeln()
       ..writeln('ARQUIVOS');

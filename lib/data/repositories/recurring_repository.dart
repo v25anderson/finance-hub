@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../core/dates.dart';
 import '../../domain/enums.dart';
 import '../../domain/recurrence.dart';
+import '../../domain/value_range.dart';
 import '../db/app_database.dart';
 import 'repo_base.dart';
 
@@ -20,7 +21,9 @@ class RecurringRepository extends RepoBase {
     int interval = 1,
     DateTime? end,
     bool favorite = false,
+    ValueRange? range,
   }) async {
+    if (range != null && !range.isValid) throw ValidationError('Faixa de valor inválida');
     if (name.trim().isEmpty) throw ValidationError('Nome é obrigatório');
     if (baseAmountCents <= 0) throw ValidationError('Informe um valor maior que zero');
     if (interval < 1 || interval > 999) throw ValidationError('Intervalo inválido');
@@ -43,6 +46,8 @@ class RecurringRepository extends RepoBase {
           startDate: isoDate(start),
           endDate: Value(end == null ? null : isoDate(end)),
           favorite: Value(favorite),
+          baseMinCents: Value(range?.minCents),
+          baseMaxCents: Value(range?.maxCents),
         ));
     return id;
   }
@@ -58,6 +63,7 @@ class RecurringRepository extends RepoBase {
         start: parseIsoDate(r.startDate),
         end: r.endDate == null ? null : parseIsoDate(r.endDate!),
         favorite: r.favorite,
+        range: (r.baseMinCents == null || r.baseMaxCents == null) ? null : ValueRange(r.baseMinCents!, r.baseMaxCents!),
       );
 
   /// Regra ativa (não excluída). Nulo se não existe ou foi excluída.
@@ -81,7 +87,8 @@ class RecurringRepository extends RepoBase {
   }
 
   /// Altera os dados-base usados nas **próximas** ocorrências geradas.
-  Future<void> updateBase(String id, {String? name, int? baseAmountCents, String? categoryId, ExpenseType? expenseType, bool? favorite}) async {
+  Future<void> updateBase(String id, {String? name, int? baseAmountCents, String? categoryId, ExpenseType? expenseType, bool? favorite, ValueRange? range, bool clearRange = false}) async {
+    if (range != null && !range.isValid) throw ValidationError('Faixa de valor inválida');
     final row = await (db.select(db.recurringTransactions)..where((t) => t.id.equals(id) & t.deletedAt.isNull())).getSingleOrNull();
     if (row == null) throw NotFoundError('recurring', id);
     if (baseAmountCents != null && baseAmountCents <= 0) throw ValidationError('Informe um valor maior que zero');
@@ -91,6 +98,8 @@ class RecurringRepository extends RepoBase {
       categoryId: categoryId == null ? const Value.absent() : Value(categoryId),
       expenseType: expenseType == null ? const Value.absent() : Value(expenseType),
       favorite: favorite == null ? const Value.absent() : Value(favorite),
+      baseMinCents: clearRange ? const Value(null) : (range == null ? const Value.absent() : Value(range.minCents)),
+      baseMaxCents: clearRange ? const Value(null) : (range == null ? const Value.absent() : Value(range.maxCents)),
       updatedAt: Value(now()),
       version: Value(row.version + 1),
       deviceId: Value(await db.currentDeviceId()),

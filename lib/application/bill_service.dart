@@ -2,6 +2,7 @@ import '../data/repositories/bill_repository.dart';
 import '../data/repositories/repo_base.dart';
 import '../data/repositories/transaction_repository.dart';
 import '../domain/enums.dart';
+import '../domain/value_range.dart';
 
 /// Casos de uso de contas e pagamentos. A UI só fala com esta classe.
 class BillService {
@@ -20,8 +21,11 @@ class BillService {
     required ExpenseType expenseType,
     bool favorite = false,
     String note = '',
-  }) {
+    ValueRange? range,
+  }) async {
     if (plannedCents <= 0) throw ValidationError('Informe um valor maior que zero');
+    final effective = expenseType == ExpenseType.variable ? range : null; // faixa só existe em gasto variável
+    checkRange(effective, plannedCents);
     return transactions.create(
       name: name,
       plannedAmountCents: plannedCents,
@@ -30,7 +34,15 @@ class BillService {
       expenseType: expenseType,
       favorite: favorite,
       note: note,
+      range: effective,
     );
+  }
+
+  /// O valor esperado precisa estar dentro da faixa informada.
+  static void checkRange(ValueRange? range, int plannedCents) {
+    if (range == null) return;
+    if (!range.isValid) throw ValidationError('Faixa de valor inválida: o mínimo deve ser maior que zero e o máximo não pode ser menor que o mínimo');
+    if (!range.contains(plannedCents)) throw ValidationError('O valor esperado deve estar dentro da faixa');
   }
 
   Future<void> update(
@@ -42,8 +54,16 @@ class BillService {
     ExpenseType? expenseType,
     bool? favorite,
     String? note,
-  }) {
+    ValueRange? range,
+    bool clearRange = false,
+  }) async {
     if (plannedCents != null && plannedCents <= 0) throw ValidationError('Informe um valor maior que zero');
+    if (range != null) {
+      final current = await bills.getBill(id);
+      if (current == null) throw NotFoundError('bill', id);
+      if ((expenseType ?? current.expenseType) != ExpenseType.variable) throw ValidationError('Faixa de valor só vale para gasto variável');
+      checkRange(range, plannedCents ?? current.plannedCents);
+    }
     return transactions.update(
       id,
       name: name,
@@ -53,6 +73,9 @@ class BillService {
       expenseType: expenseType,
       favorite: favorite,
       note: note,
+      range: range,
+      // deixar de ser variável apaga a faixa junto
+      clearRange: clearRange || (expenseType != null && expenseType != ExpenseType.variable),
     );
   }
 

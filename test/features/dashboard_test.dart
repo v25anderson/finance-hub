@@ -1,6 +1,7 @@
 import 'package:finance_hub/data/repositories/planning_repository.dart';
 import 'package:finance_hub/data/repositories/transaction_repository.dart';
 import 'package:finance_hub/domain/enums.dart';
+import 'package:finance_hub/domain/value_range.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -103,7 +104,7 @@ void main() {
     await t.enterText(find.widgetWithText(TextFormField, 'Salário líquido padrão'), '8000');
     await t.enterText(find.widgetWithText(TextFormField, 'Renda extra padrão'), '500');
     await t.enterText(find.widgetWithText(TextFormField, 'Investimento planejado padrão'), '2000');
-    await t.tap(find.text('Salvar'));
+    await tapSave(t);
     await h.settle();
     expect(textOf(t, 'income-total'), 'R\$ 8.500,00');
     expect(find.text('0%'), findsNothing);
@@ -236,5 +237,28 @@ void main() {
     expect(comparison.dy, greaterThan(kpi.dy)); // destaque primeiro
     expect(balance.dx, greaterThan(comparison.dx + 300)); // duas colunas
     expect((balance.dy - comparison.dy).abs(), lessThan(60)); // começam na mesma altura
+  });
+
+  appTest('faixa informada aparece no cabeçalho e no detalhe só quando alguma conta do mês tem faixa', (t, h) async {
+    await h.run(() => TransactionRepository(h.db).create(
+        name: 'Aluguel', plannedAmountCents: 100000, dueDate: DateTime(2026, 10, 5), categoryId: 'cat-moradia', expenseType: ExpenseType.fixed));
+    await h.settle();
+    expect(find.byKey(const Key('hero-range')), findsNothing);
+
+    await h.run(() => TransactionRepository(h.db).create(
+        name: 'Energia',
+        plannedAmountCents: 25000,
+        dueDate: DateTime(2026, 10, 20),
+        categoryId: 'cat-moradia',
+        expenseType: ExpenseType.variable,
+        range: const ValueRange(20000, 30000)));
+    await h.settle();
+    // total segue o previsto (1.250), a faixa informada vai de 1.200 a 1.300
+    expect(find.text('R\$ 1.250,00'), findsWidgets);
+    expect(find.text('Faixa informada: R\$ 1.200,00 a R\$ 1.300,00'), findsOneWidget);
+
+    await t.tap(find.text('GASTOS DO MÊS'));
+    await h.settle();
+    expect(find.text('Faixa informada para o total: R\$ 1.200,00 a R\$ 1.300,00'), findsOneWidget);
   });
 }
