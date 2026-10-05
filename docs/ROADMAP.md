@@ -14,9 +14,9 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 6.5 | Redesign visual (identidade própria, sem a cara padrão do Material) | ✅ (ver notas abaixo) |
 | 7 | Planejamento e projeções | ✅ (ver notas abaixo) |
 | 8 | Análises | ✅ (ver notas abaixo) |
-| 9 | Exportação CSV (**marco MVP local**) | ⏳ |
-| 10 | Google Drive (backup manual; comprovantes ficam para depois) | ✅ |
-| 11 | Sincronização bidirecional | ✅ |
+| 9 | Exportação CSV (**marco MVP local**) | ✅ (ver notas abaixo) |
+| 10 | Google Drive (backup manual; comprovantes ficam para depois) | ✅ (ver notas abaixo) |
+| 11 | Sincronização bidirecional | ✅ (ver notas abaixo) |
 | 12 | Testes de integração/golden e sync | ⏳ |
 | 13 | Android APK/AAB | ⏳ |
 | 14 | Web | ⏳ |
