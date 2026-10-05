@@ -37,6 +37,7 @@ flutter_launcher_icons:
   image_path: assets/icon/icon.png
   adaptive_icon_background: assets/icon/icon_bg.png
   adaptive_icon_foreground: assets/icon/icon_fg.png
+  adaptive_icon_monochrome: assets/icon/icon_mono.png
   web:
     generate: true
     image_path: assets/icon/icon.png
