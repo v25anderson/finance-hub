@@ -9,7 +9,9 @@ O app não traz credenciais do Google. Sem a configuração abaixo, a tela de ba
 
 ## 2. IDs de cliente OAuth
 Em **Credenciais → Criar credenciais → ID do cliente OAuth** crie dois:
-- **Android**: nome do pacote do app e a impressão digital **SHA-1** do certificado que assina o APK. Para o APK de teste do GitHub Actions é a chave de *debug* do runner, que muda a cada execução: para testar de verdade, assine com uma chave sua (keystore fixa) e use o SHA-1 dela.
+- **Android**: nome do pacote `com.financehub.finance_hub` e a impressão digital **SHA-1** do certificado que assina o APK. Para os APKs de teste do GitHub Actions a chave agora é **fixa** (`android/app/test-signing.jks`), então o SHA-1 não muda:
+  `1F:AC:D2:4B:CF:3A:D1:16:7B:0F:6D:BB:2B:91:E0:63:44:AE:CD:51`
+  (cada execução do Actions também mostra o SHA-1 do APK gerado, no resumo da execução). Para a versão publicada, registre também o SHA-1 da sua chave de publicação e, se usar Play App Signing, o da chave de assinatura do app que o Play Console mostra.
 - **Aplicativo da Web**: o ID gerado aqui (`xxxx.apps.googleusercontent.com`) é o **GOOGLE_SERVER_CLIENT_ID**. O Android o exige para o login funcionar, mesmo sem servidor.
 
 ## 3. Passar o ID para o app

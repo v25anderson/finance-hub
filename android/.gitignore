@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Chave de TESTE versionada de propósito (assinatura estável dos APKs de teste; nunca usar na Play Store).
+!app/test-signing.jks

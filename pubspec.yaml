@@ -1,5 +1,5 @@
 name: finance_hub
-description: "A new Flutter project."
+description: "Finance Hub: finanças pessoais local-first (contas, planejamento, análises, backup e sincronização opcionais no Google Drive)."
 publish_to: 'none'
 version: 0.1.0+1
 

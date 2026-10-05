@@ -1,7 +1,10 @@
 name: Android APK
 
-# Gera um APK instalável para testes (assinado com a chave de debug do Flutter; NÃO é para a Play Store).
-# Baixe o arquivo em: Actions → esta execução → Artifacts → finance-hub-apk.
+# Gera o APK (instalação direta) e o AAB (Play Store). Sem os segredos de assinatura, ambos saem assinados com a chave de
+# TESTE versionada em android/app/test-signing.jks: estável (um APK novo instala por cima do anterior), mas NÃO serve
+# para publicar. Com os segredos ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS e
+# ANDROID_KEY_PASSWORD, assina com a sua chave. Veja docs/RELEASE.md.
+# Baixe os arquivos em: Actions → esta execução → Artifacts (finance-hub-apk e finance-hub-aab).
 on:
   workflow_dispatch:
   push:
@@ -38,14 +41,44 @@ jobs:
           flutter analyze
           flutter test
 
-      - name: Build do APK
-        # Sem o segredo, o backup no Drive aparece como "não configurado" e o resto do app funciona igual.
+      - name: Chave de publicação (opcional)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > android/release.jks
+            printf 'storeFile=release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > android/key.properties
+            echo "Assinando com a chave de publicação."
+          else
+            echo "Sem segredos de assinatura: usando a chave de TESTE."
+          fi
+
+      - name: Build do APK e do AAB
+        # O número do build (versionCode) sobe a cada execução, para o APK novo poder atualizar o instalado.
+        # Sem GOOGLE_SERVER_CLIENT_ID, o backup no Drive aparece como "não configurado" e o resto funciona igual.
         env:
           GOOGLE_SERVER_CLIENT_ID: ${{ secrets.GOOGLE_SERVER_CLIENT_ID }}
-        run: flutter build apk --release --dart-define=GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID
+        run: |
+          flutter build apk --release --build-number=${{ github.run_number }} --dart-define=GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID
+          flutter build appbundle --release --build-number=${{ github.run_number }} --dart-define=GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID
+
+      - name: Impressão digital da chave (para o login Google)
+        run: |
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify --print-certs "$APK" | grep -E "SHA-(1|256) digest" | tee "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         with:
           name: finance-hub-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: finance-hub-aab
+          path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 14

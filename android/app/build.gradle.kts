@@ -1,7 +1,22 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Chave de publicação: `android/key.properties` (local ou criado pelo CI a partir dos segredos). Sem ele, usa a chave de
+// TESTE versionada em app/test-signing.jks: assinatura estável (o APK novo instala por cima do antigo e o SHA-1 não muda),
+// mas NÃO serve para a Play Store. Veja docs/RELEASE.md.
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("key.properties")
+    if (f.exists()) FileInputStream(f).use { load(it) }
+}
+val hasReleaseKey = keystoreProps.getProperty("storeFile") != null
+if (!hasReleaseKey) {
+    logger.lifecycle("ATENÇÃO: sem android/key.properties; builds de release serão assinados com a chave de TESTE (não enviar à Play Store).")
 }
 
 android {
@@ -15,7 +30,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // ID do aplicativo: NÃO pode mudar depois de publicado na Play Store.
         applicationId = "com.financehub.finance_hub"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -29,11 +44,25 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (hasReleaseKey) {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            } else {
+                storeFile = file("test-signing.jks")
+                storePassword = "financehub-test"
+                keyAlias = "financehub-test"
+                keyPassword = "financehub-test"
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
