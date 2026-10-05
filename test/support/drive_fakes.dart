@@ -49,9 +49,13 @@ class FakeSafety implements SafetyCopyStore {
 }
 
 class FakeAuth implements DriveAuth {
-  FakeAuth({this.available = true, this.email = 'pessoa@example.com', this.failSignIn = false});
+  FakeAuth({this.available = true, this.email = 'pessoa@example.com', this.failSignIn = false, this.reason = DriveUnavailableReason.notConfigured});
   @override
   final bool available;
+  final DriveUnavailableReason reason;
+
+  @override
+  DriveUnavailableReason? get unavailableReason => available ? null : reason;
   final String email;
   bool failSignIn;
   var signedIn = false;

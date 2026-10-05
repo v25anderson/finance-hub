@@ -1,5 +1,8 @@
 import 'dart:typed_data';
 
+/// Por que o Drive não está disponível: build sem ID de cliente do Google, ou plataforma sem login Google (web e desktop).
+enum DriveUnavailableReason { notConfigured, unsupportedPlatform }
+
 enum DriveFailure { unauthorized, notFound, quota, network, unavailable, unknown }
 
 /// Falha de acesso ao Drive. A mensagem nunca carrega dados do usuário nem trechos de resposta.
@@ -46,6 +49,9 @@ class DriveAccount {
 abstract interface class DriveAuth {
   /// Falso quando o app não foi configurado com um cliente OAuth ou a plataforma não suporta.
   bool get available;
+
+  /// Motivo da indisponibilidade; nulo quando [available].
+  DriveUnavailableReason? get unavailableReason;
 
   /// Retoma uma conexão anterior sem tela, se houver.
   Future<DriveAccount?> restore();

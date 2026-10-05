@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -17,22 +17,38 @@
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
+  <!--
+    Política de segurança de conteúdo: o app web só fala com o próprio site. Isso impede, por exemplo, o plugin de login do Google
+    de carregar seu script (accounts.google.com) a cada abertura, mesmo sem ninguém conectar ao Drive (ele não existe na web).
+    Se um dia o Drive for habilitado na web, esta política precisa liberar os domínios do Google.
+    'wasm-unsafe-eval' é necessário para o CanvasKit e o SQLite em WebAssembly.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' blob: data:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Finanças pessoais local-first: contas, planejamento e análises.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="finance_hub">
+  <meta name="apple-mobile-web-app-title" content="Finance Hub">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>finance_hub</title>
+  <title>Finance Hub</title>
+  <meta name="theme-color" content="#7A2BF0">
+  <style>
+    /* fundo escuro (tema padrão) e indicador de carga enquanto o app inicia: evita o clarão branco */
+    html, body { margin: 0; height: 100%; background: #09090D; }
+    #boot { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: #9B97AB; font: 600 14px system-ui, sans-serif; }
+    #boot i { width: 38px; height: 38px; border-radius: 50%; border: 3px solid #282833; border-top-color: #A877FF; animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <div id="boot"><i></i><span>Carregando Finance Hub…</span></div>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
@@ -41,6 +57,7 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script src="boot.js"></script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

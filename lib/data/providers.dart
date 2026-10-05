@@ -387,7 +387,8 @@ sealed class DriveConnection {
 }
 
 class DriveUnavailable extends DriveConnection {
-  const DriveUnavailable();
+  const DriveUnavailable(this.reason);
+  final DriveUnavailableReason reason;
 }
 
 class DriveDisconnected extends DriveConnection {
@@ -410,7 +411,7 @@ class DriveConnectionNotifier extends Notifier<DriveConnection> {
   @override
   DriveConnection build() {
     final auth = ref.read(driveAuthProvider);
-    if (!auth.available) return const DriveUnavailable();
+    if (!auth.available) return DriveUnavailable(auth.unavailableReason ?? DriveUnavailableReason.notConfigured);
     Future(() async {
       final account = await auth.restore();
       if (ref.mounted && state is! DriveConnected) state = account == null ? const DriveDisconnected() : DriveConnected(account.email);
@@ -454,7 +455,10 @@ final syncLightProvider = Provider<SyncLightInfo>((ref) {
   final meta = ref.watch(syncMetaProvider).value;
   final conflicts = ref.watch(openConflictsProvider).value?.length ?? 0;
   return switch (conn) {
-    DriveUnavailable() => (state: SyncLightState.off, label: 'Drive não configurado'),
+    DriveUnavailable(:final reason) => (
+        state: SyncLightState.off,
+        label: reason == DriveUnavailableReason.unsupportedPlatform ? 'Indisponível nesta plataforma' : 'Drive não configurado',
+      ),
     DriveDisconnected() => (state: SyncLightState.off, label: 'Desconectado'),
     DriveConnecting() => (state: SyncLightState.busy, label: 'Conectando…'),
     DriveConnected() when meta?.state == SyncState.syncing => (state: SyncLightState.busy, label: 'Sincronizando…'),

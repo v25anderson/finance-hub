@@ -60,6 +60,14 @@ void main() {
     await h.finish();
   });
 
+  testWidgets('web/desktop: explica que o Drive é só do aplicativo para celular', (t) async {
+    final h = await openBackup(t, auth: FakeAuth(available: false, reason: DriveUnavailableReason.unsupportedPlatform), drive: FakeDrive(), safety: FakeSafety());
+    expect(find.text('Disponível só no aplicativo para celular'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('sync-badge')), matching: find.text('Indisponível nesta plataforma')), findsOneWidget);
+    expect(find.byKey(const Key('backup-connect')), findsNothing);
+    await h.finish();
+  });
+
   testWidgets('conectar, fazer backup, restaurar com confirmação e excluir', (t) async {
     final drive = FakeDrive();
     final safety = FakeSafety();

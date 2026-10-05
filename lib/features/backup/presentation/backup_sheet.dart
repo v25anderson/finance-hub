@@ -147,13 +147,18 @@ class _BackupSheetState extends ConsumerState<BackupSheet> {
           Align(alignment: Alignment.centerLeft, child: SyncBadge(key: const Key('sync-badge'), state: light.state, label: light.label)),
           const SizedBox(height: Space.lg),
           switch (connection) {
-            DriveUnavailable() => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            DriveUnavailable(:final reason) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 AppCard(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Login com Google ainda não ativado', style: AppText.headline(c.textPrimary)),
+                    Text(
+                      reason == DriveUnavailableReason.unsupportedPlatform ? 'Disponível só no aplicativo para celular' : 'Login com Google ainda não ativado',
+                      style: AppText.headline(c.textPrimary),
+                    ),
                     const SizedBox(height: Space.xs),
                     Text(
-                      'Esta versão do app foi gerada sem o ID de cliente do Google, então o backup e a sincronização ficam desligados. Seus dados continuam salvos no aparelho e a exportação em CSV funciona normalmente.',
+                      reason == DriveUnavailableReason.unsupportedPlatform
+                          ? 'O backup e a sincronização com o Google Drive funcionam no aplicativo Android. Nesta versão, seus dados ficam salvos neste navegador e a exportação em CSV funciona normalmente.'
+                          : 'Esta versão do app foi gerada sem o ID de cliente do Google, então o backup e a sincronização ficam desligados. Seus dados continuam salvos no aparelho e a exportação em CSV funciona normalmente.',
                       key: const Key('backup-unavailable'),
                       style: AppText.body(c.textSecondary),
                     ),

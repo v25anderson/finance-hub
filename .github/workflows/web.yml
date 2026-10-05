@@ -1,0 +1,40 @@
+name: Web
+
+# Gera a versão web (arquivos estáticos). Baixe em: Actions → esta execução → Artifacts → finance-hub-web.
+# Hospedagem e detalhes: docs/WEB.md.
+on:
+  workflow_dispatch:
+    inputs:
+      base_href:
+        description: 'Caminho base (use /nome-do-repo/ no GitHub Pages; / se for na raiz do domínio)'
+        default: '/'
+  push:
+    branches: [claude/finance-hub-local-first-hnshr2, main]
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.6'
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # --no-web-resources-cdn: o CanvasKit vai junto no pacote (nada é baixado do Google em execução; funciona offline).
+      - name: Build web
+        run: flutter build web --release --no-web-resources-cdn --base-href "${{ inputs.base_href || '/' }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: finance-hub-web
+          path: build/web
+          retention-days: 14

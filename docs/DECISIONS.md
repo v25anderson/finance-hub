@@ -72,3 +72,7 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D66 | Filtros de estado em blocos com contagem (não chips com "(n)" no texto) | Leitura rápida, mais organizado e com cor de estado | Chips em linha |
 | D67 | `AppButton` com três ênfases e tema global de botões em pílula | Consistência e hierarquia clara entre ação principal, secundária e discreta | Botões padrão do Material |
 | D68 | Serviço indisponível mostra o motivo e o botão desligado, não some | O usuário vê o que existe e por que não funciona | Esconder a opção |
+| D69 | Chave de teste fixa e versionada para os APKs de teste; chave real só por `key.properties` ou segredos do CI | A chave de debug do runner muda a cada execução (APK não atualiza e SHA-1 instável); a chave de teste é pública de propósito e nunca publica | Chave de debug do CI; chave real no repositório |
+| D70 | Service worker próprio com cache por versão e sem `skipWaiting` | O do Flutter 3.47 só se desregistra; evita misturar arquivos de versões diferentes | Sem offline na web; precache fixo |
+| D71 | Content-Security-Policy no `index.html` (app web só fala com o próprio site) | O plugin do Google contatava `accounts.google.com` a cada abertura; princípio de privacidade | Aceitar a requisição; remover o plugin da web (não é possível por plataforma) |
+| D72 | Pedir armazenamento persistente ao navegador | App local-first: o IndexedDB não deve ser descartado por falta de espaço | Não pedir |

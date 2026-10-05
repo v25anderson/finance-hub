@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../application/drive/drive_storage.dart';
@@ -17,8 +18,19 @@ class GoogleSignInAuth implements DriveAuth {
   GoogleSignInAccount? _account;
   Future<void>? _init;
 
+  /// O login Google deste pacote só existe em Android e iOS (não na web nem no desktop).
+  static bool get platformSupported => !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+
   @override
-  bool get available => serverClientId.isNotEmpty && _gs.supportsAuthenticate();
+  DriveUnavailableReason? get unavailableReason {
+    if (!platformSupported) return DriveUnavailableReason.unsupportedPlatform;
+    if (serverClientId.isEmpty) return DriveUnavailableReason.notConfigured;
+    if (!_gs.supportsAuthenticate()) return DriveUnavailableReason.unsupportedPlatform;
+    return null;
+  }
+
+  @override
+  bool get available => unavailableReason == null;
 
   Future<void> _ensureInit() => _init ??= _gs.initialize(serverClientId: serverClientId);
 

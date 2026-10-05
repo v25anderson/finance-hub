@@ -18,8 +18,8 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 10 | Google Drive (backup manual; comprovantes ficam para depois) | ✅ (ver notas abaixo) |
 | 11 | Sincronização bidirecional | ✅ (ver notas abaixo) |
 | 12 | Testes de integração/golden e sync | ✅ (ver notas abaixo) |
-| 13 | Android APK/AAB | ⏳ |
-| 14 | Web | ⏳ |
+| 13 | Android APK/AAB | ✅ (preparado; falta a chave de publicação e teste em aparelho real, ver notas) |
+| 14 | Web | ✅ (ver notas abaixo) |
 | 15 | Polimento final | ⏳ |
 
 Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 12.
@@ -155,3 +155,20 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Jornada de ponta a ponta** (`test/integration/journey_test.dart`): cadastrar pela tela → pagar parcialmente (fica "parcialmente paga", 30%) → dashboard (total, pago e pendente) → exportar ZIP e conferir o CSV (valores e status derivado) → conectar ao Drive, fazer backup e sincronizar → um segundo aparelho recebe conta e pagamento → apagar e restaurar o backup pela tela (cópia de segurança criada) → a conta volta parcialmente paga.
 - **Total**: 423 testes. `pumpApp` do harness aceita `overrides`.
 - **Não coberto**: execução em Android/iOS reais (integration_test em aparelho/emulador), Drive e login Google reais, toque físico/gestos nativos, leitor de tela real (TalkBack), goldens em outras plataformas.
+
+## Notas da Fase 13
+- **Problema encontrado**: o APK de teste era assinado com a chave de *debug* do Flutter, **que muda a cada execução do Actions**. Resultado: cada APK novo não instalava por cima do anterior (desinstalar apagaria os dados locais) e o SHA-1 para o login Google nunca seria estável.
+- **Correção**: chave de teste **fixa** versionada de propósito em `android/app/test-signing.jks` (senha pública; NÃO serve para publicar). SHA-1 estável: `1F:AC:D2:4B:CF:3A:D1:16:7B:0F:6D:BB:2B:91:E0:63:44:AE:CD:51`. Quem tiver `android/key.properties` (ou os segredos no CI) assina com a chave real.
+- **CI**: gera APK e **AAB**; `versionCode` = número da execução (o APK novo atualiza o instalado); imprime o SHA-1 do APK no resumo; decodifica a chave de publicação quando os segredos existem.
+- **Abertura escura**: o fundo da janela de abertura passou de branco para o escuro do app (sem clarão branco antes do primeiro quadro). Descrição do pacote corrigida.
+- **Verificado**: o Actions compilou, assinou e publicou o APK e o AAB com a nova configuração.
+- **NÃO verificado / pendente**: o app **nunca foi aberto em um Android real**; a chave de publicação **não existe** (você precisa gerar); o ID do app (`com.financehub.finance_hub`) precisa ser confirmado antes de publicar (não muda depois); o primeiro APK com a chave fixa exige desinstalar o antigo uma vez. Passo a passo em `docs/RELEASE.md`.
+
+## Notas da Fase 14
+- **Achado importante**: o service worker do Flutter 3.47 é um *stub que se desregistra*; ou seja, **o app web nunca abriu offline**, apesar do princípio offline-first. Foi escrito um service worker próprio (`web/sw.js`, cache por versão do build, sem `skipWaiting`) com bootstrap próprio (`web/flutter_bootstrap.js`).
+- **Achado de privacidade**: o plugin de login do Google carrega `accounts.google.com/gsi/client` **a cada abertura na web**, mesmo sem ninguém conectar (o Drive nem existe na web). Corrigido com uma **Content-Security-Policy** no `index.html` (o app web só fala com o próprio site); o navegador agora recusa o script. Isso também protege contra injeção de scripts.
+- **Armazenamento persistente**: o app pede `navigator.storage.persist()` para o navegador não apagar o IndexedDB quando faltar espaço.
+- **Mensagem por plataforma**: na web e no desktop a tela de backup diz "Disponível só no aplicativo para celular" (antes dizia que faltava configuração, o que era enganoso); a luz mostra "Indisponível nesta plataforma".
+- **Pacote**: título e nome "Finance Hub", tela de carregamento escura, `theme-color`, ícones do app; workflow `Web` gera o pacote (`finance-hub-web`) com `base_href` opcional. Hospedagem e limites em `docs/WEB.md`.
+- **Verificado no Chromium**: título, abertura offline com o app completo e dados, download do ZIP de exportação, service worker ativo com cache por versão, nenhuma requisição externa permitida, app funcionando com a CSP.
+- **NÃO verificado**: Safari e Firefox, instalação como PWA, hospedagem real em HTTPS, cabeçalhos COOP/COEP, atualização real de versão com o cache antigo.
