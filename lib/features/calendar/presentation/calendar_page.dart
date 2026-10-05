@@ -94,7 +94,7 @@ class _Legend extends StatelessWidget {
         Row(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 10, height: 10, decoration: BoxDecoration(color: c.tone(styleForCalendarTone(t).tone), shape: BoxShape.circle)),
           const SizedBox(width: 5),
-          Text(styleForCalendarTone(t).label, style: AppText.body(c.textSecondary).copyWith(fontSize: 12)),
+          Flexible(child: Text(styleForCalendarTone(t).label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(c.textSecondary).copyWith(fontSize: 12))),
         ]),
     ]);
   }

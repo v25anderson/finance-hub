@@ -26,7 +26,7 @@ class DefaultsCard extends ConsumerWidget {
       child: Row(
         children: [
           Expanded(child: Text(label, style: AppText.body(c.textSecondary))),
-          if (cents == null) const Text('—') else MoneyText(cents),
+          if (cents == null) const Text('—') else Flexible(child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: MoneyText(cents))),
         ],
       ),
     );

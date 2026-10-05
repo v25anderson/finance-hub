@@ -119,7 +119,7 @@ class _Part extends StatelessWidget {
         Row(children: [
           Container(width: 8, height: 8, decoration: BoxDecoration(color: tint, shape: BoxShape.circle)),
           const SizedBox(width: 6),
-          Text(label, style: AppText.label(AppColors.onHero.withValues(alpha: 0.78))),
+          Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.label(AppColors.onHero.withValues(alpha: 0.78)))),
         ]),
         const SizedBox(height: Space.xs),
         MoneyText(cents, color: AppColors.onHero),

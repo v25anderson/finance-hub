@@ -160,10 +160,14 @@ class _Legend extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 5),
-        Text(
-          label,
-          style: AppText.body(c.textSecondary)
-              .copyWith(fontSize: 12, fontWeight: FontWeight.w600),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.body(c.textSecondary)
+                .copyWith(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );
@@ -257,7 +261,12 @@ class _MonthRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: Space.sm),
-                Column(
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 150),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
@@ -272,6 +281,8 @@ class _MonthRow extends StatelessWidget {
                           .copyWith(fontSize: 12),
                     ),
                   ],
+                ),
+                  ),
                 ),
               ],
             ),

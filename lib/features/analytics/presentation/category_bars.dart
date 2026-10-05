@@ -35,7 +35,10 @@ class CategoryBars extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(c.textPrimary).copyWith(fontWeight: FontWeight.w600, fontSize: 14))),
               const SizedBox(width: 8),
-              Text(formatPercent(fraction), style: AppText.body(c.textSecondary).copyWith(fontSize: 13)),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 64),
+                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(formatPercent(fraction), maxLines: 1, style: AppText.body(c.textSecondary).copyWith(fontSize: 13))),
+              ),
               const SizedBox(width: 10),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 112),

@@ -17,7 +17,7 @@ Uma fase só é concluída com: `flutter analyze` limpo, testes passando, build 
 | 9 | Exportação CSV (**marco MVP local**) | ✅ (ver notas abaixo) |
 | 10 | Google Drive (backup manual; comprovantes ficam para depois) | ✅ (ver notas abaixo) |
 | 11 | Sincronização bidirecional | ✅ (ver notas abaixo) |
-| 12 | Testes de integração/golden e sync | ⏳ |
+| 12 | Testes de integração/golden e sync | ✅ (ver notas abaixo) |
 | 13 | Android APK/AAB | ⏳ |
 | 14 | Web | ⏳ |
 | 15 | Polimento final | ⏳ |
@@ -146,3 +146,12 @@ Testes de domínio são escritos **junto** de cada fase (3, 5, 7), não só na 1
 - **Drive não configurado** agora explica o motivo (falta o ID de cliente do Google na build) e mostra o botão "Conectar com Google" desligado, em vez de sumir. O login só passa a funcionar quando o `GOOGLE_SERVER_CLIENT_ID` for configurado (veja `docs/GOOGLE_SETUP.md`).
 - **Ícone do app**: monograma "F" branco sobre o degradê da marca com os anéis do cabeçalho e um ponto verde-água; adaptativo no Android (fundo e primeiro plano separados) e também na web (favicon e PWA). Nome do app na web: "Finance Hub". Gerado por `flutter_launcher_icons` a partir de `assets/icon/`.
 - **Não verificado**: o ícone no launcher de um Android real (só a imagem gerada foi conferida); a luz de sincronização com Drive real.
+
+## Notas da Fase 12
+- **Sincronização sob estresse** (`test/data/sync_stress_test.dart`): 3 aparelhos, 12 rodadas de operações aleatórias (criar, editar nome/valor/observação, excluir, favoritar, pagar) com sincronizações em ordem aleatória, 3 sementes. Depois de resolver os conflitos por uma política determinística, os três convergem ao **mesmo conteúdo**, sem conflito aberto nem nada pendente de envio. O teste prova que exercita de verdade o motor (≈200 aplicações, ≈20 merges, ≈5 conflitos por execução).
+- **Desempenho medido** (memória, máquina do ambiente): 3.000 contas + 3.000 pagamentos → envio de 6.012 registros em ≈0,5 s e recebimento no outro aparelho em ≈1,3 s; segunda rodada sem mudanças não envia nada. Não substitui medir em um celular real.
+- **Acessibilidade** (`test/features/accessibility_test.dart`): as 5 telas principais com fonte do sistema a 1,5× e 2× em celular de 360 px, com nomes longos. Achou e corrigiu **5 estouros de layout** (rótulos do cabeçalho, legenda do calendário, saldo projetado, valores padrão, percentuais das categorias). Também confere rótulo e papel de botão do dock para leitor de tela.
+- **Golden** (`test/golden/`): 12 imagens (início claro/escuro e desktop, Contas, Agenda, Plano, Análises, detalhe do mês, backup, botões e luzes de sincronização). Carregam a fonte Inter e os ícones do SDK para ficarem legíveis. Regenerar: `flutter test --update-goldens test/golden`. Foram geradas no Linux; outra plataforma pode renderizar o texto de forma diferente.
+- **Jornada de ponta a ponta** (`test/integration/journey_test.dart`): cadastrar pela tela → pagar parcialmente (fica "parcialmente paga", 30%) → dashboard (total, pago e pendente) → exportar ZIP e conferir o CSV (valores e status derivado) → conectar ao Drive, fazer backup e sincronizar → um segundo aparelho recebe conta e pagamento → apagar e restaurar o backup pela tela (cópia de segurança criada) → a conta volta parcialmente paga.
+- **Total**: 423 testes. `pumpApp` do harness aceita `overrides`.
+- **Não coberto**: execução em Android/iOS reais (integration_test em aparelho/emulador), Drive e login Google reais, toque físico/gestos nativos, leitor de tela real (TalkBack), goldens em outras plataformas.

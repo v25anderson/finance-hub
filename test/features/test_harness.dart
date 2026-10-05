@@ -3,6 +3,7 @@ import 'package:finance_hub/data/db/app_database.dart';
 import 'package:finance_hub/data/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -61,7 +62,8 @@ void appTest(String name, Future<void> Function(WidgetTester t, Harness h) body,
 }
 
 /// [seed] roda ANTES de montar o app, em tempo real: sem streams ativas, várias escritas são seguras.
-Future<Harness> pumpApp(WidgetTester tester, {Size size = const Size(390, 844), Future<void> Function(AppDatabase db)? seed}) async {
+Future<Harness> pumpApp(WidgetTester tester,
+    {Size size = const Size(390, 844), Future<void> Function(AppDatabase db)? seed, List<Override> overrides = const []}) async {
   // Como a opção "reduzir movimento" do sistema: números e barras aparecem direto no valor final.
   tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
   addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
@@ -74,6 +76,7 @@ Future<Harness> pumpApp(WidgetTester tester, {Size size = const Size(390, 844), 
     overrides: [
       databaseProvider.overrideWithValue(db),
       clockProvider.overrideWithValue(() => fixedNow),
+      ...overrides,
     ],
     child: const FinanceHubApp(),
   ));
