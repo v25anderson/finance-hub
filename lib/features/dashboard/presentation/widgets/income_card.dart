@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/dashboard_data.dart';
 import '../../../../data/providers.dart';
+import '../../../../design_system/components/app_button.dart';
 import '../../../../design_system/components/app_card.dart';
 import '../../../../design_system/components/money_text.dart';
 import '../../../../design_system/components/status_chip.dart';
@@ -53,19 +54,12 @@ class IncomeCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: Space.md),
-          Wrap(
-            spacing: Space.sm,
-            runSpacing: Space.sm,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              OutlinedButton.icon(
-                onPressed: () => _addIncome(context, ref),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Adicionar renda'),
-              ),
-              TextButton(
-                onPressed: () => _editDefaults(context, ref),
-                child: const Text('Valores padrão'),
-              ),
+              AppButton(label: 'Adicionar renda', icon: Icons.add_rounded, kind: AppButtonKind.primary, expand: true, onPressed: () => _addIncome(context, ref)),
+              const SizedBox(height: Space.sm),
+              AppButton(label: 'Valores padrão', icon: Icons.tune_rounded, kind: AppButtonKind.tonal, expand: true, onPressed: () => _editDefaults(context, ref)),
             ],
           ),
         ],

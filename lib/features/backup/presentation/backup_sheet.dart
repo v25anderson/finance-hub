@@ -7,6 +7,8 @@ import '../../../core/formatting.dart';
 import '../../../data/db/app_database.dart' show SyncMetaRow;
 import '../../../data/providers.dart';
 import '../../../design_system/components/adaptive_sheet.dart';
+import '../../../design_system/components/app_button.dart';
+import '../../../design_system/components/sync_light.dart';
 import '../../../design_system/components/app_card.dart';
 import '../../../design_system/tokens/colors.dart';
 import '../../../design_system/tokens/spacing.dart';
@@ -129,6 +131,7 @@ class _BackupSheetState extends ConsumerState<BackupSheet> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final connection = ref.watch(driveConnectionProvider);
+    final light = ref.watch(syncLightProvider);
     return Material(
       color: Colors.transparent,
       child: ListView(
@@ -140,23 +143,35 @@ class _BackupSheetState extends ConsumerState<BackupSheet> {
             'O app só acessa a pasta "Finance Hub" e os arquivos que ele mesmo criar. Nada é enviado sem você tocar em "Fazer backup" ou "Sincronizar agora".',
             style: AppText.body(c.textSecondary),
           ),
+          const SizedBox(height: Space.md),
+          Align(alignment: Alignment.centerLeft, child: SyncBadge(key: const Key('sync-badge'), state: light.state, label: light.label)),
           const SizedBox(height: Space.lg),
           switch (connection) {
-            DriveUnavailable() => AppCard(
-                child: Text(
-                  'O backup no Drive não está configurado nesta versão do app. Exportar em CSV continua funcionando.',
-                  key: const Key('backup-unavailable'),
-                  style: AppText.body(c.textSecondary),
+            DriveUnavailable() => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                AppCard(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Login com Google ainda não ativado', style: AppText.headline(c.textPrimary)),
+                    const SizedBox(height: Space.xs),
+                    Text(
+                      'Esta versão do app foi gerada sem o ID de cliente do Google, então o backup e a sincronização ficam desligados. Seus dados continuam salvos no aparelho e a exportação em CSV funciona normalmente.',
+                      key: const Key('backup-unavailable'),
+                      style: AppText.body(c.textSecondary),
+                    ),
+                  ]),
                 ),
-              ),
+                const SizedBox(height: Space.md),
+                const AppButton(key: Key('backup-connect-disabled'), label: 'Conectar com Google', icon: Icons.cloud_outlined, kind: AppButtonKind.primary, expand: true, onPressed: null),
+              ]),
             DriveConnecting() => const Padding(padding: EdgeInsets.all(Space.xl), child: Center(child: CircularProgressIndicator())),
             DriveDisconnected(:final error) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 if (error != null) Padding(padding: const EdgeInsets.only(bottom: Space.sm), child: Text(error, key: const Key('backup-error'), style: AppText.body(c.danger))),
-                FilledButton.icon(
+                AppButton(
                   key: const Key('backup-connect'),
+                  label: 'Conectar com Google',
+                  icon: Icons.cloud_outlined,
+                  kind: AppButtonKind.primary,
+                  expand: true,
                   onPressed: () => ref.read(driveConnectionProvider.notifier).connect(),
-                  icon: const Icon(Icons.cloud_outlined),
-                  label: const Text('Conectar com Google'),
                 ),
               ]),
             DriveConnected(:final email) => _connected(context, email),
@@ -181,11 +196,13 @@ class _BackupSheetState extends ConsumerState<BackupSheet> {
         ),
       ])),
       const SizedBox(height: Space.md),
-      FilledButton.icon(
+      AppButton(
         key: const Key('backup-now'),
+        label: _busy ? 'Aguarde…' : 'Fazer backup agora',
+        icon: Icons.cloud_upload_outlined,
+        kind: AppButtonKind.primary,
+        expand: true,
         onPressed: _busy ? null : _backup,
-        icon: const Icon(Icons.cloud_upload_outlined),
-        label: Text(_busy ? 'Aguarde…' : 'Fazer backup agora'),
       ),
       const SizedBox(height: Space.lg),
       _syncSection(context),
@@ -233,11 +250,13 @@ class _BackupSheetState extends ConsumerState<BackupSheet> {
       const SizedBox(height: Space.xs),
       Text(_syncStatus(meta), key: const Key('sync-status'), style: AppText.body(c.textSecondary)),
       const SizedBox(height: Space.sm),
-      OutlinedButton.icon(
+      AppButton(
         key: const Key('sync-now'),
+        label: 'Sincronizar agora',
+        icon: Icons.sync_rounded,
+        kind: AppButtonKind.tonal,
+        expand: true,
         onPressed: _busy ? null : _syncNow,
-        icon: const Icon(Icons.sync_rounded),
-        label: const Text('Sincronizar agora'),
       ),
       if (conflicts > 0) ...[
         const SizedBox(height: Space.sm),

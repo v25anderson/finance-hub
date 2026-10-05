@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../design_system/components/app_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
@@ -44,10 +46,12 @@ class DefaultsCard extends ConsumerWidget {
           row('Meta de economia padrão', p?.defaultSavingsGoalCents),
           row('Investimento planejado padrão', p?.defaultInvestmentCents),
           const SizedBox(height: Space.md),
-          OutlinedButton.icon(
+          AppButton(
+            label: 'Editar padrões',
+            icon: Icons.edit_outlined,
+            kind: AppButtonKind.tonal,
+            expand: true,
             onPressed: p == null ? null : () => _edit(context, ref, p),
-            icon: const Icon(Icons.edit_outlined, size: 18),
-            label: const Text('Editar padrões'),
           ),
         ],
       ),

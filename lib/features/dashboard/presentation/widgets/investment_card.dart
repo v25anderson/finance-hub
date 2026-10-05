@@ -5,6 +5,7 @@ import '../../../../application/dashboard_data.dart';
 import '../../../../core/formatting.dart';
 import '../../../../core/money.dart';
 import '../../../../data/providers.dart';
+import '../../../../design_system/components/app_button.dart';
 import '../../../../design_system/components/app_card.dart';
 import '../../../../design_system/components/money_text.dart';
 import '../../../../design_system/tokens/colors.dart';
@@ -53,18 +54,12 @@ class InvestmentCard extends ConsumerWidget {
         ] else
           Text('Sem meta de investimento neste mês. Defina em Renda › Valores padrão.', style: AppText.body(c.textSecondary)),
         const SizedBox(height: Space.md),
-        Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
-          if (gap > 0)
-            FilledButton.icon(
-              onPressed: () => _register(context, ref, gap),
-              icon: const Icon(Icons.check, size: 18),
-              label: const Text('Marcar meta como realizada'),
-            ),
-          OutlinedButton.icon(
-            onPressed: () => _custom(context, ref),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Registrar investimento'),
-          ),
+        Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          if (gap > 0) ...[
+            AppButton(label: 'Marcar meta como realizada', icon: Icons.check_rounded, kind: AppButtonKind.primary, expand: true, onPressed: () => _register(context, ref, gap)),
+            const SizedBox(height: Space.sm),
+          ],
+          AppButton(label: 'Registrar investimento', icon: Icons.add_rounded, kind: AppButtonKind.tonal, expand: true, onPressed: () => _custom(context, ref)),
         ]),
       ]),
     );

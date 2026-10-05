@@ -16,6 +16,7 @@ import '../../../design_system/tokens/typography.dart';
 import '../../../domain/analytics.dart';
 import '../../../domain/enums.dart';
 import '../../bills/presentation/status_style.dart' show expenseTypeLabel;
+import '../../../design_system/components/sync_light.dart';
 import '../../backup/presentation/backup_sheet.dart';
 import '../../export/presentation/export_sheet.dart';
 import '../../shared/presentation/page_header.dart';
@@ -43,12 +44,7 @@ class AnalyticsPage extends ConsumerWidget {
         PageHeader(
           'Análises',
           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-            IconButton(
-              key: const Key('backup-open'),
-              tooltip: 'Backup no Google Drive',
-              onPressed: () => showBackupSheet(context),
-              icon: const Icon(Icons.cloud_outlined),
-            ),
+            const _CloudButton(),
             IconButton(
               key: const Key('export-open'),
               tooltip: 'Exportar dados',
@@ -369,6 +365,25 @@ class _ChartCard extends StatelessWidget {
         ]),
         const SizedBox(height: Space.md),
         child,
+      ]),
+    );
+  }
+}
+
+/// Ícone de nuvem com a luz de sincronização no canto.
+class _CloudButton extends ConsumerWidget {
+  const _CloudButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final light = ref.watch(syncLightProvider);
+    return IconButton(
+      key: const Key('backup-open'),
+      tooltip: 'Backup e sincronização: ${light.label}',
+      onPressed: () => showBackupSheet(context),
+      icon: Stack(clipBehavior: Clip.none, children: [
+        const Icon(Icons.cloud_outlined),
+        Positioned(right: -3, top: -3, child: DecoratedBox(decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: context.colors.background, width: 2)), child: SyncLight(state: light.state, size: 9))),
       ]),
     );
   }

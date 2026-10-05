@@ -7,8 +7,8 @@ import '../../../core/money.dart';
 import '../../../data/providers.dart';
 import '../../../design_system/components/adaptive_sheet.dart';
 import '../../../design_system/components/app_card.dart';
-import '../../../design_system/components/app_segmented.dart';
 import '../../../design_system/components/money_text.dart';
+import '../../../design_system/components/pressable.dart';
 import '../../../design_system/tokens/colors.dart';
 import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
@@ -38,6 +38,14 @@ class _MonthDetailSheetState extends ConsumerState<MonthDetailSheet> {
     _Group.overdue: 'Vencidas',
     _Group.partial: 'Parcialmente pagas',
     _Group.future: 'Futuras',
+  };
+
+  static const _tones = {
+    _Group.paid: Tone.success,
+    _Group.pending: Tone.warning,
+    _Group.overdue: Tone.danger,
+    _Group.partial: Tone.info,
+    _Group.future: Tone.neutral,
   };
 
   List<Bill> _bills(DashboardData d) => switch (_group) {
@@ -81,12 +89,18 @@ class _MonthDetailSheetState extends ConsumerState<MonthDetailSheet> {
             Expanded(child: _Stat('Pendente', s.pendingCents, tone: Tone.warning)),
           ]),
           const SizedBox(height: Space.lg),
-          Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
-            for (final g in _Group.values)
-              KeyedSubtree(
-                key: Key('group-${g.name}'),
-                child: AppChoice(label: '${_labels[g]} (${count(g)})', selected: _group == g, onTap: () => setState(() => _group = g)),
-              ),
+          Row(children: [
+            for (final g in const [_Group.paid, _Group.pending, _Group.overdue]) ...[
+              if (g != _Group.paid) const SizedBox(width: Space.sm),
+              Expanded(child: _GroupTile(key: Key('group-${g.name}'), label: _labels[g]!, count: count(g), tone: _tones[g]!, selected: _group == g, onTap: () => setState(() => _group = g))),
+            ],
+          ]),
+          const SizedBox(height: Space.sm),
+          Row(children: [
+            for (final g in const [_Group.partial, _Group.future]) ...[
+              if (g != _Group.partial) const SizedBox(width: Space.sm),
+              Expanded(child: _GroupTile(key: Key('group-${g.name}'), label: _labels[g]!, count: count(g), tone: _tones[g]!, selected: _group == g, onTap: () => setState(() => _group = g))),
+            ],
           ]),
           const SizedBox(height: Space.md),
           if (list.isEmpty)
@@ -143,4 +157,44 @@ class _Stat extends StatelessWidget {
         const SizedBox(height: Space.xs),
         MoneyText(cents, tone: tone),
       ]);
+}
+
+/// Filtro em bloco: número grande, nome do estado e um ponto na cor do estado. O selecionado ganha contorno e fundo tingido.
+class _GroupTile extends StatelessWidget {
+  const _GroupTile({super.key, required this.label, required this.count, required this.tone, required this.selected, required this.onTap});
+  final String label;
+  final int count;
+  final Tone tone;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final color = c.tone(tone);
+    return Pressable(
+      onTap: onTap,
+      scale: 0.96,
+      semanticLabel: '$label: $count',
+      child: AnimatedContainer(
+        duration: (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ? Duration.zero : Motion.normal,
+        curve: Motion.curve,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? color.withValues(alpha: 0.14) : c.surfaceAlt,
+          borderRadius: BorderRadius.circular(Radii.lg),
+          border: Border.all(color: selected ? color : Colors.transparent, width: 1.6),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Container(width: 9, height: 9, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+            const Spacer(),
+            Text('$count', style: AppText.display(selected ? color : c.textPrimary).copyWith(fontSize: 26, letterSpacing: -1)),
+          ]),
+          const SizedBox(height: 6),
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(selected ? c.textPrimary : c.textSecondary).copyWith(fontSize: 13, fontWeight: FontWeight.w700, height: 1.1)),
+        ]),
+      ),
+    );
+  }
 }

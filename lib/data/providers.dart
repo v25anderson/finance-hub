@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../application/backup_service.dart';
+import '../design_system/components/sync_light.dart';
 import '../application/bill_service.dart';
 import '../application/drive/drive_storage.dart';
 import '../application/sync/sync_service.dart';
@@ -16,6 +17,7 @@ import '../application/planning_service.dart';
 import '../application/recurrence_service.dart';
 import '../core/dates.dart';
 import '../domain/alerts.dart';
+import '../domain/enums.dart';
 import '../domain/analytics.dart';
 import '../domain/balance.dart';
 import '../domain/month_comparison.dart';
@@ -442,4 +444,23 @@ final driveConnectionProvider = NotifierProvider<DriveConnectionNotifier, DriveC
 final remoteBackupsProvider = FutureProvider.autoDispose<List<RemoteBackup>>((ref) {
   if (ref.watch(driveConnectionProvider) is! DriveConnected) return const [];
   return ref.watch(backupServiceProvider).list();
+});
+
+/// Estado da "luz" de sincronização e o texto curto que a acompanha.
+typedef SyncLightInfo = ({SyncLightState state, String label});
+
+final syncLightProvider = Provider<SyncLightInfo>((ref) {
+  final conn = ref.watch(driveConnectionProvider);
+  final meta = ref.watch(syncMetaProvider).value;
+  final conflicts = ref.watch(openConflictsProvider).value?.length ?? 0;
+  return switch (conn) {
+    DriveUnavailable() => (state: SyncLightState.off, label: 'Drive não configurado'),
+    DriveDisconnected() => (state: SyncLightState.off, label: 'Desconectado'),
+    DriveConnecting() => (state: SyncLightState.busy, label: 'Conectando…'),
+    DriveConnected() when meta?.state == SyncState.syncing => (state: SyncLightState.busy, label: 'Sincronizando…'),
+    DriveConnected() when meta?.state == SyncState.error => (state: SyncLightState.problem, label: 'Falhou'),
+    DriveConnected() when conflicts > 0 => (state: SyncLightState.problem, label: conflicts == 1 ? '1 conflito' : '$conflicts conflitos'),
+    DriveConnected() when meta?.state == SyncState.synced => (state: SyncLightState.ok, label: 'Sincronizado'),
+    DriveConnected() => (state: SyncLightState.idle, label: 'Conectado'),
+  };
 });

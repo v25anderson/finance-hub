@@ -178,11 +178,17 @@ void main() {
     await t.tap(find.text('GASTOS DO MÊS'));
     await h.settle();
     expect(find.text('Gastos de Outubro 2026'), findsOneWidget);
-    expect(find.text('Pagas (1)'), findsOneWidget);
-    expect(find.text('Pendentes (1)'), findsOneWidget);
-    expect(find.text('Vencidas (1)'), findsOneWidget);
-    expect(find.text('Parcialmente pagas (1)'), findsOneWidget);
-    expect(find.text('Futuras (0)'), findsOneWidget);
+    void group(String key, String label, String count) {
+      final tile = find.byKey(Key('group-$key'));
+      expect(find.descendant(of: tile, matching: find.text(label)), findsOneWidget);
+      expect(find.descendant(of: tile, matching: find.text(count)), findsOneWidget);
+    }
+
+    group('paid', 'Pagas', '1');
+    group('pending', 'Pendentes', '1');
+    group('overdue', 'Vencidas', '1');
+    group('partial', 'Parcialmente pagas', '1');
+    group('future', 'Futuras', '0');
     expect(find.text('Parcial'), findsNWidgets(2)); // grupo inicial = Pendentes (+ o pôster em "Próximas contas")
     await t.tap(find.byKey(const Key('group-paid')));
     await h.settle();

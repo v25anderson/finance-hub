@@ -69,3 +69,6 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D63 | Dock flutuante de vidro com cápsula ativa e "+" embutido, em vez de barra inferior fixa | Visual próprio e memorável; libera o canto da tela (sem FAB cobrindo valores) | Barra inferior Material; FAB separado |
 | D64 | Tema escuro como padrão, com alternância no cabeçalho | Identidade "cinema" e contraste dos pôsteres; o usuário escolhe | Seguir o sistema |
 | D65 | Navegação nos testes por chave (`nav-<nome>`), não por texto | Rótulos de itens inativos não existem mais no dock | Manter rótulos invisíveis na árvore |
+| D66 | Filtros de estado em blocos com contagem (não chips com "(n)" no texto) | Leitura rápida, mais organizado e com cor de estado | Chips em linha |
+| D67 | `AppButton` com três ênfases e tema global de botões em pílula | Consistência e hierarquia clara entre ação principal, secundária e discreta | Botões padrão do Material |
+| D68 | Serviço indisponível mostra o motivo e o botão desligado, não some | O usuário vê o que existe e por que não funciona | Esconder a opção |

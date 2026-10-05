@@ -1,11 +1,11 @@
 {
-    "name": "finance_hub",
-    "short_name": "finance_hub",
+    "name": "Finance Hub",
+    "short_name": "Finance Hub",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#09090D",
+    "theme_color": "#7A2BF0",
+    "description": "Finanças pessoais local-first: contas, planejamento e análises.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

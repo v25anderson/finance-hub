@@ -55,6 +55,8 @@ void main() {
     final h = await openBackup(t, auth: FakeAuth(available: false), drive: FakeDrive(), safety: FakeSafety());
     expect(find.byKey(const Key('backup-unavailable')), findsOneWidget);
     expect(find.byKey(const Key('backup-connect')), findsNothing);
+    expect(find.byKey(const Key('backup-connect-disabled')), findsOneWidget); // visível, porém desligado
+    expect(find.text('Drive não configurado'), findsOneWidget); // selo da luz
     await h.finish();
   });
 
@@ -66,6 +68,7 @@ void main() {
     await t.tap(find.byKey(const Key('backup-connect')));
     await h.settle();
     expect(find.text('Conectado: pessoa@example.com'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('sync-badge')), matching: find.text('Conectado')), findsOneWidget);
     expect(find.byKey(const Key('backup-empty')), findsOneWidget);
 
     await t.tap(find.byKey(const Key('backup-now')));
@@ -160,6 +163,7 @@ void main() {
     await h.settle();
     expect(find.textContaining('enviados'), findsOneWidget);
     expect(find.textContaining('Última sincronização'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('sync-badge')), matching: find.text('Sincronizado')), findsOneWidget);
 
     // outro aparelho recebe, edita e publica
     final other = memoryDb(clock: () => fixedNow.toUtc());
@@ -176,6 +180,7 @@ void main() {
     await t.tap(find.byKey(const Key('sync-now')));
     await h.settle();
     expect(find.text('1 conflito para resolver'), findsOneWidget); // o aviso fixo (a mensagem rápida fica na fila)
+    expect(find.descendant(of: find.byKey(const Key('sync-badge')), matching: find.text('1 conflito')), findsOneWidget); // luz vermelha
     await t.tap(find.byKey(const Key('sync-conflicts')));
     await h.settle();
     expect(find.text('Conflitos de sincronização'), findsOneWidget);

@@ -53,7 +53,7 @@ class BillTile extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
-                  Flexible(child: Text(bill.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(c.textPrimary).copyWith(fontWeight: FontWeight.w700, fontSize: 15.5))),
+                  Flexible(child: Text(bill.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.body(c.textPrimary).copyWith(fontWeight: FontWeight.w700, fontSize: 15.5))),
                   if (bill.favorite) ...[const SizedBox(width: 4), Icon(Icons.star_rounded, size: 16, color: c.warning, semanticLabel: 'Favorita')],
                   if (bill.isRecurring) ...[const SizedBox(width: 4), Icon(Icons.repeat_rounded, size: 15, color: c.textSecondary, semanticLabel: 'Recorrente')],
                 ]),
