@@ -45,20 +45,14 @@ class PreferencesThemeStore implements ThemeStore {
 
 final themeStoreProvider = Provider<ThemeStore>((ref) => MemoryThemeStore());
 
-/// Modo de tema escolhido pelo usuário. O padrão é escuro (a identidade "cinema" do app) e a escolha é lembrada.
+/// Modo de tema escolhido pelo usuário: Automático (segue o aparelho, o padrão), Claro ou Escuro. A escolha é lembrada.
 class ThemeModeNotifier extends Notifier<ThemeMode> {
   @override
-  ThemeMode build() => ref.read(themeStoreProvider).load() ?? ThemeMode.dark;
+  ThemeMode build() => ref.read(themeStoreProvider).load() ?? ThemeMode.system;
 
   void set(ThemeMode mode) {
     state = mode;
     ref.read(themeStoreProvider).save(mode).catchError((Object _) {}); // lembrar é um extra: falhar não atrapalha
-  }
-
-  /// Alterna entre claro e escuro conforme o que está sendo exibido agora.
-  void toggle(BuildContext context) {
-    final dark = state == ThemeMode.dark || (state == ThemeMode.system && MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-    set(dark ? ThemeMode.light : ThemeMode.dark);
   }
 }
 

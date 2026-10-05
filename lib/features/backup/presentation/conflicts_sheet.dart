@@ -24,12 +24,14 @@ const _entityLabels = {
   'payments': 'Pagamento',
   'incomes': 'Renda',
   'investments': 'Investimento',
-  'plannings': 'Planejamento',
+  'plannings': 'Planejamento (legado)',
+  'planning_defaults_versions': 'Padrões do planejamento',
   'month_configurations': 'Mês personalizado',
 };
 
 const _fieldLabels = {
   'name': 'Nome',
+  'effectiveFrom': 'Vale a partir de',
   'plannedAmountCents': 'Valor previsto',
   'dueDate': 'Vencimento',
   'categoryId': 'Categoria',

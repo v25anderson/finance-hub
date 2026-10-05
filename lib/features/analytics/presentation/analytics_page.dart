@@ -101,6 +101,9 @@ class _FilterBar extends ConsumerWidget {
     final notifier = ref.read(analyticsFilterProvider.notifier);
     final first = parseYearMonth(months.first);
     final last = parseYearMonth(months.last);
+    final analytics = ref.watch(analyticsProvider).value;
+    final skipped = analytics?.skippedMonths ?? const <String>[];
+    final captionShown = analytics == null ? const <String>[] : [for (final m in analytics.months) m.yearMonth];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       AppSegmented<AnalyticsPreset>(
         options: const [
@@ -122,10 +125,23 @@ class _FilterBar extends ConsumerWidget {
       ],
       const SizedBox(height: Space.sm),
       Text(
-        '${formatMonthYear(first)}${months.length > 1 ? ' a ${formatMonthYear(last)}' : ''} · ${months.length} ${months.length == 1 ? 'mês' : 'meses'} · inclui o mês atual, em andamento',
+        captionShown.isEmpty
+            ? '${formatMonthYear(first)}${months.length > 1 ? ' a ${formatMonthYear(last)}' : ''} · ${months.length} ${months.length == 1 ? 'mês' : 'meses'}'
+            : '${formatMonthYear(parseYearMonth(captionShown.first))}${captionShown.length > 1 ? ' a ${formatMonthYear(parseYearMonth(captionShown.last))}' : ''} · ${captionShown.length} ${captionShown.length == 1 ? 'mês com dados' : 'meses com dados'} · inclui o mês atual, em andamento',
         key: const Key('period-caption'),
         style: AppText.body(c.textSecondary).copyWith(fontSize: 12.5),
       ),
+      if (skipped.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            skipped.length == 1
+                ? 'Sem dados em ${formatMonthYear(parseYearMonth(skipped.first))}: ficou de fora das médias e dos gráficos.'
+                : 'Sem dados de ${formatMonthYear(parseYearMonth(skipped.first))} a ${formatMonthYear(parseYearMonth(skipped.last))}: ficaram de fora das médias e dos gráficos.',
+            key: const Key('period-skipped'),
+            style: AppText.body(c.textSecondary).copyWith(fontSize: 12.5),
+          ),
+        ),
     ]);
   }
 }

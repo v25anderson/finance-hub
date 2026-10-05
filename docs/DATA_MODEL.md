@@ -80,7 +80,7 @@ Personalização do mês: `MonthConfiguration` com 4 campos opcionais (nulo herd
 ## Análises (Fase 8)
 Período: lista de meses `yyyy-MM` terminando, no máximo, no mês atual.
 - **Gastos** = soma do valor **previsto** das contas com vencimento no mês, sem canceladas nem excluídas (inclui recorrências já geradas). Por categoria e por tipo (fixo/variável/pontual). **Média mensal** = total ÷ número de meses (meses sem gasto contam como zero).
-- **Renda** = mesma regra do planejamento: (padrão ou valor do mês) + lançamentos de renda do mês. Os padrões valem também para meses passados sem personalização.
+- **Renda** = mesma regra do planejamento: (padrão **que valia naquele mês** ou valor do mês) + lançamentos de renda do mês. Um padrão só vale a partir do mês em que foi definido (veja "Padrões com vigência", v5): meses anteriores não ganham renda por herança.
 - **Investimentos**: planejado = meta do mês (valor do mês ou padrão); realizado = soma dos investimentos registrados no mês.
 - **Taxa de poupança** = investimentos realizados ÷ renda, por mês e no período. Sem renda, é indefinida ("—"); pode passar de 100%.
 - Categoria: parte = gasto da categoria ÷ gasto total; ordenadas do maior para o menor (desempate por id). A tela mostra as 8 maiores e agrupa o resto em "Outras".
@@ -108,3 +108,10 @@ Um arquivo por conjunto, UTF-8 com BOM, CRLF. Valores monetários em reais com d
 - O valor esperado continua sendo o único número usado em status, progresso, totais, planejamento e projeções. A faixa é uma **informação do usuário**: aparece na lista, no detalhe ("pago dentro/abaixo/acima da faixa", só descrevendo) e como "faixa informada" do total do mês (contas com faixa entram com mínimo e máximo; as demais com o previsto). Nunca vira previsão do app nem recomendação.
 - Recorrências: a regra guarda a faixa e toda ocorrência gerada nasce com ela; "esta e as próximas" troca a faixa nas próximas não editadas e sem pagamento; "somente esta" não mexe nas outras.
 - Migração v3 → v4: duas colunas nulas em cada tabela; dados antigos ficam sem faixa. Exportação CSV: `faixa_minima` e `faixa_maxima` (contas e recorrências), vazias sem faixa. Backup e sincronização carregam as colunas (arquivos v4 não são lidos por apps antigos: "atualize o app").
+
+## Padrões com vigência (esquema v5)
+- Tabela `planning_defaults_versions` (`id = defaults-AAAA-MM`, `effective_from`, salário, renda extra, meta de economia e investimento planejado). Cada linha vale **a partir de** `effective_from` até a próxima.
+- Mudar o padrão cria (ou atualiza) a linha do **mês selecionado**; os meses anteriores continuam com o que valia. Antes da primeira versão não há padrão (renda 0, sem plano): nada é herdado para trás. Resolução: `DefaultsTimeline.at(mês)`; personalização do mês (`month_configurations`) e lançamentos continuam por cima, como antes.
+- A tabela `plannings` (singleton) ficou como **legado**: só serve de origem na migração e ao restaurar backups antigos. Migração v4 → v5 e backup antigo: o padrão único vira a primeira versão, valendo a partir do mês do primeiro dado registrado (conta, renda, investimento ou personalização); sem dados, a partir do mês atual; sem valores, nenhuma versão.
+- Id determinístico: a mesma vigência criada em dois aparelhos é o mesmo registro (conflito só se os valores diferirem). Exportação CSV: no arquivo `planejamento`, `padrao_desde_AAAA-MM` (padrão em vigor a partir do mês) e `AAAA-MM` (personalização do mês).
+- **Análises**: meses do começo do período sem nenhum registro (conta, renda, investimento, personalização ou padrão em vigor) ficam de fora e são listados como "sem dados"; médias, totais e taxa de poupança usam só os meses com dados.

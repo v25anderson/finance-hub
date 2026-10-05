@@ -122,6 +122,20 @@ class Plannings extends Table with BaseColumns {
   IntColumn get defaultInvestmentCents => integer().withDefault(const Constant(0))();
 }
 
+/// Padrões de planejamento com vigência (v5): cada linha vale **a partir** de `effective_from` até a próxima.
+/// Mudar o padrão cria/atualiza a linha do mês escolhido e não reescreve os meses anteriores.
+/// Id determinístico (`defaults-AAAA-MM`): a mesma vigência criada em dois aparelhos é o mesmo registro.
+/// A tabela `plannings` (singleton) ficou só como legado: serve de origem da migração e não é mais usada.
+@DataClassName('DefaultsVersionRow')
+class PlanningDefaultsVersions extends Table with BaseColumns {
+  /// `yyyy-MM`.
+  TextColumn get effectiveFrom => text()();
+  IntColumn get salaryCents => integer().withDefault(const Constant(0))();
+  IntColumn get extraIncomeCents => integer().withDefault(const Constant(0))();
+  IntColumn get savingsGoalCents => integer().withDefault(const Constant(0))();
+  IntColumn get investmentCents => integer().withDefault(const Constant(0))();
+}
+
 /// Override mensal; coluna nula = herda o padrão, zero = zero explícito.
 @DataClassName('MonthConfigRow')
 class MonthConfigurations extends Table with BaseColumns {

@@ -12,7 +12,9 @@ import '../../../../design_system/tokens/colors.dart';
 import '../../../../design_system/tokens/spacing.dart';
 import '../../../../design_system/tokens/typography.dart';
 import '../../../bills/presentation/ui_helpers.dart';
+import '../../../../data/db/app_database.dart';
 import '../dashboard_dialogs.dart';
+import 'entry_rows.dart';
 
 class InvestmentCard extends ConsumerWidget {
   const InvestmentCard({super.key, required this.data});
@@ -24,6 +26,7 @@ class InvestmentCard extends ConsumerWidget {
     final p = data.plan;
     final hasTarget = p.investmentTargetCents > 0;
     final gap = p.investmentGapCents;
+    final entries = ref.watch(investmentsProvider(data.yearMonth)).value ?? const <InvestmentRow>[];
     return AppCard(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const SectionLabel('Investimentos'),
@@ -53,16 +56,47 @@ class InvestmentCard extends ConsumerWidget {
               style: AppText.body(c.textSecondary).copyWith(fontSize: 13)),
         ] else
           Text('Sem meta de investimento neste mês. Defina em Renda › Valores padrão.', style: AppText.body(c.textSecondary)),
+        if (entries.isNotEmpty) ...[
+          const SizedBox(height: Space.md),
+          const SectionLabel('Lançamentos do mês'),
+          const SizedBox(height: Space.xs),
+          for (final e in entries)
+            EntryRow(
+              key: Key('investment-entry-${e.id}'),
+              title: e.description.isNotEmpty ? e.description : 'Investimento realizado',
+              cents: e.realizedCents,
+              removeTooltip: 'Desfazer lançamento',
+              onRemove: () => removeWithUndo(
+                context,
+                remove: () => ref.read(incomeInvestmentServiceProvider).removeInvestment(e.id),
+                restore: () => ref.read(incomeInvestmentServiceProvider).restoreInvestment(e.id),
+                message: 'Lançamento de investimento removido',
+              ),
+            ),
+        ],
         const SizedBox(height: Space.md),
         Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           if (gap > 0) ...[
-            AppButton(label: 'Marcar meta como realizada', icon: Icons.check_rounded, kind: AppButtonKind.primary, expand: true, onPressed: () => _register(context, ref, gap)),
+            AppButton(label: 'Marcar meta como realizada', icon: Icons.check_rounded, kind: AppButtonKind.primary, expand: true, onPressed: () => _registerWithUndo(context, ref, gap)),
             const SizedBox(height: Space.sm),
           ],
           AppButton(label: 'Registrar investimento', icon: Icons.add_rounded, kind: AppButtonKind.tonal, expand: true, onPressed: () => _custom(context, ref)),
         ]),
       ]),
     );
+  }
+
+  /// "Marcar meta como realizada" é um toque só: oferece desfazer na hora, caso tenha sido sem querer.
+  Future<void> _registerWithUndo(BuildContext context, WidgetRef ref, int cents) async {
+    final svc = ref.read(incomeInvestmentServiceProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    String? id;
+    final done = await runGuarded(context, () async => id = await svc.registerInvestment(data.yearMonth, cents));
+    if (!done || id == null) return;
+    messenger.showSnackBar(SnackBar(
+      content: const Text('Meta marcada como realizada'),
+      action: SnackBarAction(label: 'Desfazer', onPressed: () => svc.removeInvestment(id!)),
+    ));
   }
 
   Future<void> _register(BuildContext context, WidgetRef ref, int cents) =>

@@ -20,8 +20,12 @@ const backupTables = <String>[
   'incomes',
   'investments',
   'plannings',
+  'planning_defaults_versions',
   'month_configurations',
 ];
+
+/// Tabelas que backups antigos não têm (acrescentadas depois): ausentes valem como vazias.
+const optionalBackupTables = {'planning_defaults_versions'};
 
 /// Envelope de um backup. O conteúdo das tabelas é opaco aqui; só contagens são expostas.
 class BackupSnapshot {
@@ -72,7 +76,7 @@ class BackupSnapshot {
     if (created == null || tablesRaw is! Map<String, dynamic>) throw BackupFormatError('Backup incompleto.');
     final tables = <String, List<Map<String, Object?>>>{};
     for (final t in backupTables) {
-      final rows = tablesRaw[t];
+      final rows = tablesRaw[t] ?? (optionalBackupTables.contains(t) ? const [] : null);
       if (rows is! List) throw BackupFormatError('Backup incompleto: falta "$t".');
       tables[t] = [
         for (final r in rows)

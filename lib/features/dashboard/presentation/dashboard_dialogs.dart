@@ -191,9 +191,10 @@ class DefaultsInput {
   final int salaryCents, extraCents, savingsCents, investmentCents;
 }
 
-/// Edita os valores padrão (valem para todos os meses sem personalização).
+/// Edita os valores padrão, que valem a partir do mês indicado (os meses anteriores não mudam).
 Future<DefaultsInput?> showDefaultsDialog(
   BuildContext context, {
+  required String fromLabel,
   required int salaryCents,
   required int extraCents,
   required int savingsCents,
@@ -201,6 +202,7 @@ Future<DefaultsInput?> showDefaultsDialog(
 }) => showDialog<DefaultsInput>(
   context: context,
   builder: (_) => _DefaultsDialog(
+    fromLabel: fromLabel,
     salaryCents: salaryCents,
     extraCents: extraCents,
     savingsCents: savingsCents,
@@ -210,11 +212,13 @@ Future<DefaultsInput?> showDefaultsDialog(
 
 class _DefaultsDialog extends StatefulWidget {
   const _DefaultsDialog({
+    required this.fromLabel,
     required this.salaryCents,
     required this.extraCents,
     required this.savingsCents,
     required this.investmentCents,
   });
+  final String fromLabel;
   final int salaryCents, extraCents, savingsCents, investmentCents;
   @override
   State<_DefaultsDialog> createState() => _DefaultsDialogState();
@@ -276,10 +280,11 @@ class _DefaultsDialogState extends State<_DefaultsDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: Space.md),
+              Padding(
+                padding: const EdgeInsets.only(bottom: Space.md),
                 child: Text(
-                  'Valem para todos os meses que não foram personalizados. Deixe vazio para zero.',
+                  'Valem a partir de ${widget.fromLabel}, até você mudar de novo. Os meses anteriores não são alterados. Deixe vazio para zero.',
+                  key: const Key('defaults-from-note'),
                 ),
               ),
               _field(_salary, 'Salário líquido padrão'),

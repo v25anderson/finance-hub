@@ -168,10 +168,10 @@ class CsvExporter implements DataExporter {
             for (final i in rs) withDeletedCell([i.id, i.yearMonth, CsvMoney(i.plannedCents), CsvMoney(i.realizedCents), i.description], i.deletedAt),
           ]));
         case ExportDataset.planning:
-          // 'padrao' primeiro, depois os meses em ordem
+          // os padrões (padrao_desde_AAAA-MM) primeiro, em ordem, depois as personalizações dos meses
+          bool isDefault(ExportPlanningRow r) => r.scope.startsWith('padrao');
           final rs = [...data.planning]..sort((a, b) {
-              if (a.scope == 'padrao') return b.scope == 'padrao' ? 0 : -1;
-              if (b.scope == 'padrao') return 1;
+              if (isDefault(a) != isDefault(b)) return isDefault(a) ? -1 : 1;
               return a.scope.compareTo(b.scope);
             });
           CsvMoney? m(int? v) => v == null ? null : CsvMoney(v);
@@ -199,6 +199,7 @@ class CsvExporter implements DataExporter {
       ..writeln('- Textos que começariam com = + - @ recebem um apóstrofo (\') à frente para não virarem fórmula na planilha.')
       ..writeln('- "status" das contas é calculado na data da exportação: prevista, pendente, parcialmente_paga, paga, vencida ou cancelada.')
       ..writeln('- "valor_pago" é a soma dos pagamentos; "excedente" é o que foi pago além do previsto.')
+      ..writeln('- Planejamento: "padrao_desde_AAAA-MM" são os padrões em vigor a partir daquele mês (valem até o próximo); "AAAA-MM" é a personalização de um mês.')
       ..writeln('- "faixa_minima" e "faixa_maxima": faixa de valor que você informou para gastos variáveis (vazio = sem faixa). O previsto continua sendo "valor_previsto".')
       ..writeln('- ${options.includeDeleted ? 'Inclui itens excluídos (coluna excluido_em).' : 'Itens excluídos não estão incluídos.'}')
       ..writeln()

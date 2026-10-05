@@ -55,6 +55,7 @@ class SyncRepository extends RepoBase {
         _entity('incomes', db.incomes, IncomeRow.fromJson, (r) => r.toCompanion(false)),
         _entity('investments', db.investments, InvestmentRow.fromJson, (r) => r.toCompanion(false)),
         _entity('plannings', db.plannings, PlanningRow.fromJson, (r) => r.toCompanion(false)),
+        _entity('planning_defaults_versions', db.planningDefaultsVersions, DefaultsVersionRow.fromJson, (r) => r.toCompanion(false)),
         _entity('month_configurations', db.monthConfigurations, MonthConfigRow.fromJson, (r) => r.toCompanion(false)),
       ])
         e.name: e,

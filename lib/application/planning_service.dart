@@ -6,12 +6,15 @@ class PlanningService {
   PlanningService(this.planning);
   final PlanningRepository planning;
 
+  /// Define os padrões **a partir de** [fromYearMonth]; os meses anteriores não mudam.
   Future<void> setDefaults({
+    required String fromYearMonth,
     required int salaryCents,
     required int extraIncomeCents,
     required int savingsGoalCents,
     required int investmentCents,
-  }) => planning.updatePlanning(
+  }) => planning.setDefaultsFrom(
+    fromYearMonth,
     salaryCents: salaryCents,
     extraIncomeCents: extraIncomeCents,
     savingsGoalCents: savingsGoalCents,

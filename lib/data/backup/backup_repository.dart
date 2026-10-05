@@ -20,6 +20,7 @@ class BackupRepository extends RepoBase {
       tables['incomes'] = [for (final r in await db.select(db.incomes).get()) r.toJson()];
       tables['investments'] = [for (final r in await db.select(db.investments).get()) r.toJson()];
       tables['plannings'] = [for (final r in await db.select(db.plannings).get()) r.toJson()];
+      tables['planning_defaults_versions'] = [for (final r in await db.select(db.planningDefaultsVersions).get()) r.toJson()];
       tables['month_configurations'] = [for (final r in await db.select(db.monthConfigurations).get()) r.toJson()];
     });
     return BackupSnapshot(createdAt: now(), deviceId: deviceId, schemaVersion: db.schemaVersion, tables: tables);
@@ -33,6 +34,7 @@ class BackupRepository extends RepoBase {
     await db.transaction(() async {
       // exclusão na ordem inversa das chaves estrangeiras
       await db.delete(db.monthConfigurations).go();
+      await db.delete(db.planningDefaultsVersions).go();
       await db.delete(db.plannings).go();
       await db.delete(db.investments).go();
       await db.delete(db.incomes).go();
@@ -57,6 +59,8 @@ class BackupRepository extends RepoBase {
       await load(db.incomes, 'incomes', IncomeRow.fromJson);
       await load(db.investments, 'investments', InvestmentRow.fromJson);
       await load(db.plannings, 'plannings', PlanningRow.fromJson);
+      await load(db.planningDefaultsVersions, 'planning_defaults_versions', DefaultsVersionRow.fromJson);
+      await db.seedDefaultsFromLegacy(); // backup antigo (sem versões): o padrão único vira a primeira versão
       await load(db.monthConfigurations, 'month_configurations', MonthConfigRow.fromJson);
       // os dados mudaram por inteiro: o histórico de sincronização deixou de valer
       await db.delete(db.syncBase).go();

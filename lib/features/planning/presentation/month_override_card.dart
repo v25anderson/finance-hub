@@ -6,6 +6,7 @@ import '../../../core/formatting.dart';
 import '../../../core/money.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/providers.dart';
+import '../../../domain/month_plan.dart';
 import '../../../design_system/components/app_card.dart';
 import '../../../design_system/tokens/colors.dart';
 import '../../../design_system/tokens/spacing.dart';
@@ -35,7 +36,7 @@ class _MonthOverrideCardState extends ConsumerState<MonthOverrideCard> {
       _userOn = null;
     }
     final config = ref.watch(monthConfigProvider(ym)).value;
-    final defaults = ref.watch(planningProvider).value;
+    final defaults = ref.watch(defaultsTimelineProvider).value?.atOrZero(ym);
     final saved =
         config != null &&
         (config.salaryCents != null ||
@@ -115,7 +116,7 @@ class _OverrideForm extends ConsumerStatefulWidget {
   });
   final String yearMonth;
   final MonthConfigRow? config;
-  final PlanningRow defaults;
+  final PlanningDefaults defaults;
   @override
   ConsumerState<_OverrideForm> createState() => _OverrideFormState();
 }
@@ -207,10 +208,10 @@ class _OverrideFormState extends ConsumerState<_OverrideForm> {
             style: AppText.body(c.textSecondary).copyWith(fontSize: 13),
           ),
           const SizedBox(height: Space.md),
-          _field(_salary, 'Salário líquido', d.defaultSalaryCents),
-          _field(_extra, 'Renda extra', d.defaultExtraIncomeCents),
-          _field(_savings, 'Meta de economia', d.defaultSavingsGoalCents),
-          _field(_invest, 'Investimento planejado', d.defaultInvestmentCents),
+          _field(_salary, 'Salário líquido', d.salaryCents),
+          _field(_extra, 'Renda extra', d.extraIncomeCents),
+          _field(_savings, 'Meta de economia', d.savingsGoalCents),
+          _field(_invest, 'Investimento planejado', d.investmentCents),
           FilledButton(onPressed: _save, child: const Text('Salvar este mês')),
         ],
       ),

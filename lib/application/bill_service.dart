@@ -108,4 +108,24 @@ class BillService {
   }
 
   Future<void> deletePayment(String paymentId) => transactions.deletePayment(paymentId);
+  Future<void> restorePayment(String paymentId) => transactions.restorePayment(paymentId);
+
+  /// "Desmarcar como pago": remove TODOS os pagamentos da conta (exclusão lógica) e devolve os ids, para poder desfazer.
+  /// A conta volta ao estado derivado de antes do pagamento (pendente, vencida ou prevista).
+  Future<List<String>> removeAllPayments(String billId) async {
+    final bill = await bills.getBill(billId);
+    if (bill == null) throw NotFoundError('bill', billId);
+    final ids = [for (final p in bill.payments) p.id];
+    for (final id in ids) {
+      await transactions.deletePayment(id);
+    }
+    return ids;
+  }
+
+  /// Desfaz [removeAllPayments] (ou a exclusão de um pagamento).
+  Future<void> restorePayments(List<String> ids) async {
+    for (final id in ids) {
+      await transactions.restorePayment(id);
+    }
+  }
 }

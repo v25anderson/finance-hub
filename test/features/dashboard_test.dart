@@ -21,7 +21,7 @@ Future<String> bill(Harness h, String name, int cents, DateTime due, {int paid =
 }
 
 Future<void> setDefaults(Harness h, {int salary = 800000, int extra = 50000, int invest = 200000}) =>
-    h.run(() => PlanningRepository(h.db).updatePlanning(salaryCents: salary, extraIncomeCents: extra, investmentCents: invest));
+    h.run(() => PlanningRepository(h.db).setDefaultsFrom('2026-01', salaryCents: salary, extraIncomeCents: extra, savingsGoalCents: 0, investmentCents: invest));
 
 /// Texto de um widget com chave: a própria `Text` ou a `Text` dentro de um `MoneyText`.
 String textOf(WidgetTester t, String key) {

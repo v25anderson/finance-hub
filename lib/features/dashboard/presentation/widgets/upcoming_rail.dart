@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/selected_month_provider.dart';
 import '../../../../core/formatting.dart';
 import '../../../../core/money.dart';
 import '../../../../data/db/app_database.dart';
@@ -22,8 +23,9 @@ String relativeDue(DateTime due, DateTime today) {
   return 'Em $d dias';
 }
 
-/// "Próximas contas": carrossel horizontal de cartões em formato de pôster, no estilo das prateleiras de streaming.
-/// Vencidas primeiro, depois por data. Toque abre os detalhes.
+/// Carrossel horizontal de cartões em formato de pôster (estilo prateleira de streaming) com as contas **ainda a pagar do
+/// mês selecionado**, por vencimento (as vencidas do mês aparecem primeiro, por serem as datas mais antigas). Ao trocar de
+/// mês o carrossel acompanha. Toque abre os detalhes.
 class UpcomingRail extends ConsumerWidget {
   const UpcomingRail({super.key, required this.categories});
   final Map<String, CategoryRow> categories;
@@ -32,13 +34,16 @@ class UpcomingRail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final today = ref.watch(todayProvider);
-    final bills = (ref.watch(openBillsProvider).value ?? const <Bill>[]).take(12).toList();
+    final ym = ref.watch(selectedYearMonthProvider);
+    final month = ref.watch(selectedMonthProvider);
+    final inMonth = ref.watch(billsForMonthProvider(ym)).value ?? const <Bill>[];
+    final bills = ([for (final b in inMonth) if (!b.isCanceled && b.remainingCents > 0) b]..sort((a, b) => a.dueDate.compareTo(b.dueDate))).take(12).toList();
     if (bills.isEmpty) return const SizedBox.shrink();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(Space.lg, Space.lg, Space.lg, Space.sm + 2),
         child: Row(children: [
-          Expanded(child: Text('Próximas contas', style: AppText.headline(c.textPrimary))),
+          Expanded(child: Text('A pagar em ${formatMonthName(month.month)}', key: const Key('rail-title'), style: AppText.headline(c.textPrimary))),
           Text(bills.length == 1 ? '1 a pagar' : '${bills.length} a pagar', style: AppText.body(c.textSecondary).copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
         ]),
       ),

@@ -103,6 +103,13 @@ class _Content extends ConsumerWidget {
       Text('${formatPercent(bill.paidFraction)} pago', style: AppText.body(c.textSecondary).copyWith(fontSize: 13)),
       const SizedBox(height: Space.md),
       Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
+        if (bill.paidCents > 0)
+          OutlinedButton.icon(
+            key: const Key('unpay-button'),
+            onPressed: () => _unpay(context, ref),
+            icon: const Icon(Icons.undo_rounded),
+            label: Text(bill.isFullyPaid ? 'Desmarcar como pago' : 'Desfazer pagamentos'),
+          ),
         FilledButton.icon(
           onPressed: canPay ? () => _pay(context, ref, total: true) : null,
           icon: const Icon(Icons.check),
@@ -186,6 +193,38 @@ class _Content extends ConsumerWidget {
         await svc.registerPayment(bill.id, input.amountCents, paidAt: input.paidAt, note: input.note);
       }
     });
+  }
+
+  /// Remove todos os pagamentos da conta, com confirmação e "Desfazer". Nada é apagado de verdade.
+  Future<void> _unpay(BuildContext context, WidgetRef ref) async {
+    final svc = ref.read(billServiceProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    final n = bill.payments.length;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(bill.isFullyPaid ? 'Desmarcar como pago?' : 'Desfazer os pagamentos?'),
+        content: Text(
+          n == 1
+              ? 'O pagamento de ${formatCents(bill.paidCents)} será removido e a conta volta a ficar em aberto. Você pode desfazer logo em seguida.'
+              : '$n pagamentos (${formatCents(bill.paidCents)} no total) serão removidos e a conta volta a ficar em aberto. Você pode desfazer logo em seguida.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Cancelar')),
+          FilledButton(key: const Key('unpay-confirm'), onPressed: () => Navigator.pop(d, true), child: const Text('Desmarcar')),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    List<String>? removed;
+    final done = await runGuarded(context, () async => removed = await svc.removeAllPayments(bill.id));
+    if (!done || removed == null || !context.mounted) return;
+    // A barra de aviso fica atrás da folha modal (o toque cairia na área escura): fecha a folha e oferece o "Desfazer" na lista.
+    Navigator.pop(context);
+    messenger.showSnackBar(SnackBar(
+      content: const Text('Pagamentos removidos'),
+      action: SnackBarAction(label: 'Desfazer', onPressed: () => svc.restorePayments(removed!)),
+    ));
   }
 
   Future<void> _deletePayment(BuildContext context, WidgetRef ref, Payment p) async {

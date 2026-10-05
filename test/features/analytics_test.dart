@@ -28,7 +28,7 @@ Future<void> bill(AppDatabase db, String name, int cents, DateTime due, String c
 ///  investido: jun 1.500 · set 2.000 · out 500 = 4.000; meta: 2.000 × 6 = 12.000
 Future<void> seedYear(AppDatabase db) async {
   final plan = PlanningRepository(db);
-  await plan.updatePlanning(salaryCents: 800000, extraIncomeCents: 50000, investmentCents: 200000);
+  await plan.setDefaultsFrom('2026-05', salaryCents: 800000, extraIncomeCents: 50000, savingsGoalCents: 0, investmentCents: 200000);
   await plan.setMonthConfig('2026-09', salaryCents: 920000);
   const m = 'cat-moradia', a = 'cat-alimentacao';
   const f = ExpenseType.fixed, v = ExpenseType.variable, o = ExpenseType.oneOff;
@@ -153,19 +153,24 @@ void main() {
       await goToAnalytics(h);
       await t.tap(find.text('12 meses'));
       await h.settle();
-      expect(textKey(t, 'period-caption'), startsWith('Novembro 2025 a Outubro 2026 · 12 meses'));
+      // Só abril tem dados antes do padrão (a conta "Antiga"); nov/2025 a mar/2026 não têm nada e ficam de fora
+      expect(textKey(t, 'period-caption'), startsWith('Abril 2026 a Outubro 2026 · 7 meses com dados'));
+      expect(textKey(t, 'period-skipped'), 'Sem dados de Novembro 2025 a Março 2026: ficaram de fora das médias e dos gráficos.');
       expect(textKey(t, 'stat-spending'), 'R\$ 18.500,00'); // + Antiga (3.000)
-      expect(textKey(t, 'stat-income'), 'R\$ 103.200,00'); // 12 × 8.500 + 1.200 de setembro
+      expect(textKey(t, 'stat-income'), 'R\$ 52.200,00'); // 6 meses de padrão (mai a out) + 1.200 de setembro; NÃO 12 × 8.500
+      expect(textKey(t, 'stat-average'), 'R\$ 2.642,86'); // 18.500 ÷ 7 meses com dados, não ÷ 12
       await t.tap(find.byKey(const Key('table-toggle-spending')));
       await h.settle();
-      expect(find.descendant(of: find.byKey(const Key('table-spending')), matching: find.text('nov/25')), findsOneWidget);
+      expect(find.descendant(of: find.byKey(const Key('table-spending')), matching: find.text('abr/26')), findsOneWidget);
+      expect(find.descendant(of: find.byKey(const Key('table-spending')), matching: find.text('nov/25')), findsNothing);
     });
 
     appTest('24 meses atravessa dois anos sem erro', size: wide, seed: seedYear, (t, h) async {
       await goToAnalytics(h);
       await t.tap(find.text('24 meses'));
       await h.settle();
-      expect(textKey(t, 'period-caption'), startsWith('Novembro 2024 a Outubro 2026 · 24 meses'));
+      expect(textKey(t, 'period-caption'), startsWith('Abril 2026 a Outubro 2026 · 7 meses com dados'));
+      expect(textKey(t, 'period-skipped'), startsWith('Sem dados de Novembro 2024 a Março 2026'));
       expect(find.byKey(const Key('chart-types')), findsOneWidget);
       expect(find.byKey(const Key('chart-investments')), findsOneWidget);
     });
@@ -229,7 +234,7 @@ void main() {
       expect(textKey(t, 'readout-value-savings-0'), '—');
     });
 
-    appTest('só renda padrão (sem contas) ainda mostra as análises', size: wide, seed: (db) => PlanningRepository(db).updatePlanning(salaryCents: 800000), (t, h) async {
+    appTest('só renda padrão (sem contas) ainda mostra as análises', size: wide, seed: (db) => PlanningRepository(db).setDefaultsFrom('2026-05', salaryCents: 800000, extraIncomeCents: 0, savingsGoalCents: 0, investmentCents: 0), (t, h) async {
       await goToAnalytics(h);
       expect(find.byKey(const Key('analytics-empty')), findsNothing);
       expect(textKey(t, 'stat-income'), 'R\$ 48.000,00');

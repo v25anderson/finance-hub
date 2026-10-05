@@ -275,6 +275,18 @@ class TransactionRepository extends RepoBase {
     return id;
   }
 
+  /// Desfaz uma exclusão de pagamento (o registro nunca foi apagado de verdade).
+  Future<void> restorePayment(String paymentId) async {
+    final row = await (db.select(db.payments)..where((p) => p.id.equals(paymentId))).getSingleOrNull();
+    if (row == null) throw NotFoundError('payment', paymentId);
+    await (db.update(db.payments)..where((p) => p.id.equals(paymentId))).write(PaymentsCompanion(
+      deletedAt: const Value(null),
+      updatedAt: Value(now()),
+      version: Value(row.version + 1),
+      deviceId: Value(await db.currentDeviceId()),
+    ));
+  }
+
   Future<void> deletePayment(String paymentId) async {
     final row = await (db.select(db.payments)..where((p) => p.id.equals(paymentId) & p.deletedAt.isNull())).getSingleOrNull();
     if (row == null) throw NotFoundError('payment', paymentId);

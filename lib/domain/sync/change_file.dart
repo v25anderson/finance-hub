@@ -20,6 +20,7 @@ const syncTables = <String>[
   'incomes',
   'investments',
   'plannings',
+  'planning_defaults_versions',
   'month_configurations',
 ];
 

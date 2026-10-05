@@ -17,11 +17,7 @@ import '../support/seed.dart';
 /// Para regenerar depois de uma mudança visual intencional: `flutter test --update-goldens test/golden`.
 /// As imagens foram geradas no Linux com o Flutter fixado no workflow; outra plataforma pode renderizar texto de forma diferente.
 Future<Harness> open(WidgetTester t, {Size size = const Size(390, 844), String? tab, bool light = false}) async {
-  final h = await pumpApp(t, size: size, seed: seedRich);
-  if (light) {
-    await t.tap(find.byKey(const Key('theme-toggle')));
-    await h.settle();
-  }
+  final h = await pumpApp(t, size: size, seed: seedRich, theme: light ? ThemeMode.light : ThemeMode.dark);
   if (tab != null) {
     await t.tap(find.byKey(Key('nav-$tab')));
     await h.settle();
@@ -111,7 +107,7 @@ void main() {
   });
 
   testWidgets('contas com faixa na lista e detalhe', (t) async {
-    final h = await pumpApp(t, seed: (db) async {
+    final h = await pumpApp(t, theme: ThemeMode.dark, seed: (db) async {
       await seedRich(db);
       await TransactionRepository(db).create(
           name: 'Energia elétrica',
@@ -127,6 +123,14 @@ void main() {
     await t.tap(find.text('Energia elétrica'));
     await h.settle();
     await shot(t, 'bill_detail_range_dark');
+    await h.finish();
+  });
+
+  testWidgets('escolha da aparência (Automático, Claro, Escuro)', (t) async {
+    final h = await open(t);
+    await t.tap(find.byKey(const Key('theme-toggle')));
+    await h.settle();
+    await shot(t, 'theme_chooser_dark');
     await h.finish();
   });
 

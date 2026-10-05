@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/theme_chooser.dart';
 import '../../../../app/theme_mode_provider.dart';
 import '../../../../design_system/components/aurora.dart';
 import '../../../../application/dashboard_data.dart';
@@ -32,7 +33,6 @@ class HeroHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final top = edgeToEdge ? topInset(context) : 0.0;
     final radius = edgeToEdge ? const BorderRadius.vertical(bottom: Radius.circular(40)) : BorderRadius.circular(Radii.xl + 8);
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: edgeToEdge ? EdgeInsets.zero : const EdgeInsets.fromLTRB(Space.md, Space.lg, Space.md, 0),
       child: Aurora(
@@ -43,13 +43,13 @@ class HeroHeader extends ConsumerWidget {
             Expanded(child: Text('Visão geral', style: AppText.title(AppColors.onHero).copyWith(fontSize: 28))),
             Pressable(
               key: const Key('theme-toggle'),
-              onTap: () => ref.read(themeModeProvider.notifier).toggle(context),
-              semanticLabel: 'Alternar tema',
+              onTap: () => showThemeChooser(context),
+              semanticLabel: 'Aparência: ${themeModeLabel(ref.watch(themeModeProvider))}',
               child: Container(
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.16), border: Border.all(color: Colors.white.withValues(alpha: 0.22))),
-                child: Icon(dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, color: AppColors.onHero, size: 20),
+                child: Icon(themeModeIcon(ref.watch(themeModeProvider)), color: AppColors.onHero, size: 20),
               ),
             ),
           ]),

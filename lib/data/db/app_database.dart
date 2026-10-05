@@ -37,6 +37,7 @@ const defaultCategories = <({String id, String name, int color, String icon})>[
   SyncMetadata,
   SyncConflicts,
   SyncBase,
+  PlanningDefaultsVersions,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e, {DateTime Function()? clock}) : clock = clock ?? DateTime.now;
@@ -47,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   DateTime now() => clock().toUtc();
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -73,12 +74,51 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(recurringTransactions, recurringTransactions.baseMinCents);
             await m.addColumn(recurringTransactions, recurringTransactions.baseMaxCents);
           }
+          if (from < 5) {
+            // v5: padrões com vigência. O padrão único antigo vira a primeira versão, valendo a partir do mês do primeiro dado
+            // (antes disso nada foi registrado, então não há renda "padrão" a atribuir).
+            await m.createTable(planningDefaultsVersions);
+            await seedDefaultsFromLegacy();
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
           await _seed();
         },
       );
+
+  /// Id da versão de padrões de um mês (determinístico: igual em todos os aparelhos).
+  static String defaultsVersionId(String yearMonth) => 'defaults-$yearMonth';
+
+  /// Cria a primeira versão de padrões a partir do padrão único antigo (`plannings`), se ele tiver algum valor e ainda
+  /// não houver versões. Vale a partir do mês do primeiro dado registrado (conta, renda, investimento ou personalização);
+  /// sem nenhum dado, a partir do mês atual. Usado na migração v5 e ao restaurar um backup antigo.
+  Future<void> seedDefaultsFromLegacy() async {
+    if ((await select(planningDefaultsVersions).get()).isNotEmpty) return;
+    final legacy = await (select(plannings)..where((p) => p.id.equals(planningId))).getSingleOrNull();
+    if (legacy == null) return;
+    final values = [legacy.defaultSalaryCents, legacy.defaultExtraIncomeCents, legacy.defaultSavingsGoalCents, legacy.defaultInvestmentCents];
+    if (values.every((v) => v == 0)) return;
+    final firstMonth = (await customSelect('''
+      SELECT MIN(m) AS m FROM (
+        SELECT substr(due_date, 1, 7) AS m FROM transactions WHERE deleted_at IS NULL
+        UNION ALL SELECT year_month FROM incomes WHERE deleted_at IS NULL
+        UNION ALL SELECT year_month FROM investments WHERE deleted_at IS NULL
+        UNION ALL SELECT year_month FROM month_configurations WHERE deleted_at IS NULL
+      )''').getSingle()).read<String?>('m');
+    final n = now();
+    final ym = firstMonth ?? '${n.year.toString().padLeft(4, '0')}-${n.month.toString().padLeft(2, '0')}';
+    await into(planningDefaultsVersions).insert(PlanningDefaultsVersionsCompanion.insert(
+      id: defaultsVersionId(ym),
+      createdAt: n,
+      updatedAt: n,
+      effectiveFrom: ym,
+      salaryCents: Value(values[0]),
+      extraIncomeCents: Value(values[1]),
+      savingsGoalCents: Value(values[2]),
+      investmentCents: Value(values[3]),
+    ));
+  }
 
   /// Reaplica o seed (usado após restaurar um backup incompleto).
   Future<void> ensureSeed() => _seed();

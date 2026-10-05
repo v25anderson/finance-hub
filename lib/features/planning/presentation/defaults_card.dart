@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../design_system/components/app_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../data/db/app_database.dart';
+import '../../../app/selected_month_provider.dart';
+import '../../../core/dates.dart';
+import '../../../core/formatting.dart';
+import '../../../domain/month_plan.dart';
 import '../../../data/providers.dart';
 import '../../../design_system/components/app_card.dart';
 import '../../../design_system/components/money_text.dart';
@@ -13,14 +16,18 @@ import '../../../design_system/tokens/typography.dart';
 import '../../bills/presentation/ui_helpers.dart';
 import '../../dashboard/presentation/dashboard_dialogs.dart';
 
-/// Valores padrão (valem para todos os meses que não foram personalizados).
+/// Valores padrão **em vigor no mês selecionado**. Mudar vale a partir desse mês; os anteriores não mudam.
 class DefaultsCard extends ConsumerWidget {
   const DefaultsCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final p = ref.watch(planningProvider).value;
+    final ym = ref.watch(selectedYearMonthProvider);
+    final timeline = ref.watch(defaultsTimelineProvider).value;
+    final version = timeline?.versionAt(ym);
+    final p = version?.defaults;
+    final monthLabel = formatMonthYear(parseYearMonth(ym));
     Widget row(String label, int? cents) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -37,34 +44,38 @@ class DefaultsCard extends ConsumerWidget {
           const SectionLabel('Valores padrão'),
           const SizedBox(height: Space.xs),
           Text(
-            'Valem para todos os meses que não foram personalizados.',
+            version == null
+                ? 'Ainda não há padrão definido em $monthLabel. Ao definir, vale a partir deste mês.'
+                : 'Em vigor em $monthLabel, definidos a partir de ${formatMonthYear(parseYearMonth(version.effectiveFrom))}. Mudar vale a partir do mês selecionado; os anteriores não mudam.',
+            key: const Key('defaults-vigencia'),
             style: AppText.body(c.textSecondary).copyWith(fontSize: 13),
           ),
           const SizedBox(height: Space.md),
-          row('Salário líquido padrão', p?.defaultSalaryCents),
-          row('Renda extra padrão', p?.defaultExtraIncomeCents),
-          row('Meta de economia padrão', p?.defaultSavingsGoalCents),
-          row('Investimento planejado padrão', p?.defaultInvestmentCents),
+          row('Salário líquido padrão', p?.salaryCents),
+          row('Renda extra padrão', p?.extraIncomeCents),
+          row('Meta de economia padrão', p?.savingsGoalCents),
+          row('Investimento planejado padrão', p?.investmentCents),
           const SizedBox(height: Space.md),
           AppButton(
             label: 'Editar padrões',
             icon: Icons.edit_outlined,
             kind: AppButtonKind.tonal,
             expand: true,
-            onPressed: p == null ? null : () => _edit(context, ref, p),
+            onPressed: timeline == null ? null : () => _edit(context, ref, ym, p ?? const PlanningDefaults()),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _edit(BuildContext context, WidgetRef ref, PlanningRow p) async {
+  Future<void> _edit(BuildContext context, WidgetRef ref, String ym, PlanningDefaults p) async {
     final input = await showDefaultsDialog(
       context,
-      salaryCents: p.defaultSalaryCents,
-      extraCents: p.defaultExtraIncomeCents,
-      savingsCents: p.defaultSavingsGoalCents,
-      investmentCents: p.defaultInvestmentCents,
+      fromLabel: formatMonthYear(parseYearMonth(ym)),
+      salaryCents: p.salaryCents,
+      extraCents: p.extraIncomeCents,
+      savingsCents: p.savingsGoalCents,
+      investmentCents: p.investmentCents,
     );
     if (input == null || !context.mounted) return;
     await runGuarded(
@@ -72,6 +83,7 @@ class DefaultsCard extends ConsumerWidget {
       () => ref
           .read(planningServiceProvider)
           .setDefaults(
+            fromYearMonth: ym,
             salaryCents: input.salaryCents,
             extraIncomeCents: input.extraCents,
             savingsGoalCents: input.savingsCents,

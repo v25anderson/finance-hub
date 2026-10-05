@@ -132,8 +132,9 @@ final incomeInvestmentServiceProvider = Provider(
   (ref) => IncomeInvestmentService(ref.watch(planningRepositoryProvider)),
 );
 
-final planningProvider = StreamProvider(
-  (ref) => ref.watch(planningRepositoryProvider).watchPlanning(),
+/// Os padrões de planejamento ao longo do tempo (cada versão vale a partir de um mês).
+final defaultsTimelineProvider = StreamProvider(
+  (ref) => ref.watch(planningRepositoryProvider).watchDefaultsTimeline(),
 );
 final monthConfigProvider = StreamProvider.family(
   (ref, String ym) =>
@@ -162,7 +163,7 @@ final dashboardProvider = Provider.family<AsyncValue<DashboardData>, String>((
   final bills = ref.watch(billsForMonthProvider(ym));
   final prevBills = ref.watch(billsForMonthProvider(previousYearMonth(ym)));
   final open = ref.watch(openBillsProvider);
-  final planning = ref.watch(planningProvider);
+  final timeline = ref.watch(defaultsTimelineProvider);
   final config = ref.watch(monthConfigProvider(ym));
   final incomes = ref.watch(incomesProvider(ym));
   final investments = ref.watch(investmentsProvider(ym));
@@ -171,7 +172,7 @@ final dashboardProvider = Provider.family<AsyncValue<DashboardData>, String>((
     bills,
     prevBills,
     open,
-    planning,
+    timeline,
     config,
     incomes,
     investments,
@@ -185,15 +186,9 @@ final dashboardProvider = Provider.family<AsyncValue<DashboardData>, String>((
 
   final summary = computeMonthSummary(bills.requireValue, today);
   final previous = computeMonthSummary(prevBills.requireValue, today);
-  final p = planning.requireValue;
   final c = config.requireValue;
   final plan = resolveMonthPlan(
-    defaults: PlanningDefaults(
-      salaryCents: p.defaultSalaryCents,
-      extraIncomeCents: p.defaultExtraIncomeCents,
-      savingsGoalCents: p.defaultSavingsGoalCents,
-      investmentCents: p.defaultInvestmentCents,
-    ),
+    defaults: timeline.requireValue.atOrZero(ym), // o padrão que valia NAQUELE mês
     overrides: c == null
         ? const MonthOverrides()
         : MonthOverrides(
@@ -218,7 +213,8 @@ final dashboardProvider = Provider.family<AsyncValue<DashboardData>, String>((
       comparison: compareMonths(summary, previous),
       plan: plan,
       balance: computeBalance(plan, summary),
-      alerts: computeAlerts(open.requireValue, today),
+      // alertas só das contas do mês exibido (as vencidas de outros meses não aparecem em um mês que não é o delas)
+      alerts: computeAlerts([for (final b in open.requireValue) if (yearMonthOf(b.dueDate) == ym) b], today),
     ),
   );
 });

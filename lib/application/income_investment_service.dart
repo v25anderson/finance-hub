@@ -7,13 +7,15 @@ class IncomeInvestmentService {
   IncomeInvestmentService(this.planning);
   final PlanningRepository planning;
 
-  /// Padrões globais (aplicam-se a todos os meses sem personalização).
+  /// Padrões **a partir de** [fromYearMonth] (valem até a próxima mudança); os meses anteriores não mudam.
   Future<void> setDefaults({
-    int? salaryCents,
-    int? extraIncomeCents,
-    int? savingsGoalCents,
-    int? investmentCents,
-  }) => planning.updatePlanning(
+    required String fromYearMonth,
+    required int salaryCents,
+    required int extraIncomeCents,
+    required int savingsGoalCents,
+    required int investmentCents,
+  }) => planning.setDefaultsFrom(
+    fromYearMonth,
     salaryCents: salaryCents,
     extraIncomeCents: extraIncomeCents,
     savingsGoalCents: savingsGoalCents,
@@ -35,6 +37,14 @@ class IncomeInvestmentService {
       received: true,
     );
   }
+
+  /// Remove um lançamento de renda (dá para desfazer com [restoreIncome]).
+  Future<void> removeIncome(String id) => planning.deleteIncome(id);
+  Future<void> restoreIncome(String id) => planning.restoreIncome(id);
+
+  /// Remove um lançamento de investimento (dá para desfazer com [restoreInvestment]).
+  Future<void> removeInvestment(String id) => planning.deleteInvestment(id);
+  Future<void> restoreInvestment(String id) => planning.restoreInvestment(id);
 
   /// Registra um investimento **realizado** no mês.
   Future<String> registerInvestment(

@@ -3,17 +3,20 @@ import 'package:drift/drift.dart';
 import '../../core/dates.dart';
 import '../../domain/analytics.dart';
 import '../../domain/enums.dart';
+import '../../domain/defaults_timeline.dart';
 import '../../domain/month_plan.dart';
-import '../db/app_database.dart';
+import 'planning_repository.dart';
 import 'repo_base.dart';
 
 /// Leitura dos dados de um período para as Análises. Uma passada por tabela, sem uma consulta por mês.
 class AnalyticsRepository extends RepoBase {
   AnalyticsRepository(super.db);
 
+  Future<DefaultsTimeline> getDefaultsTimeline() async => PlanningRepository(db).getDefaultsTimeline();
+
   /// Reemite quando qualquer tabela usada na análise muda.
   Stream<AnalyticsSource> watchRange(String startYearMonth, String endYearMonth) => db
-      .customSelect('SELECT 1', readsFrom: {db.transactions, db.incomes, db.investments, db.monthConfigurations, db.plannings})
+      .customSelect('SELECT 1', readsFrom: {db.transactions, db.incomes, db.investments, db.monthConfigurations, db.planningDefaultsVersions})
       .watch()
       .asyncMap((_) => load(startYearMonth, endYearMonth));
 
@@ -67,18 +70,13 @@ class AnalyticsRepository extends RepoBase {
         ),
     };
 
-    final p = await (db.select(db.plannings)..where((x) => x.id.equals(planningId))).getSingle();
+    final timeline = await getDefaultsTimeline();
     return AnalyticsSource(
       spend: spend,
       incomes: incomes,
       realizedInvestmentByMonth: realized,
       overrides: overrides,
-      defaults: PlanningDefaults(
-        salaryCents: p.defaultSalaryCents,
-        extraIncomeCents: p.defaultExtraIncomeCents,
-        savingsGoalCents: p.defaultSavingsGoalCents,
-        investmentCents: p.defaultInvestmentCents,
-      ),
+      timeline: timeline,
     );
   }
 }

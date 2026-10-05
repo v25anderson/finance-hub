@@ -18,7 +18,7 @@ Future<void> populate(AppDatabase db) async {
   await tx.addPayment(transactionId: a, amountCents: 50000, paidAt: DateTime.utc(2026, 10, 2, 8), note: 'parte');
   final gone = await tx.create(name: 'Apagada', plannedAmountCents: 100, dueDate: DateTime(2026, 10, 3), categoryId: 'cat-outros', expenseType: ExpenseType.oneOff);
   await tx.softDelete(gone);
-  await plan.updatePlanning(salaryCents: 800000, investmentCents: 100000);
+  await plan.setDefaultsFrom('2026-10', salaryCents: 800000, extraIncomeCents: 0, savingsGoalCents: 0, investmentCents: 100000);
   await plan.setMonthConfig('2026-11', salaryCents: 920000);
   await plan.addIncome(yearMonth: '2026-10', kind: IncomeKind.extra, amountCents: 10000, description: 'freela');
   await plan.addInvestment(yearMonth: '2026-10', plannedCents: 1, realizedCents: 2);

@@ -1,4 +1,5 @@
 import 'package:finance_hub/domain/analytics.dart';
+import 'package:finance_hub/domain/defaults_timeline.dart';
 import 'package:finance_hub/domain/enums.dart';
 import 'package:finance_hub/domain/month_plan.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,10 +52,14 @@ void main() {
       expect(a.spendingCents, 100);
     });
 
-    test('mês sem gastos conta na média (zeros incluídos)', () {
-      final a = buildAnalytics(['2026-08', '2026-09', '2026-10'], AnalyticsSource(spend: [row('2026-10', 'a', ExpenseType.fixed, 30000)]));
-      expect(a.months.map((m) => m.spendingCents), [0, 0, 30000]);
-      expect(a.averageSpendingCents, 10000);
+    test('mês sem gastos NO MEIO do período conta na média (zero incluído)', () {
+      final a = buildAnalytics(['2026-08', '2026-09', '2026-10'], AnalyticsSource(spend: [
+        row('2026-08', 'a', ExpenseType.fixed, 30000),
+        row('2026-10', 'a', ExpenseType.fixed, 30000),
+      ]));
+      expect(a.months.map((m) => m.spendingCents), [30000, 0, 30000]);
+      expect(a.averageSpendingCents, 20000);
+      expect(a.skippedMonths, isEmpty);
     });
 
     test('desempate de categorias é por id; tipos sempre aparecem nos três', () {
@@ -65,8 +70,8 @@ void main() {
     });
 
     test('média arredonda para o centavo mais próximo', () {
-      final a = buildAnalytics(['2026-09', '2026-10'], AnalyticsSource(spend: [row('2026-10', 'a', ExpenseType.fixed, 101)]));
-      expect(a.averageSpendingCents, 51); // 50,5 → 51
+      final a = buildAnalytics(['2026-09', '2026-10'], AnalyticsSource(spend: [row('2026-09', 'a', ExpenseType.fixed, 100), row('2026-10', 'a', ExpenseType.fixed, 101)]));
+      expect(a.averageSpendingCents, 101); // 100,5 → 101
     });
   });
 
@@ -75,7 +80,7 @@ void main() {
 
     test('renda usa o padrão, o valor do mês e lançamentos, como no planejamento', () {
       final a = buildAnalytics(['2026-08', '2026-09', '2026-10'], AnalyticsSource(
-        defaults: defaults,
+        timeline: DefaultsTimeline([DefaultsVersion('2026-08', defaults)]),
         overrides: {'2026-09': const MonthOverrides(salaryCents: 920000)},
         incomes: {'2026-10': const [IncomeEntry(IncomeKind.other, 10000)]},
       ));
@@ -85,7 +90,7 @@ void main() {
 
     test('investimentos: planejado (meta do mês) × realizado (registros)', () {
       final a = buildAnalytics(['2026-09', '2026-10'], AnalyticsSource(
-        defaults: defaults,
+        timeline: DefaultsTimeline([DefaultsVersion('2026-08', defaults)]),
         overrides: {'2026-10': const MonthOverrides(investmentCents: 300000)},
         realizedInvestmentByMonth: {'2026-09': 150000, '2026-10': 300000},
       ));
@@ -96,7 +101,7 @@ void main() {
 
     test('taxa de poupança = realizado ÷ renda, por mês e no período', () {
       final a = buildAnalytics(['2026-09', '2026-10'], AnalyticsSource(
-        defaults: defaults,
+        timeline: DefaultsTimeline([DefaultsVersion('2026-08', defaults)]),
         realizedInvestmentByMonth: {'2026-09': 85000, '2026-10': 170000},
       ));
       expect(a.months[0].savingsRate, closeTo(0.1, 1e-9));
@@ -105,29 +110,30 @@ void main() {
     });
 
     test('sem renda: taxa indefinida (nulo), sem divisão por zero', () {
-      final a = buildAnalytics(['2026-10'], const AnalyticsSource(realizedInvestmentByMonth: {'2026-10': 50000}));
+      final a = buildAnalytics(['2026-10'], AnalyticsSource(realizedInvestmentByMonth: {'2026-10': 50000}));
       expect(a.months.single.incomeCents, 0);
       expect(a.months.single.savingsRate, isNull);
       expect(a.savingsRate, isNull);
     });
 
     test('investido acima da renda passa de 100% sem erro', () {
-      final a = buildAnalytics(['2026-10'], const AnalyticsSource(defaults: PlanningDefaults(salaryCents: 100000), realizedInvestmentByMonth: {'2026-10': 150000}));
+      final a = buildAnalytics(['2026-10'], AnalyticsSource(timeline: DefaultsTimeline([const DefaultsVersion('2026-10', PlanningDefaults(salaryCents: 100000))]), realizedInvestmentByMonth: {'2026-10': 150000}));
       expect(a.savingsRate, closeTo(1.5, 1e-9));
     });
   });
 
   group('período vazio e casos-limite', () {
     test('sem nenhum dado: zeros e hasData falso', () {
-      final a = buildAnalytics(presetMonths('2026-10', 6), const AnalyticsSource());
+      final a = buildAnalytics(presetMonths('2026-10', 6), AnalyticsSource());
       expect(a.hasData, isFalse);
       expect((a.spendingCents, a.incomeCents, a.averageSpendingCents), (0, 0, 0));
       expect(a.categories, isEmpty);
-      expect(a.monthCount, 6);
+      expect(a.monthCount, 0); // nenhum mês tem dados: nada é inventado
+      expect(a.skippedMonths.length, 6);
     });
 
     test('só renda padrão já conta como dado', () {
-      final a = buildAnalytics(['2026-10'], const AnalyticsSource(defaults: PlanningDefaults(salaryCents: 1)));
+      final a = buildAnalytics(['2026-10'], AnalyticsSource(timeline: DefaultsTimeline([const DefaultsVersion('2026-10', PlanningDefaults(salaryCents: 1))])));
       expect(a.hasData, isTrue);
     });
 
@@ -141,9 +147,59 @@ void main() {
     });
 
     test('lista de meses vazia não quebra', () {
-      final a = buildAnalytics(const [], const AnalyticsSource());
+      final a = buildAnalytics(const [], AnalyticsSource());
       expect(a.averageSpendingCents, 0);
       expect(a.hasData, isFalse);
+    });
+  });
+
+  group('meses sem dados e padrões com vigência (nada é projetado para trás)', () {
+    const salary = PlanningDefaults(salaryCents: 850000);
+
+    test('meses do começo sem nenhum registro ficam de fora e são listados', () {
+      final a = buildAnalytics(presetMonths('2026-10', 6), AnalyticsSource(spend: [
+        row('2026-08', 'a', ExpenseType.fixed, 100000),
+        row('2026-10', 'a', ExpenseType.fixed, 100000),
+      ]));
+      expect(a.skippedMonths, ['2026-05', '2026-06', '2026-07']);
+      expect(a.months.map((m) => m.yearMonth), ['2026-08', '2026-09', '2026-10']);
+      expect(a.averageSpendingCents, 66667); // 200.000 ÷ 3 meses com dados, não ÷ 6
+    });
+
+    test('o padrão só vale a partir do mês em que foi definido: antes dele não há renda', () {
+      final a = buildAnalytics(presetMonths('2026-10', 6), AnalyticsSource(
+        timeline: DefaultsTimeline([const DefaultsVersion('2026-08', salary)]),
+      ));
+      expect(a.skippedMonths, ['2026-05', '2026-06', '2026-07']); // sem renda "de mentirinha"
+      expect(a.months.map((m) => m.incomeCents), [850000, 850000, 850000]);
+      expect(a.incomeCents, 2550000); // e não 6 × 8.500
+    });
+
+    test('mudar o padrão depois não altera os meses anteriores', () {
+      final a = buildAnalytics(presetMonths('2026-10', 6), AnalyticsSource(
+        timeline: DefaultsTimeline([
+          const DefaultsVersion('2026-05', PlanningDefaults(salaryCents: 800000)),
+          const DefaultsVersion('2026-10', PlanningDefaults(salaryCents: 900000)),
+        ]),
+      ));
+      expect(a.months.map((m) => m.incomeCents), [800000, 800000, 800000, 800000, 800000, 900000]);
+    });
+
+    test('um mês só com lançamento de renda, só com investimento ou só com personalização conta como dado', () {
+      expect(buildAnalytics(['2026-09', '2026-10'], AnalyticsSource(incomes: {'2026-10': const [IncomeEntry(IncomeKind.salary, 100)]})).skippedMonths, ['2026-09']);
+      expect(buildAnalytics(['2026-09', '2026-10'], AnalyticsSource(realizedInvestmentByMonth: {'2026-10': 0})).skippedMonths, ['2026-09']);
+      expect(buildAnalytics(['2026-09', '2026-10'], AnalyticsSource(overrides: {'2026-10': const MonthOverrides(salaryCents: 5)})).skippedMonths, ['2026-09']);
+      // personalização vazia (todos nulos) não é dado
+      expect(buildAnalytics(['2026-09', '2026-10'], AnalyticsSource(overrides: {'2026-10': const MonthOverrides()})).hasData, isFalse);
+    });
+
+    test('média e taxa de poupança usam só os meses com dados', () {
+      final a = buildAnalytics(presetMonths('2026-10', 6), AnalyticsSource(
+        timeline: DefaultsTimeline([const DefaultsVersion('2026-09', salary)]),
+        realizedInvestmentByMonth: {'2026-10': 85000},
+      ));
+      expect(a.monthCount, 2);
+      expect(a.savingsRate, closeTo(85000 / 1700000, 1e-9));
     });
   });
 }

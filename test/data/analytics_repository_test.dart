@@ -59,7 +59,7 @@ void main() {
   });
 
   test('renda, investimentos, personalização do mês e padrões', () async {
-    await planning.updatePlanning(salaryCents: 800000, extraIncomeCents: 50000, investmentCents: 200000);
+    await planning.setDefaultsFrom('2026-08', salaryCents: 800000, extraIncomeCents: 50000, savingsGoalCents: 0, investmentCents: 200000);
     await planning.setMonthConfig('2026-10', salaryCents: 920000);
     await planning.addIncome(yearMonth: '2026-10', kind: IncomeKind.other, amountCents: 10000);
     await planning.addInvestment(yearMonth: '2026-10', realizedCents: 150000);

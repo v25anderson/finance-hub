@@ -7,7 +7,7 @@ import 'package:finance_hub/domain/enums.dart';
 Future<void> seedRich(AppDatabase db) async {
   final tx = TransactionRepository(db);
   final plan = PlanningRepository(db);
-  await plan.updatePlanning(salaryCents: 850000, extraIncomeCents: 120000, investmentCents: 150000, savingsGoalCents: 200000);
+  await plan.setDefaultsFrom('2026-05', salaryCents: 850000, extraIncomeCents: 120000, savingsGoalCents: 200000, investmentCents: 150000);
   Future<void> b(String n, int c, int d, String cat, {int paid = 0, int month = 10}) async {
     final id = await tx.create(name: n, plannedAmountCents: c, dueDate: DateTime(2026, month, d), categoryId: cat, expenseType: ExpenseType.fixed);
     if (paid > 0) await tx.addPayment(transactionId: id, amountCents: paid, paidAt: DateTime(2026, month, d));

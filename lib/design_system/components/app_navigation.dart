@@ -188,7 +188,7 @@ class AppSidebar extends StatelessWidget {
             for (final (i, item) in items.indexed) _SidebarItem(item: item, selected: i == selectedIndex, extended: extended, onTap: () => onSelected(i)),
             const Spacer(),
             Tooltip(
-              message: 'Alternar tema',
+              message: 'Aparência',
               child: Pressable(
                 onTap: onToggleTheme,
                 child: Container(
@@ -197,7 +197,7 @@ class AppSidebar extends StatelessWidget {
                     Icon(Theme.of(context).brightness == Brightness.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, color: c.textSecondary, size: 22),
                     if (extended) ...[
                       const SizedBox(width: 12),
-                      Expanded(child: Text('Alternar tema', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(c.textSecondary).copyWith(fontWeight: FontWeight.w600, fontSize: 14))),
+                      Expanded(child: Text('Aparência', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(c.textSecondary).copyWith(fontWeight: FontWeight.w600, fontSize: 14))),
                     ],
                   ]),
                 ),

@@ -163,12 +163,12 @@ void main() {
   });
 
   test('padrões criados pelo seed não geram conflito; edição de um lado vale no outro', () async {
-    await a.plan.updatePlanning(salaryCents: 800000);
+    await a.plan.setDefaultsFrom('2026-10', salaryCents: 800000, extraIncomeCents: 0, savingsGoalCents: 0, investmentCents: 0);
     await a.cats.update('cat-lazer', name: 'Diversão');
     await a.sync.sync();
     final rb = await b.sync.sync();
     expect(rb.newConflicts, 0);
-    expect((await b.plan.getPlanning()).defaultSalaryCents, 800000);
+    expect((await b.plan.getDefaultsTimeline()).atOrZero('2026-10').salaryCents, 800000);
     expect((await (b.db.select(b.db.categories)..where((c) => c.id.equals('cat-lazer'))).getSingle()).name, 'Diversão');
     expect((await b.sync.sync()).newConflicts, 0);
   });

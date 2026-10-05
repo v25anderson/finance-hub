@@ -1,3 +1,4 @@
+import 'defaults_timeline.dart';
 import 'enums.dart';
 import 'month_plan.dart';
 
@@ -41,18 +42,20 @@ class SpendRow {
 
 /// Dados brutos do período, já lidos do banco. A análise é calculada só a partir deles.
 class AnalyticsSource {
-  const AnalyticsSource({
+  AnalyticsSource({
     this.spend = const [],
     this.incomes = const {},
     this.realizedInvestmentByMonth = const {},
     this.overrides = const {},
-    this.defaults = const PlanningDefaults(),
-  });
+    DefaultsTimeline? timeline,
+  }) : timeline = timeline ?? DefaultsTimeline.empty;
   final List<SpendRow> spend;
   final Map<String, List<IncomeEntry>> incomes;
   final Map<String, int> realizedInvestmentByMonth;
   final Map<String, MonthOverrides> overrides;
-  final PlanningDefaults defaults;
+
+  /// Padrões ao longo do tempo: cada mês usa o que valia **naquele mês** (nada é projetado para trás).
+  final DefaultsTimeline timeline;
 }
 
 class AnalyticsMonth {
@@ -103,9 +106,15 @@ class Analytics {
     required this.investmentRealizedCents,
     required this.categories,
     required this.types,
+    this.skippedMonths = const [],
   });
 
+  /// Só os meses **com dados**. Meses do início do período em que nada foi registrado ficam em [skippedMonths].
   final List<AnalyticsMonth> months;
+
+  /// Meses pedidos (do início do período) em que não há registro nenhum nem padrão definido: não entram na análise,
+  /// para não fingir que a renda ou os gastos de hoje já existiam.
+  final List<String> skippedMonths;
   final int spendingCents;
   final int incomeCents;
   final int investmentPlannedCents;
@@ -129,8 +138,10 @@ class Analytics {
 /// Monta a análise dos [months] (já em ordem) a partir da [source].
 ///
 /// - **Gastos** = valor previsto das contas com vencimento no mês.
-/// - **Renda** = a mesma regra do planejamento: (padrão ou valor do mês) + lançamentos de renda.
-///   Os padrões valem também para meses passados sem personalização.
+/// - **Renda** = a mesma regra do planejamento: (padrão que valia naquele mês, ou o valor do mês) + lançamentos de renda.
+///   Um padrão só vale **a partir do mês em que foi definido**: meses anteriores não ganham renda "de mentirinha".
+/// - **Meses sem dados** (nenhuma conta, renda, investimento, personalização nem padrão definido) no começo do período
+///   ficam de fora e são listados em [Analytics.skippedMonths]; médias e taxas usam só os meses com dados.
 /// - **Investimentos** = meta do mês (planejado) × soma dos registros (realizado).
 Analytics buildAnalytics(List<String> months, AnalyticsSource source) {
   final set = months.toSet();
@@ -139,10 +150,21 @@ Analytics buildAnalytics(List<String> months, AnalyticsSource source) {
     if (set.contains(r.yearMonth)) spendByMonth.putIfAbsent(r.yearMonth, () => []).add(r);
   }
 
+  bool hasRecords(String ym) =>
+      (spendByMonth[ym]?.isNotEmpty ?? false) ||
+      (source.incomes[ym]?.isNotEmpty ?? false) ||
+      source.realizedInvestmentByMonth.containsKey(ym) ||
+      (source.overrides[ym]?.isCustomized ?? false) ||
+      source.timeline.at(ym) != null;
+
+  final firstWithData = months.indexWhere(hasRecords);
+  final skipped = firstWithData < 0 ? List<String>.of(months) : months.sublist(0, firstWithData);
+  final usable = firstWithData < 0 ? const <String>[] : months.sublist(firstWithData);
+
   final out = <AnalyticsMonth>[];
   final catTotals = <String, int>{};
   final typeTotals = <ExpenseType, int>{};
-  for (final ym in months) {
+  for (final ym in usable) {
     final rows = spendByMonth[ym] ?? const <SpendRow>[];
     final byType = <ExpenseType, int>{};
     final byCat = <String, int>{};
@@ -156,7 +178,7 @@ Analytics buildAnalytics(List<String> months, AnalyticsSource source) {
     }
     final realized = source.realizedInvestmentByMonth[ym] ?? 0;
     final plan = resolveMonthPlan(
-      defaults: source.defaults,
+      defaults: source.timeline.atOrZero(ym),
       overrides: source.overrides[ym] ?? const MonthOverrides(),
       incomes: source.incomes[ym] ?? const [],
       investmentRealizedCents: realized,
@@ -191,5 +213,6 @@ Analytics buildAnalytics(List<String> months, AnalyticsSource source) {
     investmentRealizedCents: out.fold(0, (s, m) => s + m.investmentRealizedCents),
     categories: categories,
     types: types,
+    skippedMonths: skipped,
   );
 }

@@ -235,7 +235,7 @@ void main() {
       investments: const [ExportInvestment(id: 'v1', yearMonth: '2026-10', plannedCents: 200000, realizedCents: 150000, description: 'CDB')],
       planning: const [
         ExportPlanningRow(scope: '2026-11', salaryCents: 920000, investmentCents: 300000),
-        ExportPlanningRow(scope: 'padrao', salaryCents: 800000, extraIncomeCents: 50000, savingsGoalCents: 100000, investmentCents: 200000),
+        ExportPlanningRow(scope: 'padrao_desde_2026-01', salaryCents: 800000, extraIncomeCents: 50000, savingsGoalCents: 100000, investmentCents: 200000),
         ExportPlanningRow(scope: '2026-10', extraIncomeCents: 0),
       ],
     );
@@ -268,7 +268,7 @@ void main() {
     test('planejamento: padrão primeiro; campo vazio = herda; zero é zero', () {
       final r = only(ExportDataset.planning);
       expect(r.first, ['escopo', 'salario_liquido', 'renda_extra', 'meta_economia', 'investimento_planejado']);
-      expect(r[1], ['padrao', '8000.00', '500.00', '1000.00', '2000.00']);
+      expect(r[1], ['padrao_desde_2026-01', '8000.00', '500.00', '1000.00', '2000.00']);
       expect(r[2], ['2026-10', '', '0.00', '', '']);
       expect(r[3], ['2026-11', '9200.00', '', '', '3000.00']);
     });

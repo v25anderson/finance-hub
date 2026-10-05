@@ -36,7 +36,8 @@ Future<void> seedPlan(
   bool recurring = true,
   bool withBills = true,
 }) async {
-  await PlanningRepository(db).updatePlanning(
+  await PlanningRepository(db).setDefaultsFrom(
+    '2026-01',
     salaryCents: 800000,
     extraIncomeCents: 50000,
     savingsGoalCents: 100000,
@@ -101,16 +102,16 @@ void main() {
       );
       await tapSave(t);
       await h.settle();
-      final p = await h.run(() => PlanningRepository(h.db).getPlanning());
+      final timeline = await h.run(() => PlanningRepository(h.db).getDefaultsTimeline());
+      final p = timeline.atOrZero('2026-10');
       expect(
-        (
-          p.defaultSalaryCents,
-          p.defaultSavingsGoalCents,
-          p.defaultExtraIncomeCents,
-          p.defaultInvestmentCents,
-        ),
+        (p.salaryCents, p.savingsGoalCents, p.extraIncomeCents, p.investmentCents),
         (900000, 150000, 50000, 200000),
       );
+      // a mudança vale a partir do mês selecionado (outubro): os meses anteriores continuam como estavam
+      expect(timeline.atOrZero('2026-09').salaryCents, 800000);
+      expect(timeline.versions.map((v) => v.effectiveFrom), ['2026-01', '2026-10']);
+      expect(find.byKey(const Key('defaults-from-note')), findsNothing); // o diálogo já fechou
       expect(find.text('R\$ 9.000,00'), findsWidgets);
     });
 
@@ -159,7 +160,7 @@ void main() {
         );
         expect(await h.run(() => repo.getMonthConfig('2026-11')), isNull);
         expect(
-          (await h.run(() => repo.getPlanning())).defaultSalaryCents,
+          (await h.run(() => repo.getDefaultsTimeline())).atOrZero('2026-10').salaryCents,
           800000,
         ); // padrão intacto
 
@@ -459,7 +460,7 @@ void main() {
       'sem meta de economia o detalhe não mostra essa seção',
       size: wide,
       seed: (db) async {
-        await PlanningRepository(db).updatePlanning(salaryCents: 800000);
+        await PlanningRepository(db).setDefaultsFrom('2026-01', salaryCents: 800000, extraIncomeCents: 0, savingsGoalCents: 0, investmentCents: 0);
       },
       (t, h) async {
         await goToPlanning(h);

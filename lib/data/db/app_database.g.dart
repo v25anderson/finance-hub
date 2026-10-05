@@ -8302,6 +8302,680 @@ class SyncBaseCompanion extends UpdateCompanion<SyncBaseRow> {
   }
 }
 
+class $PlanningDefaultsVersionsTable extends PlanningDefaultsVersions
+    with TableInfo<$PlanningDefaultsVersionsTable, DefaultsVersionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlanningDefaultsVersionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _effectiveFromMeta = const VerificationMeta(
+    'effectiveFrom',
+  );
+  @override
+  late final GeneratedColumn<String> effectiveFrom = GeneratedColumn<String>(
+    'effective_from',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _salaryCentsMeta = const VerificationMeta(
+    'salaryCents',
+  );
+  @override
+  late final GeneratedColumn<int> salaryCents = GeneratedColumn<int>(
+    'salary_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _extraIncomeCentsMeta = const VerificationMeta(
+    'extraIncomeCents',
+  );
+  @override
+  late final GeneratedColumn<int> extraIncomeCents = GeneratedColumn<int>(
+    'extra_income_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _savingsGoalCentsMeta = const VerificationMeta(
+    'savingsGoalCents',
+  );
+  @override
+  late final GeneratedColumn<int> savingsGoalCents = GeneratedColumn<int>(
+    'savings_goal_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _investmentCentsMeta = const VerificationMeta(
+    'investmentCents',
+  );
+  @override
+  late final GeneratedColumn<int> investmentCents = GeneratedColumn<int>(
+    'investment_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    version,
+    deviceId,
+    effectiveFrom,
+    salaryCents,
+    extraIncomeCents,
+    savingsGoalCents,
+    investmentCents,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'planning_defaults_versions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DefaultsVersionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    }
+    if (data.containsKey('effective_from')) {
+      context.handle(
+        _effectiveFromMeta,
+        effectiveFrom.isAcceptableOrUnknown(
+          data['effective_from']!,
+          _effectiveFromMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_effectiveFromMeta);
+    }
+    if (data.containsKey('salary_cents')) {
+      context.handle(
+        _salaryCentsMeta,
+        salaryCents.isAcceptableOrUnknown(
+          data['salary_cents']!,
+          _salaryCentsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('extra_income_cents')) {
+      context.handle(
+        _extraIncomeCentsMeta,
+        extraIncomeCents.isAcceptableOrUnknown(
+          data['extra_income_cents']!,
+          _extraIncomeCentsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('savings_goal_cents')) {
+      context.handle(
+        _savingsGoalCentsMeta,
+        savingsGoalCents.isAcceptableOrUnknown(
+          data['savings_goal_cents']!,
+          _savingsGoalCentsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('investment_cents')) {
+      context.handle(
+        _investmentCentsMeta,
+        investmentCents.isAcceptableOrUnknown(
+          data['investment_cents']!,
+          _investmentCentsMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DefaultsVersionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DefaultsVersionRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      effectiveFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}effective_from'],
+      )!,
+      salaryCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}salary_cents'],
+      )!,
+      extraIncomeCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}extra_income_cents'],
+      )!,
+      savingsGoalCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}savings_goal_cents'],
+      )!,
+      investmentCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}investment_cents'],
+      )!,
+    );
+  }
+
+  @override
+  $PlanningDefaultsVersionsTable createAlias(String alias) {
+    return $PlanningDefaultsVersionsTable(attachedDatabase, alias);
+  }
+}
+
+class DefaultsVersionRow extends DataClass
+    implements Insertable<DefaultsVersionRow> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int version;
+  final String deviceId;
+
+  /// `yyyy-MM`.
+  final String effectiveFrom;
+  final int salaryCents;
+  final int extraIncomeCents;
+  final int savingsGoalCents;
+  final int investmentCents;
+  const DefaultsVersionRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.version,
+    required this.deviceId,
+    required this.effectiveFrom,
+    required this.salaryCents,
+    required this.extraIncomeCents,
+    required this.savingsGoalCents,
+    required this.investmentCents,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['device_id'] = Variable<String>(deviceId);
+    map['effective_from'] = Variable<String>(effectiveFrom);
+    map['salary_cents'] = Variable<int>(salaryCents);
+    map['extra_income_cents'] = Variable<int>(extraIncomeCents);
+    map['savings_goal_cents'] = Variable<int>(savingsGoalCents);
+    map['investment_cents'] = Variable<int>(investmentCents);
+    return map;
+  }
+
+  PlanningDefaultsVersionsCompanion toCompanion(bool nullToAbsent) {
+    return PlanningDefaultsVersionsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+      deviceId: Value(deviceId),
+      effectiveFrom: Value(effectiveFrom),
+      salaryCents: Value(salaryCents),
+      extraIncomeCents: Value(extraIncomeCents),
+      savingsGoalCents: Value(savingsGoalCents),
+      investmentCents: Value(investmentCents),
+    );
+  }
+
+  factory DefaultsVersionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DefaultsVersionRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      effectiveFrom: serializer.fromJson<String>(json['effectiveFrom']),
+      salaryCents: serializer.fromJson<int>(json['salaryCents']),
+      extraIncomeCents: serializer.fromJson<int>(json['extraIncomeCents']),
+      savingsGoalCents: serializer.fromJson<int>(json['savingsGoalCents']),
+      investmentCents: serializer.fromJson<int>(json['investmentCents']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'effectiveFrom': serializer.toJson<String>(effectiveFrom),
+      'salaryCents': serializer.toJson<int>(salaryCents),
+      'extraIncomeCents': serializer.toJson<int>(extraIncomeCents),
+      'savingsGoalCents': serializer.toJson<int>(savingsGoalCents),
+      'investmentCents': serializer.toJson<int>(investmentCents),
+    };
+  }
+
+  DefaultsVersionRow copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? version,
+    String? deviceId,
+    String? effectiveFrom,
+    int? salaryCents,
+    int? extraIncomeCents,
+    int? savingsGoalCents,
+    int? investmentCents,
+  }) => DefaultsVersionRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    version: version ?? this.version,
+    deviceId: deviceId ?? this.deviceId,
+    effectiveFrom: effectiveFrom ?? this.effectiveFrom,
+    salaryCents: salaryCents ?? this.salaryCents,
+    extraIncomeCents: extraIncomeCents ?? this.extraIncomeCents,
+    savingsGoalCents: savingsGoalCents ?? this.savingsGoalCents,
+    investmentCents: investmentCents ?? this.investmentCents,
+  );
+  DefaultsVersionRow copyWithCompanion(PlanningDefaultsVersionsCompanion data) {
+    return DefaultsVersionRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      effectiveFrom: data.effectiveFrom.present
+          ? data.effectiveFrom.value
+          : this.effectiveFrom,
+      salaryCents: data.salaryCents.present
+          ? data.salaryCents.value
+          : this.salaryCents,
+      extraIncomeCents: data.extraIncomeCents.present
+          ? data.extraIncomeCents.value
+          : this.extraIncomeCents,
+      savingsGoalCents: data.savingsGoalCents.present
+          ? data.savingsGoalCents.value
+          : this.savingsGoalCents,
+      investmentCents: data.investmentCents.present
+          ? data.investmentCents.value
+          : this.investmentCents,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DefaultsVersionRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('effectiveFrom: $effectiveFrom, ')
+          ..write('salaryCents: $salaryCents, ')
+          ..write('extraIncomeCents: $extraIncomeCents, ')
+          ..write('savingsGoalCents: $savingsGoalCents, ')
+          ..write('investmentCents: $investmentCents')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    version,
+    deviceId,
+    effectiveFrom,
+    salaryCents,
+    extraIncomeCents,
+    savingsGoalCents,
+    investmentCents,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DefaultsVersionRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version &&
+          other.deviceId == this.deviceId &&
+          other.effectiveFrom == this.effectiveFrom &&
+          other.salaryCents == this.salaryCents &&
+          other.extraIncomeCents == this.extraIncomeCents &&
+          other.savingsGoalCents == this.savingsGoalCents &&
+          other.investmentCents == this.investmentCents);
+}
+
+class PlanningDefaultsVersionsCompanion
+    extends UpdateCompanion<DefaultsVersionRow> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> version;
+  final Value<String> deviceId;
+  final Value<String> effectiveFrom;
+  final Value<int> salaryCents;
+  final Value<int> extraIncomeCents;
+  final Value<int> savingsGoalCents;
+  final Value<int> investmentCents;
+  final Value<int> rowid;
+  const PlanningDefaultsVersionsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.effectiveFrom = const Value.absent(),
+    this.salaryCents = const Value.absent(),
+    this.extraIncomeCents = const Value.absent(),
+    this.savingsGoalCents = const Value.absent(),
+    this.investmentCents = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PlanningDefaultsVersionsCompanion.insert({
+    required String id,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    required String effectiveFrom,
+    this.salaryCents = const Value.absent(),
+    this.extraIncomeCents = const Value.absent(),
+    this.savingsGoalCents = const Value.absent(),
+    this.investmentCents = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       effectiveFrom = Value(effectiveFrom);
+  static Insertable<DefaultsVersionRow> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? version,
+    Expression<String>? deviceId,
+    Expression<String>? effectiveFrom,
+    Expression<int>? salaryCents,
+    Expression<int>? extraIncomeCents,
+    Expression<int>? savingsGoalCents,
+    Expression<int>? investmentCents,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (version != null) 'version': version,
+      if (deviceId != null) 'device_id': deviceId,
+      if (effectiveFrom != null) 'effective_from': effectiveFrom,
+      if (salaryCents != null) 'salary_cents': salaryCents,
+      if (extraIncomeCents != null) 'extra_income_cents': extraIncomeCents,
+      if (savingsGoalCents != null) 'savings_goal_cents': savingsGoalCents,
+      if (investmentCents != null) 'investment_cents': investmentCents,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PlanningDefaultsVersionsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? version,
+    Value<String>? deviceId,
+    Value<String>? effectiveFrom,
+    Value<int>? salaryCents,
+    Value<int>? extraIncomeCents,
+    Value<int>? savingsGoalCents,
+    Value<int>? investmentCents,
+    Value<int>? rowid,
+  }) {
+    return PlanningDefaultsVersionsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      deviceId: deviceId ?? this.deviceId,
+      effectiveFrom: effectiveFrom ?? this.effectiveFrom,
+      salaryCents: salaryCents ?? this.salaryCents,
+      extraIncomeCents: extraIncomeCents ?? this.extraIncomeCents,
+      savingsGoalCents: savingsGoalCents ?? this.savingsGoalCents,
+      investmentCents: investmentCents ?? this.investmentCents,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (effectiveFrom.present) {
+      map['effective_from'] = Variable<String>(effectiveFrom.value);
+    }
+    if (salaryCents.present) {
+      map['salary_cents'] = Variable<int>(salaryCents.value);
+    }
+    if (extraIncomeCents.present) {
+      map['extra_income_cents'] = Variable<int>(extraIncomeCents.value);
+    }
+    if (savingsGoalCents.present) {
+      map['savings_goal_cents'] = Variable<int>(savingsGoalCents.value);
+    }
+    if (investmentCents.present) {
+      map['investment_cents'] = Variable<int>(investmentCents.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanningDefaultsVersionsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('effectiveFrom: $effectiveFrom, ')
+          ..write('salaryCents: $salaryCents, ')
+          ..write('extraIncomeCents: $extraIncomeCents, ')
+          ..write('savingsGoalCents: $savingsGoalCents, ')
+          ..write('investmentCents: $investmentCents, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8319,6 +8993,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncMetadataTable syncMetadata = $SyncMetadataTable(this);
   late final $SyncConflictsTable syncConflicts = $SyncConflictsTable(this);
   late final $SyncBaseTable syncBase = $SyncBaseTable(this);
+  late final $PlanningDefaultsVersionsTable planningDefaultsVersions =
+      $PlanningDefaultsVersionsTable(this);
   late final Index idxTransactionsDue = Index(
     'idx_transactions_due',
     'CREATE INDEX idx_transactions_due ON transactions (due_date)',
@@ -8364,6 +9040,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncMetadata,
     syncConflicts,
     syncBase,
+    planningDefaultsVersions,
     idxTransactionsDue,
     idxTransactionsCategory,
     uqTransactionsOccurrence,
@@ -13245,6 +13922,361 @@ typedef $$SyncBaseTableProcessedTableManager =
       SyncBaseRow,
       PrefetchHooks Function()
     >;
+typedef $$PlanningDefaultsVersionsTableCreateCompanionBuilder =
+    PlanningDefaultsVersionsCompanion Function({
+      required String id,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> deviceId,
+      required String effectiveFrom,
+      Value<int> salaryCents,
+      Value<int> extraIncomeCents,
+      Value<int> savingsGoalCents,
+      Value<int> investmentCents,
+      Value<int> rowid,
+    });
+typedef $$PlanningDefaultsVersionsTableUpdateCompanionBuilder =
+    PlanningDefaultsVersionsCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> deviceId,
+      Value<String> effectiveFrom,
+      Value<int> salaryCents,
+      Value<int> extraIncomeCents,
+      Value<int> savingsGoalCents,
+      Value<int> investmentCents,
+      Value<int> rowid,
+    });
+
+class $$PlanningDefaultsVersionsTableFilterComposer
+    extends Composer<_$AppDatabase, $PlanningDefaultsVersionsTable> {
+  $$PlanningDefaultsVersionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get salaryCents => $composableBuilder(
+    column: $table.salaryCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get extraIncomeCents => $composableBuilder(
+    column: $table.extraIncomeCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get savingsGoalCents => $composableBuilder(
+    column: $table.savingsGoalCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get investmentCents => $composableBuilder(
+    column: $table.investmentCents,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PlanningDefaultsVersionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlanningDefaultsVersionsTable> {
+  $$PlanningDefaultsVersionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get salaryCents => $composableBuilder(
+    column: $table.salaryCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get extraIncomeCents => $composableBuilder(
+    column: $table.extraIncomeCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get savingsGoalCents => $composableBuilder(
+    column: $table.savingsGoalCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get investmentCents => $composableBuilder(
+    column: $table.investmentCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PlanningDefaultsVersionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlanningDefaultsVersionsTable> {
+  $$PlanningDefaultsVersionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get salaryCents => $composableBuilder(
+    column: $table.salaryCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get extraIncomeCents => $composableBuilder(
+    column: $table.extraIncomeCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get savingsGoalCents => $composableBuilder(
+    column: $table.savingsGoalCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get investmentCents => $composableBuilder(
+    column: $table.investmentCents,
+    builder: (column) => column,
+  );
+}
+
+class $$PlanningDefaultsVersionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlanningDefaultsVersionsTable,
+          DefaultsVersionRow,
+          $$PlanningDefaultsVersionsTableFilterComposer,
+          $$PlanningDefaultsVersionsTableOrderingComposer,
+          $$PlanningDefaultsVersionsTableAnnotationComposer,
+          $$PlanningDefaultsVersionsTableCreateCompanionBuilder,
+          $$PlanningDefaultsVersionsTableUpdateCompanionBuilder,
+          (
+            DefaultsVersionRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PlanningDefaultsVersionsTable,
+              DefaultsVersionRow
+            >,
+          ),
+          DefaultsVersionRow,
+          PrefetchHooks Function()
+        > {
+  $$PlanningDefaultsVersionsTableTableManager(
+    _$AppDatabase db,
+    $PlanningDefaultsVersionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlanningDefaultsVersionsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PlanningDefaultsVersionsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PlanningDefaultsVersionsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> effectiveFrom = const Value.absent(),
+                Value<int> salaryCents = const Value.absent(),
+                Value<int> extraIncomeCents = const Value.absent(),
+                Value<int> savingsGoalCents = const Value.absent(),
+                Value<int> investmentCents = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PlanningDefaultsVersionsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                version: version,
+                deviceId: deviceId,
+                effectiveFrom: effectiveFrom,
+                salaryCents: salaryCents,
+                extraIncomeCents: extraIncomeCents,
+                savingsGoalCents: savingsGoalCents,
+                investmentCents: investmentCents,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                required String effectiveFrom,
+                Value<int> salaryCents = const Value.absent(),
+                Value<int> extraIncomeCents = const Value.absent(),
+                Value<int> savingsGoalCents = const Value.absent(),
+                Value<int> investmentCents = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PlanningDefaultsVersionsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                version: version,
+                deviceId: deviceId,
+                effectiveFrom: effectiveFrom,
+                salaryCents: salaryCents,
+                extraIncomeCents: extraIncomeCents,
+                savingsGoalCents: savingsGoalCents,
+                investmentCents: investmentCents,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $PlanningDefaultsVersionsTable,
+                    DefaultsVersionRow
+                  >(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PlanningDefaultsVersionsTable,
+                    DefaultsVersionRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PlanningDefaultsVersionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlanningDefaultsVersionsTable,
+      DefaultsVersionRow,
+      $$PlanningDefaultsVersionsTableFilterComposer,
+      $$PlanningDefaultsVersionsTableOrderingComposer,
+      $$PlanningDefaultsVersionsTableAnnotationComposer,
+      $$PlanningDefaultsVersionsTableCreateCompanionBuilder,
+      $$PlanningDefaultsVersionsTableUpdateCompanionBuilder,
+      (
+        DefaultsVersionRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PlanningDefaultsVersionsTable,
+          DefaultsVersionRow
+        >,
+      ),
+      DefaultsVersionRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13273,4 +14305,9 @@ class $AppDatabaseManager {
       $$SyncConflictsTableTableManager(_db, _db.syncConflicts);
   $$SyncBaseTableTableManager get syncBase =>
       $$SyncBaseTableTableManager(_db, _db.syncBase);
+  $$PlanningDefaultsVersionsTableTableManager get planningDefaultsVersions =>
+      $$PlanningDefaultsVersionsTableTableManager(
+        _db,
+        _db.planningDefaultsVersions,
+      );
 }

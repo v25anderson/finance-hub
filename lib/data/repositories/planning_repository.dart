@@ -1,38 +1,76 @@
 import 'package:drift/drift.dart';
 
+import '../../domain/defaults_timeline.dart';
 import '../../domain/enums.dart';
+import '../../domain/month_plan.dart';
 import '../db/app_database.dart';
 import 'repo_base.dart';
 
 class PlanningRepository extends RepoBase {
   PlanningRepository(super.db);
 
-  // ── Padrões globais ───────────────────────────────────────────
+  // ── Padrões com vigência ──────────────────────────────────────
 
-  Stream<PlanningRow> watchPlanning() =>
-      (db.select(db.plannings)..where((p) => p.id.equals(planningId))).watchSingle();
+  DefaultsTimeline _timeline(List<DefaultsVersionRow> rows) => DefaultsTimeline([
+        for (final r in rows)
+          DefaultsVersion(
+            r.effectiveFrom,
+            PlanningDefaults(
+              salaryCents: r.salaryCents,
+              extraIncomeCents: r.extraIncomeCents,
+              savingsGoalCents: r.savingsGoalCents,
+              investmentCents: r.investmentCents,
+            ),
+          ),
+      ]);
 
-  Future<PlanningRow> getPlanning() => watchPlanning().first;
+  /// Os padrões ao longo do tempo (versões não excluídas).
+  Stream<DefaultsTimeline> watchDefaultsTimeline() =>
+      (db.select(db.planningDefaultsVersions)..where((v) => v.deletedAt.isNull())).watch().map(_timeline);
 
-  Future<void> updatePlanning({
-    int? salaryCents,
-    int? extraIncomeCents,
-    int? savingsGoalCents,
-    int? investmentCents,
+  Future<DefaultsTimeline> getDefaultsTimeline() => watchDefaultsTimeline().first;
+
+  /// Define os padrões **a partir de** [yearMonth]. Os meses anteriores não mudam: continuam com a versão que já valia
+  /// (ou sem padrão). Repetir no mesmo mês atualiza aquela versão; meses seguintes que já tinham versão própria mantêm a sua.
+  Future<void> setDefaultsFrom(
+    String yearMonth, {
+    required int salaryCents,
+    required int extraIncomeCents,
+    required int savingsGoalCents,
+    required int investmentCents,
   }) async {
     for (final v in [salaryCents, extraIncomeCents, savingsGoalCents, investmentCents]) {
-      if (v != null && v < 0) throw ValidationError('Valor não pode ser negativo');
+      if (v < 0) throw ValidationError('Valor não pode ser negativo');
     }
-    final row = await getPlanning();
-    await (db.update(db.plannings)..where((p) => p.id.equals(planningId))).write(PlanningsCompanion(
-      defaultSalaryCents: salaryCents == null ? const Value.absent() : Value(salaryCents),
-      defaultExtraIncomeCents: extraIncomeCents == null ? const Value.absent() : Value(extraIncomeCents),
-      defaultSavingsGoalCents: savingsGoalCents == null ? const Value.absent() : Value(savingsGoalCents),
-      defaultInvestmentCents: investmentCents == null ? const Value.absent() : Value(investmentCents),
-      updatedAt: Value(now()),
-      version: Value(row.version + 1),
-      deviceId: Value(await db.currentDeviceId()),
-    ));
+    if (!RegExp(r'^\d{4}-(0[1-9]|1[0-2])$').hasMatch(yearMonth)) throw ValidationError('Mês inválido');
+    final id = AppDatabase.defaultsVersionId(yearMonth);
+    final existing = await (db.select(db.planningDefaultsVersions)..where((v) => v.id.equals(id))).getSingleOrNull();
+    final t = now();
+    final device = await db.currentDeviceId();
+    if (existing == null) {
+      await db.into(db.planningDefaultsVersions).insert(PlanningDefaultsVersionsCompanion.insert(
+            id: id,
+            createdAt: t,
+            updatedAt: t,
+            deviceId: Value(device),
+            effectiveFrom: yearMonth,
+            salaryCents: Value(salaryCents),
+            extraIncomeCents: Value(extraIncomeCents),
+            savingsGoalCents: Value(savingsGoalCents),
+            investmentCents: Value(investmentCents),
+          ));
+    } else {
+      await (db.update(db.planningDefaultsVersions)..where((v) => v.id.equals(id))).write(PlanningDefaultsVersionsCompanion(
+        salaryCents: Value(salaryCents),
+        extraIncomeCents: Value(extraIncomeCents),
+        savingsGoalCents: Value(savingsGoalCents),
+        investmentCents: Value(investmentCents),
+        deletedAt: const Value(null),
+        updatedAt: Value(t),
+        version: Value(existing.version + 1),
+        deviceId: Value(device),
+      ));
+    }
   }
 
   // ── Configuração por mês ──────────────────────────────────────
@@ -132,7 +170,42 @@ class PlanningRepository extends RepoBase {
     ));
   }
 
+  Future<void> restoreIncome(String id) async {
+    final row = await (db.select(db.incomes)..where((i) => i.id.equals(id))).getSingleOrNull();
+    if (row == null) throw NotFoundError('income', id);
+    await (db.update(db.incomes)..where((i) => i.id.equals(id))).write(IncomesCompanion(
+      deletedAt: const Value(null),
+      updatedAt: Value(now()),
+      version: Value(row.version + 1),
+      deviceId: Value(await db.currentDeviceId()),
+    ));
+  }
+
   // ── Investimentos ─────────────────────────────────────────────
+
+  /// Remove um lançamento de investimento (exclusão lógica: dá para desfazer).
+  Future<void> deleteInvestment(String id) async {
+    final row = await (db.select(db.investments)..where((i) => i.id.equals(id) & i.deletedAt.isNull())).getSingleOrNull();
+    if (row == null) throw NotFoundError('investment', id);
+    final t = now();
+    await (db.update(db.investments)..where((i) => i.id.equals(id))).write(InvestmentsCompanion(
+      deletedAt: Value(t),
+      updatedAt: Value(t),
+      version: Value(row.version + 1),
+      deviceId: Value(await db.currentDeviceId()),
+    ));
+  }
+
+  Future<void> restoreInvestment(String id) async {
+    final row = await (db.select(db.investments)..where((i) => i.id.equals(id))).getSingleOrNull();
+    if (row == null) throw NotFoundError('investment', id);
+    await (db.update(db.investments)..where((i) => i.id.equals(id))).write(InvestmentsCompanion(
+      deletedAt: const Value(null),
+      updatedAt: Value(now()),
+      version: Value(row.version + 1),
+      deviceId: Value(await db.currentDeviceId()),
+    ));
+  }
 
   Stream<List<InvestmentRow>> watchInvestments(String yearMonth) => (db.select(db.investments)
         ..where((i) => i.yearMonth.equals(yearMonth) & i.deletedAt.isNull())

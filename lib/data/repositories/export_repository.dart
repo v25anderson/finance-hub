@@ -13,7 +13,7 @@ class ExportRepository extends RepoBase {
     final rules = await db.select(db.recurringTransactions).get();
     final incomes = await db.select(db.incomes).get();
     final invs = await db.select(db.investments).get();
-    final planning = await db.select(db.plannings).get();
+    final versions = await db.select(db.planningDefaultsVersions).get();
     final configs = await db.select(db.monthConfigurations).get();
 
     bool keep(DateTime? deletedAt) => includeDeleted || deletedAt == null;
@@ -102,14 +102,15 @@ class ExportRepository extends RepoBase {
             ExportInvestment(id: i.id, yearMonth: i.yearMonth, plannedCents: i.plannedCents, realizedCents: i.realizedCents, description: i.description, deletedAt: i.deletedAt),
       ],
       planning: [
-        for (final p in planning)
-          ExportPlanningRow(
-            scope: 'padrao',
-            salaryCents: p.defaultSalaryCents,
-            extraIncomeCents: p.defaultExtraIncomeCents,
-            savingsGoalCents: p.defaultSavingsGoalCents,
-            investmentCents: p.defaultInvestmentCents,
-          ),
+        for (final v in versions)
+          if (v.deletedAt == null)
+            ExportPlanningRow(
+              scope: 'padrao_desde_${v.effectiveFrom}', // padrão em vigor a partir daquele mês
+              salaryCents: v.salaryCents,
+              extraIncomeCents: v.extraIncomeCents,
+              savingsGoalCents: v.savingsGoalCents,
+              investmentCents: v.investmentCents,
+            ),
         for (final m in configs)
           if (m.deletedAt == null)
             ExportPlanningRow(

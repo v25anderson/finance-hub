@@ -289,7 +289,7 @@ void main() {
     expect(nov.single.plannedCents, 3990);
   });
 
-  group('migração v1 → v2 → v3 → v4', () {
+  group('migração v1 → … → v5', () {
     test('reabrir um banco v1 cria o índice único e preserva os dados', () async {
       final dir = await Directory.systemTemp.createTemp('fh_mig');
       addTearDown(() => dir.delete(recursive: true));
@@ -317,6 +317,9 @@ void main() {
       for (final c in ['base_min_cents', 'base_max_cents']) {
         await d1.customStatement('ALTER TABLE recurring_transactions DROP COLUMN $c');
       }
+      // e sem a tabela de padrões com vigência (v5); o padrão único antigo tem um valor
+      await d1.customStatement('DROP TABLE planning_defaults_versions');
+      await d1.customStatement("UPDATE plannings SET default_salary_cents = 850000 WHERE id = 'planning'");
       await d1.customStatement('PRAGMA user_version = 1');
       await d1.close();
 
@@ -325,7 +328,7 @@ void main() {
       await d2.customSelect('SELECT 1').get(); // dispara a migração
       final idx = await d2.customSelect("SELECT name FROM sqlite_master WHERE type='index' AND name LIKE '%occurrence%'").get();
       expect(idx.map((r) => r.read<String>('name')), contains('uq_transactions_occurrence'));
-      expect((await d2.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 4); // v1 → v2 → v3 → v4 numa só abertura
+      expect((await d2.customSelect('PRAGMA user_version').getSingle()).read<int>('user_version'), 5); // v1 → … → v5 numa só abertura
       expect((await d2.customSelect("SELECT name FROM sqlite_master WHERE type='table' AND name='sync_base'").get()).length, 1);
 
       final cols = (await d2.customSelect("PRAGMA table_info('transactions')").get()).map((r) => r.read<String>('name')).toSet();
@@ -333,6 +336,9 @@ void main() {
       final rows = await d2.select(d2.transactions).get();
       expect(rows.every((r) => r.plannedMinCents == null && r.plannedMaxCents == null), isTrue); // dados antigos ficam sem faixa
       expect(rows.length, 3); // nada foi apagado
+      // v5: o padrão único antigo virou a primeira versão, valendo a partir do mês do primeiro dado (outubro/2026)
+      final versions = await d2.select(d2.planningDefaultsVersions).get();
+      expect(versions.map((v) => (v.effectiveFrom, v.salaryCents)), [('2026-10', 850000)]);
       expect(rows.where((r) => r.recurringId == 'r1').length, 1); // a duplicata perdeu o vínculo
       expect(rows.firstWhere((r) => r.id == a).name, 'A');
     });

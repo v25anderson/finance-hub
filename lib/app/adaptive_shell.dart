@@ -10,7 +10,7 @@ import '../features/calendar/presentation/calendar_page.dart';
 import '../features/dashboard/presentation/dashboard_page.dart';
 import '../features/planning/presentation/planning_page.dart';
 import 'shell_index_provider.dart';
-import 'theme_mode_provider.dart';
+import 'theme_chooser.dart';
 
 class AppDestination {
   const AppDestination(this.nav, this.page);
@@ -45,7 +45,7 @@ class AdaptiveShell extends ConsumerStatefulWidget {
 class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
   void _select(int i) => ref.read(shellIndexProvider.notifier).select(i);
 
-  void _toggleTheme() => ref.read(themeModeProvider.notifier).toggle(context);
+  void _toggleTheme() => showThemeChooser(context);
 
   @override
   Widget build(BuildContext context) {
