@@ -16,8 +16,8 @@ Future<EditScope?> showEditScopeDialog(BuildContext context, {required bool allo
             EditScope.thisAndFollowing,
             'Esta e as próximas',
             allowFollowing
-                ? 'Muda a regra daqui para frente. Passadas, editadas à mão e com pagamento não mudam.'
-                : 'Indisponível ao mudar o vencimento (use "somente esta").',
+                ? 'Daqui para frente. Passadas e pagas não mudam.'
+                : 'Indisponível ao mudar o vencimento.',
             enabled: allowFollowing,
           ),
         ],
@@ -33,8 +33,8 @@ Future<DeleteScope?> showDeleteScopeDialog(BuildContext context) => showDialog<D
         initial: DeleteScope.thisOnly,
         options: const [
           _Option(DeleteScope.thisOnly, 'Excluir apenas esta ocorrência', 'Não será recriada. As outras continuam.'),
-          _Option(DeleteScope.thisAndFollowing, 'Excluir esta e as próximas', 'A recorrência termina antes desta. Anteriores e contas com pagamento ficam.'),
-          _Option(DeleteScope.all, 'Excluir toda a recorrência', 'Remove as futuras sem pagamento e encerra a regra. O passado e o que já tem pagamento ficam no histórico.'),
+          _Option(DeleteScope.thisAndFollowing, 'Excluir esta e as próximas', 'Encerra a regra antes desta. O passado fica.'),
+          _Option(DeleteScope.all, 'Excluir toda a recorrência', 'Remove as futuras sem pagamento e encerra a regra.'),
         ],
       ),
     );

@@ -78,7 +78,7 @@ void main() {
       expect(find.text('1 conta está vencida'), findsOneWidget); // só a de outubro
       await nextMonth(t, h);
       expect(find.text('1 conta está vencida'), findsNothing); // novembro não herda as de outubro
-      expect(find.text('Nenhuma conta vencida ou vencendo nos próximos 30 dias.'), findsOneWidget);
+      expect(find.text('Nada vencendo nos próximos 30 dias.'), findsOneWidget);
       await prevMonth(t, h);
       await prevMonth(t, h);
       expect(find.text('1 conta está vencida'), findsOneWidget); // setembro mostra a dele
@@ -200,7 +200,7 @@ void main() {
       await tapVisible(t, h, find.text('Valores padrão'));
       expect(find.byKey(const Key('defaults-from-note')), findsOneWidget);
       expect(t.widget<Text>(find.byKey(const Key('defaults-from-note'))).data, contains('a partir de Outubro 2026'));
-      expect(t.widget<Text>(find.byKey(const Key('defaults-from-note'))).data, contains('anteriores não são alterados'));
+      expect(t.widget<Text>(find.byKey(const Key('defaults-from-note'))).data, contains('anteriores não mudam'));
       await t.enterText(find.widgetWithText(TextFormField, 'Salário líquido padrão'), '9000');
       await tapSave(t);
       await h.settle();

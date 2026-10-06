@@ -90,7 +90,7 @@ class BillTile extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Pago ${formatCents(bill.paidCents)} · restam ${formatCents(bill.remainingCents)} · ${formatPercent(bill.paidFraction)}',
+                'Restam ${formatCents(bill.remainingCents)}',
                 style: AppText.body(c.textSecondary).copyWith(fontSize: 12.5),
               ),
             ),

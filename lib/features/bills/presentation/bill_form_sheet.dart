@@ -290,7 +290,7 @@ class _BillFormSheetState extends ConsumerState<BillFormSheet> {
           ),
         ]),
         const SizedBox(height: Space.xs),
-        Text('A faixa é uma informação sua: os totais continuam usando o valor esperado.', style: AppText.body(c.textSecondary).copyWith(fontSize: 12)),
+        Text('Os totais usam o valor esperado.', style: AppText.body(c.textSecondary).copyWith(fontSize: 12)),
       ],
     ]);
   }

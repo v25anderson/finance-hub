@@ -37,7 +37,7 @@ class ProjectionSection extends ConsumerWidget {
         Text('Projeções', style: AppText.headline(c.textPrimary)),
         const SizedBox(height: Space.xs),
         Text(
-          'A partir do mês atual. Sólido é dado real; hachurado é projeção.',
+          'Sólido: real · hachurado: projeção',
           style: AppText.body(c.textSecondary).copyWith(fontSize: 13),
         ),
         const SizedBox(height: Space.md),

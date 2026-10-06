@@ -89,14 +89,14 @@ class _Kpi extends StatelessWidget {
         if (s.hasRange) ...[
           const SizedBox(height: Space.xs),
           Text(
-            'Faixa informada: ${formatRange(ValueRange(s.rangeMinCents, s.rangeMaxCents))}',
+            'Faixa ${formatRange(ValueRange(s.rangeMinCents, s.rangeMaxCents))}',
             key: const Key('hero-range'),
             style: AppText.body(dim).copyWith(fontSize: 13, fontWeight: FontWeight.w600),
           ),
         ],
         const SizedBox(height: Space.lg),
         if (s.isEmpty)
-          Text('Nenhuma conta neste mês.', style: AppText.body(dim))
+          Text('Sem contas neste mês.', style: AppText.body(dim))
         else ...[
           AppProgress(value: s.paidFraction, color: AppColors.onHero, track: Colors.white.withValues(alpha: 0.2), height: 12),
           const SizedBox(height: Space.md),
@@ -105,13 +105,10 @@ class _Kpi extends StatelessWidget {
             Expanded(child: _Part('PENDENTE', s.pendingCents, _pendingTint)),
           ]),
           const SizedBox(height: Space.md),
-          Wrap(spacing: Space.md, children: [
-            Text('${formatPercent(s.paidFraction)} quitado', style: AppText.number(AppColors.onHero).copyWith(fontSize: 15)),
-            Text('${formatPercent(s.remainingFraction)} restante', style: AppText.body(dim).copyWith(fontSize: 15)),
-          ]),
+          Text('${formatPercent(s.paidFraction)} quitado', style: AppText.number(AppColors.onHero).copyWith(fontSize: 15)),
           if (s.excessCents > 0) ...[
-            const SizedBox(height: Space.sm),
-            Text('Pago além do previsto: +${formatCents(s.excessCents)}', style: AppText.body(dim).copyWith(fontSize: 13)),
+            const SizedBox(height: Space.xs),
+            Text('+${formatCents(s.excessCents)} além do previsto', style: AppText.body(dim).copyWith(fontSize: 13)),
           ],
         ],
       ]),

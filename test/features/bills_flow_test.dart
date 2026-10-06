@@ -21,7 +21,7 @@ void main() {
 
   appTest('mês sem contas mostra estado vazio', (t, h) async {
     await goToBills(h);
-    expect(find.text('Nenhuma conta neste mês.'), findsOneWidget);
+    expect(find.text('Sem contas neste mês.'), findsOneWidget);
     expect(find.text('Outubro 2026'), findsOneWidget);
   });
 
@@ -143,7 +143,7 @@ void main() {
     await t.tap(find.byKey(const Key('tab-overdue')));
     await h.settle();
     expect(find.text('Vencida'), findsOneWidget);
-    expect(find.textContaining('40%'), findsOneWidget);
+    expect(find.textContaining('Restam'), findsOneWidget);
   });
 
   appTest('favoritar e filtrar por Favoritos', (t, h) async {

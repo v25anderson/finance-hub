@@ -42,7 +42,6 @@ void main() {
     expect(find.text('R\$ 3.800,00'), findsWidgets);
     expect(find.text('R\$ 1.440,00'), findsWidgets);
     expect(find.text('72,5% quitado'), findsOneWidget);
-    expect(find.text('27,5% restante'), findsOneWidget);
   });
 
   appTest('comparação: +8,3% vs setembro, com variação por categoria', size: wide, (t, h) async {
@@ -53,8 +52,8 @@ void main() {
     await h.settle();
     expect(find.text('+8,3%'), findsOneWidget);
     expect(find.text('vs setembro'), findsOneWidget);
-    expect(find.textContaining('+R\$ 402,00'), findsWidgets);
-    expect(find.text('MAIORES VARIAÇÕES POR CATEGORIA'), findsOneWidget);
+    expect(find.textContaining('→'), findsWidgets);
+    expect(find.text('POR CATEGORIA'), findsOneWidget);
     expect(find.text('+R\$ 200,00'), findsOneWidget); // moradia
     expect(find.text('+R\$ 202,00'), findsOneWidget); // alimentação
   });
@@ -73,8 +72,8 @@ void main() {
     await h.settle();
     expect(textOf(t, 'balance-projected'), 'R\$ 1.260,00'); // 8.500 − 3.800 − 1.440 − 2.000
     expect(find.text('Saldo atual'), findsOneWidget);
-    expect(find.text('Se todas as pendentes forem pagas'), findsOneWidget);
-    expect(find.text('Saldo após investimentos planejados'), findsOneWidget);
+    expect(find.text('Após contas'), findsOneWidget);
+    expect(find.text('Após investimentos'), findsOneWidget);
     expect(find.text('R\$ 4.700,00'), findsOneWidget); // atual: 8.500 − 3.800
     expect(find.text('R\$ 3.260,00'), findsOneWidget); // após contas
   });
@@ -159,7 +158,7 @@ void main() {
 
   appTest('sem pendências mostra mensagem tranquila', size: wide, (t, h) async {
     await h.settle();
-    expect(find.textContaining('Nenhuma conta vencida ou vencendo'), findsOneWidget);
+    expect(find.textContaining('Nada vencendo'), findsOneWidget);
   });
 
   appTest('alerta leva à tela de Contas', size: wide, (t, h) async {
@@ -194,7 +193,7 @@ void main() {
     await t.tap(find.byKey(const Key('group-paid')));
     await h.settle();
     expect(find.text('Aluguel'), findsOneWidget);
-    await scrollTo(t, find.text('DISTRIBUIÇÃO POR CATEGORIA'));
+    await scrollTo(t, find.text('CATEGORIAS'));
     expect(find.text('R\$ 8.000,00 · 88,9%'), findsOneWidget); // moradia: 6.000 + 2.000 de 9.000
     expect(find.text('R\$ 1.000,00 · 11,1%'), findsOneWidget);
   });
@@ -205,7 +204,7 @@ void main() {
     await t.tap(find.byTooltip('Próximo mês'));
     await h.settle();
     expect(find.text('Novembro 2026'), findsOneWidget);
-    expect(find.text('Nenhuma conta neste mês.'), findsOneWidget);
+    expect(find.text('Sem contas neste mês.'), findsOneWidget);
     expect(find.text('−100%'), findsOneWidget);
     expect(find.text('vs outubro'), findsOneWidget);
   });
@@ -213,8 +212,8 @@ void main() {
   appTest('mês sem nenhum dado: sem erros nem divisões por zero', size: wide, (t, h) async {
     await h.settle();
     expect(find.text('R\$ 0,00'), findsWidgets);
-    expect(find.textContaining('Nenhum gasto neste mês nem em setembro'), findsOneWidget);
-    expect(find.textContaining('Sem meta de investimento'), findsOneWidget);
+    expect(find.textContaining('Sem gastos para comparar'), findsOneWidget);
+    expect(find.textContaining('Sem meta neste mês'), findsOneWidget);
   });
 
   appTest('celular: destaque no topo, alertas logo abaixo e tudo cabe sem estourar layout', (t, h) async {
@@ -232,7 +231,7 @@ void main() {
   appTest('desktop: destaque em largura total e duas colunas abaixo', size: wide, (t, h) async {
     await h.settle();
     final kpi = t.getTopLeft(find.text('GASTOS DO MÊS'));
-    final comparison = t.getTopLeft(find.text('COMPARAÇÃO COM O MÊS ANTERIOR'));
+    final comparison = t.getTopLeft(find.text('MÊS ANTERIOR'));
     final balance = t.getTopLeft(find.text('QUANTO SOBRA'));
     expect(comparison.dy, greaterThan(kpi.dy)); // destaque primeiro
     expect(balance.dx, greaterThan(comparison.dx + 300)); // duas colunas
@@ -255,10 +254,10 @@ void main() {
     await h.settle();
     // total segue o previsto (1.250), a faixa informada vai de 1.200 a 1.300
     expect(find.text('R\$ 1.250,00'), findsWidgets);
-    expect(find.text('Faixa informada: R\$ 1.200,00 a R\$ 1.300,00'), findsOneWidget);
+    expect(find.text('Faixa R\$ 1.200,00 a R\$ 1.300,00'), findsOneWidget);
 
     await t.tap(find.text('GASTOS DO MÊS'));
     await h.settle();
-    expect(find.text('Faixa informada para o total: R\$ 1.200,00 a R\$ 1.300,00'), findsOneWidget);
+    expect(find.byKey(const Key('detail-range')), findsOneWidget);
   });
 }

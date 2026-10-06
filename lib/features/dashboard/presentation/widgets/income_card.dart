@@ -50,7 +50,7 @@ class IncomeCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Renda total',
+                  'Total',
                   style: AppText.body(c.textPrimary)
                       .copyWith(fontWeight: FontWeight.w600),
                 ),
@@ -78,12 +78,11 @@ class IncomeCard extends ConsumerWidget {
               ),
           ],
           const SizedBox(height: Space.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          Row(
             children: [
-              AppButton(label: 'Adicionar renda', icon: Icons.add_rounded, kind: AppButtonKind.primary, expand: true, onPressed: () => _addIncome(context, ref)),
-              const SizedBox(height: Space.sm),
-              AppButton(label: 'Valores padrão', icon: Icons.tune_rounded, kind: AppButtonKind.tonal, expand: true, onPressed: () => _editDefaults(context, ref)),
+              Expanded(child: AppButton(label: 'Adicionar renda', icon: Icons.add_rounded, kind: AppButtonKind.primary, expand: true, onPressed: () => _addIncome(context, ref))),
+              const SizedBox(width: Space.sm),
+              Expanded(child: AppButton(label: 'Valores padrão', icon: Icons.tune_rounded, kind: AppButtonKind.tonal, expand: true, onPressed: () => _editDefaults(context, ref))),
             ],
           ),
         ],

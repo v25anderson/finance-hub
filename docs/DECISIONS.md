@@ -84,3 +84,4 @@ Formato: **ID — decisão** · contexto · alternativa descartada.
 | D78 | Carrossel e alertas do dashboard seguem o mês selecionado | Coerência com o resto da tela; alertas globais confundiam ao navegar | Alertas sempre relativos a hoje, de qualquer mês |
 | D79 | "Desmarcar" remove pagamentos/lançamentos por exclusão lógica, com confirmação e "Desfazer" | Erros de toque acontecem; nunca apagar histórico em silêncio | Excluir de verdade; sem confirmação |
 | D80 | Tema Automático é o padrão (Claro e Escuro opcionais), em folha de escolha | Pedido do usuário; respeita o aparelho | Padrão escuro; alternância binária |
+| D81 | Interface com menos texto: um número principal por cartão, rótulos curtos, explicações longas só em diálogos de risco | Pedido do usuário (telas sobrecarregadas); informação completa segue nos detalhes | Manter legendas em todo cartão; ocultar por configuração |

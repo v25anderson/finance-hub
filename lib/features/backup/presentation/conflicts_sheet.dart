@@ -90,7 +90,7 @@ class ConflictsSheet extends ConsumerWidget {
         children: [
           Text('Conflitos de sincronização', style: AppText.title(c.textPrimary)),
           const SizedBox(height: Space.xs),
-          Text('O mesmo item foi alterado nos dois aparelhos. Escolha qual versão vale. Enquanto não decidir, nada é enviado nem sobrescrito.', style: AppText.body(c.textSecondary)),
+          Text('Alterado nos dois aparelhos. Escolha qual vale; até lá nada é sobrescrito.', style: AppText.body(c.textSecondary)),
           const SizedBox(height: Space.lg),
           if (conflicts.isEmpty) Text('Nenhum conflito.', key: const Key('conflicts-empty'), style: AppText.body(c.textSecondary)),
           for (final k in conflicts) _ConflictCard(k),

@@ -24,10 +24,10 @@ class ComparisonCard extends StatelessWidget {
     final prevName = formatMonthName(DateTime(month.year, month.month - 1).month).toLowerCase();
     return AppCard(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SectionLabel('Comparação com o mês anterior'),
+        const SectionLabel('Mês anterior'),
         const SizedBox(height: Space.md),
         if (cmp.isEmpty)
-          Text('Nenhum gasto neste mês nem em $prevName.', style: AppText.body(c.textSecondary))
+          Text('Sem gastos para comparar.', style: AppText.body(c.textSecondary))
         else ...[
           Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Icon(cmp.deltaCents == 0 ? Icons.drag_handle : (cmp.deltaCents > 0 ? Icons.arrow_upward : Icons.arrow_downward), size: 20, color: c.textSecondary),
@@ -50,13 +50,13 @@ class ComparisonCard extends StatelessWidget {
           const SizedBox(height: Space.xs),
           Text(
             cmp.deltaFraction == null
-                ? 'Sem gastos em $prevName para calcular o percentual.'
-                : '${formatSigned(cmp.deltaCents)} (de ${formatCents(cmp.previousCents)} para ${formatCents(cmp.currentCents)})',
+                ? 'Sem gastos em $prevName.'
+                : '${formatCents(cmp.previousCents)} → ${formatCents(cmp.currentCents)}',
             style: AppText.body(c.textSecondary).copyWith(fontSize: 13),
           ),
           if (cmp.topChanges.isNotEmpty) ...[
             const SizedBox(height: Space.lg),
-            const SectionLabel('Maiores variações por categoria'),
+            const SectionLabel('Por categoria'),
             const SizedBox(height: Space.sm),
             for (final ch in cmp.topChanges)
               Padding(

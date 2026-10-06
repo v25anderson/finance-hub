@@ -120,8 +120,7 @@ class _Empty extends StatelessWidget {
       child: Column(children: [
         Icon(Icons.receipt_long_outlined, size: 40, color: c.textSecondary),
         const SizedBox(height: Space.md),
-        Text(hasAny ? 'Nenhuma conta nesta aba.' : 'Nenhuma conta neste mês.', style: AppText.body(c.textSecondary)),
-        if (!hasAny) Text('Toque em Adicionar para criar a primeira.', style: AppText.body(c.textSecondary)),
+        Text(hasAny ? 'Nada nesta aba.' : 'Sem contas neste mês.', style: AppText.body(c.textSecondary)),
       ]),
     );
   }

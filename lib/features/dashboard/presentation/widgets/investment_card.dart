@@ -56,7 +56,7 @@ class InvestmentCard extends ConsumerWidget {
           Text('Projeção do mês, se a meta for cumprida: ${formatCents(p.investmentProjectedCents)}',
               style: AppText.body(c.textSecondary).copyWith(fontSize: 13)),
         ] else
-          Text('Sem meta de investimento neste mês. Defina em Renda › Valores padrão.', style: AppText.body(c.textSecondary)),
+          Text('Sem meta neste mês. Defina em Renda › Valores padrão.', style: AppText.body(c.textSecondary)),
         if (entries.isNotEmpty) ...[
           const SizedBox(height: Space.md),
           const SectionLabel('Lançamentos do mês'),

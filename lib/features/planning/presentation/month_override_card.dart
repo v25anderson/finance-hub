@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/selected_month_provider.dart';
-import '../../../core/formatting.dart';
 import '../../../core/money.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/providers.dart';
@@ -29,9 +28,7 @@ class _MonthOverrideCardState extends ConsumerState<MonthOverrideCard> {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     final ym = ref.watch(selectedYearMonthProvider);
-    final month = ref.watch(selectedMonthProvider);
     if (_forMonth != ym) {
       _forMonth = ym;
       _userOn = null;
@@ -61,9 +58,6 @@ class _MonthOverrideCardState extends ConsumerState<MonthOverrideCard> {
               key: const Key('customize-switch'),
               contentPadding: EdgeInsets.zero,
               title: const Text('Personalizar este mês'),
-              subtitle: Text(
-                'Só ${formatMonthYear(month)} muda; os outros meses continuam usando os padrões.',
-              ),
               value: on,
               onChanged: (v) => _toggle(v, ym, saved),
             ),
@@ -74,11 +68,6 @@ class _MonthOverrideCardState extends ConsumerState<MonthOverrideCard> {
               yearMonth: ym,
               config: config,
               defaults: defaults,
-            ),
-          if (!on)
-            Text(
-              'Este mês usa os valores padrão.',
-              style: AppText.body(c.textSecondary).copyWith(fontSize: 13),
             ),
         ],
       ),

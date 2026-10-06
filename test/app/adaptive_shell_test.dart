@@ -27,6 +27,6 @@ void main() {
     expect(find.byType(AppDock), findsNothing);
     await t.tap(find.byKey(const Key('nav-Análises')));
     await h.settle();
-    expect(find.text('Análise dos dados que você inseriu. Não é recomendação financeira.'), findsOneWidget);
+    expect(find.text('Descreve seus dados; não é recomendação.'), findsOneWidget);
   });
 }

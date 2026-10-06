@@ -54,7 +54,7 @@ class AnalyticsPage extends ConsumerWidget {
           ]),
         ),
         const SizedBox(height: Space.xs),
-        Text('Análise dos dados que você inseriu. Não é recomendação financeira.', style: AppText.body(c.textSecondary).copyWith(fontSize: 13)),
+        Text('Descreve seus dados; não é recomendação.', style: AppText.body(c.textSecondary).copyWith(fontSize: 13)),
         const SizedBox(height: Space.md),
         const _FilterBar(),
         const SizedBox(height: Space.md),
@@ -127,7 +127,7 @@ class _FilterBar extends ConsumerWidget {
       Text(
         captionShown.isEmpty
             ? '${formatMonthYear(first)}${months.length > 1 ? ' a ${formatMonthYear(last)}' : ''} · ${months.length} ${months.length == 1 ? 'mês' : 'meses'}'
-            : '${formatMonthYear(parseYearMonth(captionShown.first))}${captionShown.length > 1 ? ' a ${formatMonthYear(parseYearMonth(captionShown.last))}' : ''} · ${captionShown.length} ${captionShown.length == 1 ? 'mês com dados' : 'meses com dados'} · inclui o mês atual, em andamento',
+            : '${formatMonthYear(parseYearMonth(captionShown.first))}${captionShown.length > 1 ? ' a ${formatMonthYear(parseYearMonth(captionShown.last))}' : ''} · ${captionShown.length} ${captionShown.length == 1 ? 'mês com dados' : 'meses com dados'}',
         key: const Key('period-caption'),
         style: AppText.body(c.textSecondary).copyWith(fontSize: 12.5),
       ),
@@ -136,8 +136,8 @@ class _FilterBar extends ConsumerWidget {
           padding: const EdgeInsets.only(top: 2),
           child: Text(
             skipped.length == 1
-                ? 'Sem dados em ${formatMonthYear(parseYearMonth(skipped.first))}: ficou de fora das médias e dos gráficos.'
-                : 'Sem dados de ${formatMonthYear(parseYearMonth(skipped.first))} a ${formatMonthYear(parseYearMonth(skipped.last))}: ficaram de fora das médias e dos gráficos.',
+                ? 'Sem dados em ${formatMonthYear(parseYearMonth(skipped.first))}: fora das médias.'
+                : 'Sem dados de ${formatMonthYear(parseYearMonth(skipped.first))} a ${formatMonthYear(parseYearMonth(skipped.last))}: fora das médias.',
             key: const Key('period-skipped'),
             style: AppText.body(c.textSecondary).copyWith(fontSize: 12.5),
           ),
@@ -190,7 +190,6 @@ class _Content extends StatelessWidget {
     final cards = <Widget>[
       _ChartCard(
         title: 'Evolução dos gastos',
-        subtitle: 'Valor previsto das contas de cada mês',
         child: MonthSeriesChart(
           id: 'spending',
           months: months,
@@ -202,12 +201,10 @@ class _Content extends StatelessWidget {
       ),
       _ChartCard(
         title: 'Gastos por categoria',
-        subtitle: 'Parte de cada categoria no total do período',
         child: CategoryBars(shares: a.categories, categories: categories),
       ),
       _ChartCard(
         title: 'Fixos × variáveis × pontuais',
-        subtitle: 'Gastos de cada mês por tipo',
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           MonthSeriesChart(
             id: 'types',
@@ -230,7 +227,6 @@ class _Content extends StatelessWidget {
       ),
       _ChartCard(
         title: 'Investimentos: planejado × realizado',
-        subtitle: 'Meta do mês e o que foi investido',
         child: MonthSeriesChart(
           id: 'investments',
           months: months,
@@ -245,7 +241,6 @@ class _Content extends StatelessWidget {
       ),
       _ChartCard(
         title: 'Renda',
-        subtitle: 'Padrão ou valor do mês, mais as rendas lançadas',
         child: MonthSeriesChart(
           id: 'income',
           months: months,
@@ -257,7 +252,6 @@ class _Content extends StatelessWidget {
       ),
       _ChartCard(
         title: 'Taxa de poupança',
-        subtitle: 'Investimentos realizados ÷ renda',
         trailing: a.savingsRate == null ? '—' : formatPercent(a.savingsRate!),
         trailingKey: const Key('savings-rate-period'),
         child: MonthSeriesChart(
@@ -305,13 +299,12 @@ class _Tiles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final a = analytics;
-    final n = a.monthCount;
     final tiles = [
-      StatTile(label: 'Gastos no período', value: formatCents(a.spendingCents), caption: '$n ${n == 1 ? 'mês' : 'meses'}', valueKey: const Key('stat-spending')),
-      StatTile(label: 'Média mensal', value: formatCents(a.averageSpendingCents), caption: 'gastos por mês', valueKey: const Key('stat-average')),
+      StatTile(label: 'Gastos no período', value: formatCents(a.spendingCents), valueKey: const Key('stat-spending')),
+      StatTile(label: 'Média mensal', value: formatCents(a.averageSpendingCents), valueKey: const Key('stat-average')),
       StatTile(label: 'Renda no período', value: formatCents(a.incomeCents), valueKey: const Key('stat-income')),
       StatTile(label: 'Investido (realizado)', value: formatCents(a.investmentRealizedCents), caption: 'meta ${formatCents(a.investmentPlannedCents)}', valueKey: const Key('stat-invested')),
-      StatTile(label: 'Taxa de poupança', value: a.savingsRate == null ? '—' : formatPercent(a.savingsRate!), caption: 'investido ÷ renda', valueKey: const Key('stat-rate')),
+      StatTile(label: 'Taxa de poupança', value: a.savingsRate == null ? '—' : formatPercent(a.savingsRate!), valueKey: const Key('stat-rate')),
     ];
     final perRow = wide ? 5 : 2;
     return LayoutBuilder(builder: (context, box) {
@@ -351,9 +344,8 @@ class _TypeSummary extends StatelessWidget {
 }
 
 class _ChartCard extends StatelessWidget {
-  const _ChartCard({required this.title, required this.subtitle, required this.child, this.trailing, this.trailingKey});
+  const _ChartCard({required this.title, required this.child, this.trailing, this.trailingKey});
   final String title;
-  final String subtitle;
   final Widget child;
   final String? trailing;
   final Key? trailingKey;
@@ -367,8 +359,6 @@ class _ChartCard extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(title, style: AppText.headline(c.textPrimary).copyWith(fontSize: 17)),
-              const SizedBox(height: 2),
-              Text(subtitle, style: AppText.body(c.textSecondary).copyWith(fontSize: 12.5)),
             ]),
           ),
           if (trailing != null) ...[

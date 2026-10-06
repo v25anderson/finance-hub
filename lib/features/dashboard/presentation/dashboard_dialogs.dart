@@ -283,7 +283,7 @@ class _DefaultsDialogState extends State<_DefaultsDialog> {
               Padding(
                 padding: const EdgeInsets.only(bottom: Space.md),
                 child: Text(
-                  'Valem a partir de ${widget.fromLabel}, até você mudar de novo. Os meses anteriores não são alterados. Deixe vazio para zero.',
+                  'Vale a partir de ${widget.fromLabel}. Meses anteriores não mudam.',
                   key: const Key('defaults-from-note'),
                 ),
               ),

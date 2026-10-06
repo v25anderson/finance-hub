@@ -30,7 +30,7 @@ class AlertsCard extends ConsumerWidget {
         child: Row(children: [
           Icon(Icons.check_circle_outline, color: c.success),
           const SizedBox(width: Space.sm),
-          Expanded(child: Text('Nenhuma conta vencida ou vencendo nos próximos 30 dias.', style: AppText.body(c.textSecondary))),
+          Expanded(child: Text('Nada vencendo nos próximos 30 dias.', style: AppText.body(c.textSecondary))),
         ]),
       );
     }

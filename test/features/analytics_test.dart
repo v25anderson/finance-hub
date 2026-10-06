@@ -72,7 +72,7 @@ void main() {
 
     appTest('avisa que é análise de dados, não recomendação', size: wide, seed: seedYear, (t, h) async {
       await goToAnalytics(h);
-      expect(find.text('Análise dos dados que você inseriu. Não é recomendação financeira.'), findsOneWidget);
+      expect(find.text('Descreve seus dados; não é recomendação.'), findsOneWidget);
     });
 
     appTest('categorias ordenadas, com valor e percentual', size: wide, seed: seedYear, (t, h) async {
@@ -155,7 +155,7 @@ void main() {
       await h.settle();
       // Só abril tem dados antes do padrão (a conta "Antiga"); nov/2025 a mar/2026 não têm nada e ficam de fora
       expect(textKey(t, 'period-caption'), startsWith('Abril 2026 a Outubro 2026 · 7 meses com dados'));
-      expect(textKey(t, 'period-skipped'), 'Sem dados de Novembro 2025 a Março 2026: ficaram de fora das médias e dos gráficos.');
+      expect(textKey(t, 'period-skipped'), 'Sem dados de Novembro 2025 a Março 2026: fora das médias.');
       expect(textKey(t, 'stat-spending'), 'R\$ 18.500,00'); // + Antiga (3.000)
       expect(textKey(t, 'stat-income'), 'R\$ 52.200,00'); // 6 meses de padrão (mai a out) + 1.200 de setembro; NÃO 12 × 8.500
       expect(textKey(t, 'stat-average'), 'R\$ 2.642,86'); // 18.500 ÷ 7 meses com dados, não ÷ 12

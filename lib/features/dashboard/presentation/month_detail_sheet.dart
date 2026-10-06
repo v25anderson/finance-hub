@@ -92,7 +92,7 @@ class _MonthDetailSheetState extends ConsumerState<MonthDetailSheet> {
           ]),
           if (s.hasRange) ...[
             const SizedBox(height: Space.sm),
-            Text('Faixa informada para o total: ${formatRange(ValueRange(s.rangeMinCents, s.rangeMaxCents))}', key: const Key('detail-range'), style: AppText.body(c.textSecondary).copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('Faixa ${formatRange(ValueRange(s.rangeMinCents, s.rangeMaxCents))}', key: const Key('detail-range'), style: AppText.body(c.textSecondary).copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
           ],
           const SizedBox(height: Space.lg),
           Row(children: [
@@ -112,7 +112,7 @@ class _MonthDetailSheetState extends ConsumerState<MonthDetailSheet> {
           if (list.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: Space.lg),
-              child: Text('Nenhuma conta nesta categoria de estado.', style: AppText.body(c.textSecondary)),
+              child: Text('Nada aqui.', style: AppText.body(c.textSecondary)),
             )
           else
             for (final b in list)
@@ -121,7 +121,7 @@ class _MonthDetailSheetState extends ConsumerState<MonthDetailSheet> {
                 child: BillTile(bill: b, category: categories[b.categoryId], today: today, onTap: () => showBillDetail(context, b.id)),
               ),
           const SizedBox(height: Space.lg),
-          const SectionLabel('Distribuição por categoria'),
+          const SectionLabel('Categorias'),
           const SizedBox(height: Space.md),
           if (s.byCategory.isEmpty)
             Text('Sem gastos neste mês.', style: AppText.body(c.textSecondary))

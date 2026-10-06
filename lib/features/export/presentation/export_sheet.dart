@@ -63,7 +63,7 @@ class _ExportSheetState extends ConsumerState<ExportSheet> {
         children: [
           Text('Exportar dados', style: AppText.title(c.textPrimary)),
           const SizedBox(height: Space.xs),
-          Text('Gera arquivos com os dados deste aparelho. Você escolhe onde salvar.', style: AppText.body(c.textSecondary)),
+          Text('Você escolhe onde salvar.', style: AppText.body(c.textSecondary)),
           const SizedBox(height: Space.lg),
           Text('Formato', style: AppText.label(c.textSecondary)),
           const SizedBox(height: Space.xs),
@@ -87,8 +87,8 @@ class _ExportSheetState extends ConsumerState<ExportSheet> {
           const SizedBox(height: Space.xs),
           Text(
             _delimiter == CsvDelimiter.comma
-                ? 'Decimais com ponto (1234.56). Bom para Google Planilhas e programas.'
-                : 'Decimais com vírgula (1234,56). Abre direto no Excel em português.',
+                ? 'Ponto decimal (1234.56)'
+                : 'Vírgula decimal (1234,56) · Excel',
             style: AppText.body(c.textSecondary).copyWith(fontSize: 13),
           ),
           const SizedBox(height: Space.lg),
@@ -113,7 +113,7 @@ class _ExportSheetState extends ConsumerState<ExportSheet> {
           ),
           const SizedBox(height: Space.sm),
           Text(
-            'Os arquivos podem conter valores financeiros. Guarde-os em local seguro. Vários conjuntos viram um ZIP com um LEIA-ME.',
+            'Contêm valores financeiros: guarde em local seguro.',
             style: AppText.body(c.textSecondary).copyWith(fontSize: 13),
           ),
           const SizedBox(height: Space.md),

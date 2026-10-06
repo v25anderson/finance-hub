@@ -44,17 +44,15 @@ class DefaultsCard extends ConsumerWidget {
           const SectionLabel('Valores padrão'),
           const SizedBox(height: Space.xs),
           Text(
-            version == null
-                ? 'Ainda não há padrão definido em $monthLabel. Ao definir, vale a partir deste mês.'
-                : 'Em vigor em $monthLabel, definidos a partir de ${formatMonthYear(parseYearMonth(version.effectiveFrom))}. Mudar vale a partir do mês selecionado; os anteriores não mudam.',
+            version == null ? 'Nada definido em $monthLabel.' : 'Desde ${formatMonthYear(parseYearMonth(version.effectiveFrom))}',
             key: const Key('defaults-vigencia'),
             style: AppText.body(c.textSecondary).copyWith(fontSize: 13),
           ),
           const SizedBox(height: Space.md),
-          row('Salário líquido padrão', p?.salaryCents),
-          row('Renda extra padrão', p?.extraIncomeCents),
-          row('Meta de economia padrão', p?.savingsGoalCents),
-          row('Investimento planejado padrão', p?.investmentCents),
+          row('Salário', p?.salaryCents),
+          row('Renda extra', p?.extraIncomeCents),
+          row('Economia', p?.savingsGoalCents),
+          row('Investimento', p?.investmentCents),
           const SizedBox(height: Space.md),
           AppButton(
             label: 'Editar padrões',

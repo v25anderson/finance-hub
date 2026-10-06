@@ -141,7 +141,7 @@ class _BackupSheetState extends ConsumerState<BackupSheet> {
           Text('Backup e sincronização', style: AppText.title(c.textPrimary)),
           const SizedBox(height: Space.xs),
           Text(
-            'O app só acessa a pasta "Finance Hub" e os arquivos que ele mesmo criar. Nada é enviado sem você tocar em "Fazer backup" ou "Sincronizar agora".',
+            'Só a pasta "Finance Hub" é acessada. Nada é enviado sem você tocar.',
             style: AppText.body(c.textSecondary),
           ),
           const SizedBox(height: Space.md),
@@ -158,8 +158,8 @@ class _BackupSheetState extends ConsumerState<BackupSheet> {
                     const SizedBox(height: Space.xs),
                     Text(
                       reason == DriveUnavailableReason.unsupportedPlatform
-                          ? 'O backup e a sincronização com o Google Drive funcionam no aplicativo Android. Nesta versão, seus dados ficam salvos neste navegador e a exportação em CSV funciona normalmente.'
-                          : 'Esta versão do app foi gerada sem o ID de cliente do Google, então o backup e a sincronização ficam desligados. Seus dados continuam salvos no aparelho e a exportação em CSV funciona normalmente.',
+                          ? 'Backup no Drive só no app Android. Aqui os dados ficam neste navegador; a exportação CSV funciona.'
+                          : 'Seus dados seguem no aparelho; a exportação CSV funciona.',
                       key: const Key('backup-unavailable'),
                       style: AppText.body(c.textSecondary),
                     ),
