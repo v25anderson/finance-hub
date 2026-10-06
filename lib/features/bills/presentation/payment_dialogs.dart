@@ -4,6 +4,7 @@ import '../../../core/formatting.dart';
 import '../../../core/money.dart';
 import '../../../design_system/tokens/spacing.dart';
 import '../../../domain/bill.dart';
+import '../../../domain/enums.dart';
 
 class PaymentInput {
   const PaymentInput({required this.amountCents, required this.paidAt, required this.note});
@@ -53,6 +54,9 @@ class _PaymentDialogState extends State<_PaymentDialog> {
     super.dispose();
   }
 
+  /// Gasto variável pago por inteiro: o valor é o que a conta realmente custou, editável.
+  bool get _actual => widget.total && widget.bill.expenseType == ExpenseType.variable && widget.bill.paidCents == 0;
+
   int? get _cents => parseCents(_amount.text);
 
   void _submit() {
@@ -74,14 +78,14 @@ class _PaymentDialogState extends State<_PaymentDialog> {
           key: _form,
           child: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('${bill.name} · restam ${formatCents(bill.remainingCents)}'),
+              Text(_actual ? bill.name : '${bill.name} · restam ${formatCents(bill.remainingCents)}'),
               const SizedBox(height: Space.md),
               TextFormField(
                 controller: _amount,
                 autofocus: !widget.total,
-                readOnly: widget.total,
+                readOnly: widget.total && !_actual,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ '),
+                decoration: InputDecoration(labelText: _actual ? 'Valor real' : 'Valor', prefixText: 'R\$ ', helperText: _actual && widget.bill.range != null ? 'Esperado ${formatCents(widget.bill.remainingCents)}' : null),
                 onChanged: (_) => setState(() {}),
                 validator: (v) {
                   final c = parseCents(v ?? '');
@@ -89,7 +93,7 @@ class _PaymentDialogState extends State<_PaymentDialog> {
                   return null;
                 },
               ),
-              if (excess > 0)
+              if (excess > 0 && !_actual)
                 Padding(
                   padding: const EdgeInsets.only(top: Space.sm),
                   child: Text('Excede o restante em ${formatCents(excess)}; será registrado como excedente.'),

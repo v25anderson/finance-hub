@@ -39,6 +39,33 @@ void main() {
   Future<String> energy({ValueRange? range = energia, int cents = 25000, ExpenseType type = ExpenseType.variable}) =>
       svc.create(name: 'Energia', plannedCents: cents, dueDate: DateTime(2026, 10, 20), categoryId: 'cat-moradia', expenseType: type, range: range);
 
+  group('valor real do gasto variável', () {
+    test('real dentro da faixa vira o valor esperado e quita sem excedente', () async {
+      final id = await energy();
+      await svc.payActual(id, 23750);
+      final b = (await bills.getBill(id))!;
+      expect(b.plannedCents, 23750);
+      expect(b.paidCents, 23750);
+      expect(b.isFullyPaid, isTrue);
+      expect(b.excessCents, 0);
+      expect(b.range, energia);
+    });
+
+    test('real fora da faixa amplia a faixa para incluí-lo', () async {
+      final id = await energy();
+      await svc.payActual(id, 31000);
+      final b = (await bills.getBill(id))!;
+      expect(b.plannedCents, 31000);
+      expect(b.range, const ValueRange(20000, 31000));
+      expect(b.isFullyPaid, isTrue);
+    });
+
+    test('valor inválido é recusado', () async {
+      final id = await energy();
+      expect(() => svc.payActual(id, 0), throwsA(isA<ValidationError>()));
+    });
+  });
+
   group('conta avulsa', () {
     test('gasto variável guarda a faixa e a conta a devolve', () async {
       final id = await energy();

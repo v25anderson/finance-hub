@@ -278,6 +278,23 @@ void main() {
       expect(find.text('O total pago está dentro da faixa informada.'), findsOneWidget);
     });
 
+    appTest('marcar como pago permite informar o valor real da conta variável', (t, h) async {
+      await openForm(t, h);
+      await t.enterText(field('Nome'), 'Energia');
+      await turnOnRange(t, h, min: '200', max: '300');
+      await tapSave(t);
+      await h.settle();
+      await t.tap(find.text('Energia'));
+      await h.settle();
+      await t.tap(find.text('Marcar como pago'));
+      await h.settle();
+      await t.enterText(find.widgetWithText(TextFormField, 'Valor real'), '237,50');
+      await t.tap(find.text('Confirmar pagamento'));
+      await h.settle();
+      expect(find.text('R\$ 237,50'), findsWidgets);
+      expect(find.text('Paga'), findsWidgets);
+    });
+
     appTest('valor esperado digitado precisa estar dentro da faixa', (t, h) async {
       await openForm(t, h);
       await t.enterText(field('Nome'), 'Energia');

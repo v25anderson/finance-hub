@@ -107,6 +107,26 @@ class BillService {
     return registerPayment(billId, bill.remainingCents, paidAt: paidAt, note: note);
   }
 
+  /// Gasto variável: o usuário informa o **valor real** da conta. O valor esperado passa a ser esse valor
+  /// (somado ao que já foi pago) e a conta é quitada, sem excedente. Se o real sair da faixa, a faixa se amplia.
+  Future<String> payActual(String billId, int actualCents, {DateTime? paidAt, String note = ''}) async {
+    if (actualCents <= 0) throw ValidationError('Informe um valor maior que zero');
+    final bill = await bills.getBill(billId);
+    if (bill == null) throw NotFoundError('bill', billId);
+    if (bill.isCanceled) throw ValidationError('Conta cancelada não pode ser paga');
+    if (bill.remainingCents <= 0) throw ValidationError('Esta conta já está quitada');
+    final planned = bill.paidCents + actualCents;
+    if (planned != bill.plannedCents) {
+      final r = bill.range;
+      await transactions.update(
+        billId,
+        plannedAmountCents: planned,
+        range: r == null || r.contains(planned) ? null : ValueRange(planned < r.minCents ? planned : r.minCents, planned > r.maxCents ? planned : r.maxCents),
+      );
+    }
+    return registerPayment(billId, actualCents, paidAt: paidAt, note: note);
+  }
+
   Future<void> deletePayment(String paymentId) => transactions.deletePayment(paymentId);
   Future<void> restorePayment(String paymentId) => transactions.restorePayment(paymentId);
 

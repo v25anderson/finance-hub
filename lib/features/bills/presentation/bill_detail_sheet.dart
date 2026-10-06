@@ -11,6 +11,7 @@ import '../../../design_system/tokens/colors.dart';
 import '../../../design_system/tokens/spacing.dart';
 import '../../../design_system/tokens/typography.dart';
 import '../../../domain/bill.dart';
+import '../../../domain/enums.dart';
 import '../../../domain/recurrence.dart';
 import 'bill_form_sheet.dart';
 import 'payment_dialogs.dart';
@@ -188,7 +189,9 @@ class _Content extends ConsumerWidget {
     final input = await showPaymentDialog(context, bill: bill, total: total, now: now);
     if (input == null || !context.mounted) return;
     await runGuarded(context, () async {
-      if (total) {
+      if (total && bill.expenseType == ExpenseType.variable && bill.paidCents == 0) {
+        await svc.payActual(bill.id, input.amountCents, paidAt: input.paidAt, note: input.note);
+      } else if (total) {
         await svc.markAsPaid(bill.id, paidAt: input.paidAt, note: input.note);
       } else {
         await svc.registerPayment(bill.id, input.amountCents, paidAt: input.paidAt, note: input.note);
